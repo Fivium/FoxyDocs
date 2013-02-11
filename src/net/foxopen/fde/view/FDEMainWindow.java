@@ -55,7 +55,8 @@ import org.eclipse.core.databinding.beans.BeanProperties;
 public class FDEMainWindow extends ApplicationWindow {
   private Action action_exit;
 
-  //private static List<AbstractModelObject> d_modules = new ArrayList<AbstractModelObject>();
+  // private static List<AbstractModelObject> d_modules = new
+  // ArrayList<AbstractModelObject>();
   private static Directory root = new Directory();
   private StyledText text_documentation;
   private StyledText text_code;
@@ -64,6 +65,7 @@ public class FDEMainWindow extends ApplicationWindow {
   private TableViewer tableViewer;
   private Action action_refresh;
   private Action action_open;
+  private CTabFolder tabFolder;
 
   /**
    * Create the application window.
@@ -99,7 +101,7 @@ public class FDEMainWindow extends ApplicationWindow {
         }
       }
       {
-        CTabFolder tabFolder = new CTabFolder(sashForm, SWT.BORDER | SWT.CLOSE);
+        tabFolder = new CTabFolder(sashForm, SWT.BORDER | SWT.CLOSE);
         tabFolder.setSimple(false);
         tabFolder.setSelectionBackground(Display.getCurrent().getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));
         {
@@ -161,8 +163,9 @@ public class FDEMainWindow extends ApplicationWindow {
         public void run() {
           // FIXME Change path
           String path = "\\\\central.health\\dfsuserenv\\users\\User_07\\putalp\\Desktop\\Pierre\\PharmCIS\\CodeSource\\FoxModules\\CoreModules\\PharmCIS";
-          //String path = "\\\\central.health\\dfsuserenv\\users\\User_07\\putalp\\Desktop\\Pierre\\PharmCIS";
-          
+          // String path =
+          // "\\\\central.health\\dfsuserenv\\users\\User_07\\putalp\\Desktop\\Pierre\\PharmCIS";
+
           getStatusLineManager().setMessage("Loading " + path);
           Directory.Load(root, path);
         }
@@ -172,7 +175,9 @@ public class FDEMainWindow extends ApplicationWindow {
     }
     {
       action_open = new Action("&Open") {
-
+        public void run() {
+          new CTabItem(tabFolder, SWT.NONE, 1).setText("Test");
+        }
       };
       action_open.setAccelerator(SWT.CTRL | 'O');
       action_open.setImageDescriptor(ResourceManager.getImageDescriptor(FDEMainWindow.class, "/img/actions/fileopen.png"));
@@ -282,6 +287,7 @@ public class FDEMainWindow extends ApplicationWindow {
   protected Point getInitialSize() {
     return new Point(205, 215);
   }
+
   protected DataBindingContext initDataBindings() {
     DataBindingContext bindingContext = new DataBindingContext();
     //
