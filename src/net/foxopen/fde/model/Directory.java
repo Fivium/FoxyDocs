@@ -20,11 +20,12 @@ public class Directory extends AbstractModelObject {
   private String path;
 
   public Directory() {
-    // Empty
+    parent = null;
   }
 
-  private Directory(String path) throws IOException, JDOMException, ParserConfigurationException, SAXException {
+  private Directory(String path, Directory parent) throws IOException, JDOMException, ParserConfigurationException, SAXException {
     getContent(path);
+    this.parent = parent;
   }
 
   public String getName() {
@@ -73,13 +74,13 @@ public class Directory extends AbstractModelObject {
       if (listOfFiles[i].isFile()) {
         if (files.endsWith(".xml") || files.endsWith(".XML")) {
           try {
-            addChild(new FoxModule(listOfFiles[i].getCanonicalPath()));
+            addChild(new FoxModule(listOfFiles[i].getCanonicalPath(), this));
           } catch (NotAFoxModuleException e) {
             Logger.logStderr(e.getMessage());
           }
         }
       } else if (listOfFiles[i].isDirectory() && !files.startsWith(".svn")) {
-        addChild(new Directory(listOfFiles[i].getCanonicalPath()));
+        addChild(new Directory(listOfFiles[i].getCanonicalPath(),this));
       }
     }
   }

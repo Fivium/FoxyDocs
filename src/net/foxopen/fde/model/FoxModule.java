@@ -22,8 +22,11 @@ public class FoxModule extends AbstractModelObject {
   private final List<AbstractModelObject> documentationEntriesSet;
   private File f_file;
   
-  public FoxModule(String path) throws IOException, JDOMException, ParserConfigurationException, SAXException, NotAFoxModuleException {
+  public FoxModule(String path, AbstractModelObject parent) throws IOException, JDOMException, ParserConfigurationException, SAXException, NotAFoxModuleException {
     Logger.logStdout("Loading module " + path);
+    
+    this.parent = parent;
+    
     // Open the file in the FS
     this.f_file = new java.io.File(path);
 
@@ -73,7 +76,7 @@ public class FoxModule extends AbstractModelObject {
    * @throws JDOMException
    * @throws NotAFoxModuleException 
    */
-  private static List<AbstractModelObject> parseContent(File f_file) throws ParserConfigurationException, SAXException, IOException, JDOMException, NotAFoxModuleException {
+  private List<AbstractModelObject> parseContent(File f_file) throws ParserConfigurationException, SAXException, IOException, JDOMException, NotAFoxModuleException {
     // Parse the data
     List<AbstractModelObject> data = new ArrayList<AbstractModelObject>();
     DocumentBuilderFactory domfactory = DocumentBuilderFactory.newInstance();
@@ -98,16 +101,16 @@ public class FoxModule extends AbstractModelObject {
     return data;
   }
 
-  private static DocumentationEntriesSet parse(org.jdom2.Document document, String key, String xpath) {
+  private DocumentationEntriesSet parse(org.jdom2.Document document, String key, String xpath) {
     // Actions
-    DocumentationEntriesSet set = new DocumentationEntriesSet(key);
+    DocumentationEntriesSet set = new DocumentationEntriesSet(key, this);
     for (Element e : XPath.run(xpath, document)) {
-      set.add(new DocumentationEntry(e));
+      set.add(new DocumentationEntry(e, set));
     }
     return set;
   }
 
-  private static void addEntries(List<AbstractModelObject> data, org.jdom2.Document document, String key, String xpath) {
+  private void addEntries(List<AbstractModelObject> data, org.jdom2.Document document, String key, String xpath) {
     DocumentationEntriesSet tmp = parse(document, key, xpath);
     if (tmp.size() > 0) {
       data.add(tmp);

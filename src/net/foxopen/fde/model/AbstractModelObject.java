@@ -14,15 +14,15 @@ import org.eclipse.wb.swt.ResourceManager;
 public abstract class AbstractModelObject extends Observable {
 
   private final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
-  
+
   private static final Image OK = getImage("/img/actions/ok.png");
   private static final Image MISSING = getImage("/img/actions/no.png");
 
   private static Image getImage(String file) {
-    ImageDescriptor image = ResourceManager.getImageDescriptor(FDEMainWindow.class, file );
+    ImageDescriptor image = ResourceManager.getImageDescriptor(FDEMainWindow.class, file);
     return image.createImage();
-  } 
-  
+  }
+
   public void addPropertyChangeListener(PropertyChangeListener listener) {
     propertyChangeSupport.addPropertyChangeListener(listener);
   }
@@ -43,6 +43,15 @@ public abstract class AbstractModelObject extends Observable {
     propertyChangeSupport.firePropertyChange(propertyName, oldValue, newValue);
   }
 
+  protected void cascadeFirePropertyChange(String propertyName, Object oldValue, Object newValue) {
+    propertyChangeSupport.firePropertyChange(propertyName, oldValue, newValue);
+    if (getParent() != null) {
+      getParent().cascadeFirePropertyChange(propertyName, oldValue, newValue);
+    }
+  }
+
+  protected AbstractModelObject parent;
+
   abstract public List<AbstractModelObject> getChildren();
 
   abstract public String getName();
@@ -54,8 +63,8 @@ public abstract class AbstractModelObject extends Observable {
     }
     return true;
   }
-  
-  public boolean getFirstLevel(){
+
+  public boolean getFirstLevel() {
     return false;
   }
 
@@ -70,9 +79,13 @@ public abstract class AbstractModelObject extends Observable {
   public String getCode() {
     return null;
   }
-  
-  public Image getImage(){
-    return getStatus()?OK:MISSING;
+
+  public AbstractModelObject getParent() {
+    return parent;
+  }
+
+  public Image getImage() {
+    return getStatus() ? OK : MISSING;
   }
 
   public void setDocumentation(String documentation) {

@@ -19,9 +19,11 @@ public class DocumentationEntry extends AbstractModelObject {
   private String name;
   private boolean dirty = false;
 
-  public DocumentationEntry(Element node) {
+  public DocumentationEntry(Element node, AbstractModelObject parent) {
     if (node == null)
       throw new IllegalArgumentException("The node cannob be null");
+    
+    this.parent = parent;
 
     Element docNode = node.getChild("documentation", ns_fm);
     if (docNode == null) {
@@ -83,7 +85,8 @@ public class DocumentationEntry extends AbstractModelObject {
   }
 
   public void setDirty(boolean dirty) {
-    firePropertyChange("dirty", this.dirty, this.dirty = dirty);
+    cascadeFirePropertyChange("dirty", this.dirty, this.dirty = dirty);
+    cascadeFirePropertyChange("name", this.name, getName());
   }
 
   public String toString() {

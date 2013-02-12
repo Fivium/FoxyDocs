@@ -8,8 +8,9 @@ public class DocumentationEntriesSet extends AbstractModelObject {
   private String type;
   private final ArrayList<AbstractModelObject> documentationEntries = new ArrayList<AbstractModelObject>();
 
-  public DocumentationEntriesSet(String type) {
+  public DocumentationEntriesSet(String type, AbstractModelObject parent) {
     setType(type);
+    this.parent = parent;
   }
 
   public List<AbstractModelObject> getDocumentationEntries() {
