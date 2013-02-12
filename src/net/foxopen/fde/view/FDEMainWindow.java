@@ -94,7 +94,7 @@ public class FDEMainWindow extends ApplicationWindow {
               IStructuredSelection thisSelection = (IStructuredSelection) event.getSelection();
               Object selectedNode = thisSelection.getFirstElement();
               if (selectedNode instanceof FoxModule) {
-                new Tab(tabFolder, (FoxModule) selectedNode);
+                Tab.open(tabFolder, (FoxModule) selectedNode);
               }
             }
           });

@@ -28,9 +28,11 @@ public class Tab extends CTabItem {
   private final TreeViewer treeViewer;
   private final StyledText text_documentation;
   private final StyledText text_code;
+  private final FoxModule content;
 
-  public Tab(CTabFolder parent, FoxModule content) {
+  private Tab(CTabFolder parent, FoxModule content) {
     super(parent, SWT.CLOSE);
+    this.content = content;
     {
       setText(content.getName());
       {
@@ -87,8 +89,29 @@ public class Tab extends CTabItem {
     IObservableValue treeViewerCodeObserveDetailValue = BeanProperties.value(AbstractModelObject.class, "code", String.class).observeDetail(observeSingleSelectionTreeViewer_1);
     bindingContext.bindValue(observeTextText_codeObserveWidget, treeViewerCodeObserveDetailValue, null, null);
 
+  }
+
+  public boolean equals(FoxModule that) {
+    return content.equals(that);
+  }
+
+  public static void open(CTabFolder parent, FoxModule selectedNode) {
+    Tab tab = exists(parent, selectedNode);
+
+    if (tab == null) {
+      tab = new Tab(parent, selectedNode);
+    }
+
     // Set Focus
-    parent.setSelection(this);
+    parent.setSelection(tab);
+  }
+
+  public static Tab exists(CTabFolder folder, FoxModule selectedNode) {
+    for (CTabItem f : folder.getItems()) {
+      if (f instanceof Tab && ((Tab) f).equals(selectedNode))
+        return (Tab) f;
+    }
+    return null;
   }
 
 }
