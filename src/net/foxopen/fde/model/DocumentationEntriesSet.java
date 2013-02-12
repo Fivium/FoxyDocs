@@ -43,14 +43,6 @@ public class DocumentationEntriesSet extends AbstractModelObject {
     return getDocumentationEntries();
   }
 
-  public boolean isDirty() {
-    for (AbstractModelObject a : documentationEntries) {
-      if (((DocumentationEntry) a).isDirty())
-        return true;
-    }
-    return false;
-  }
-
   @Override
   public String getDocumentation() {
     String buffer = "";

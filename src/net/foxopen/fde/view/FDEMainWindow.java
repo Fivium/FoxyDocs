@@ -25,7 +25,6 @@ import org.eclipse.jface.window.ApplicationWindow;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.SashForm;
-import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.ShellAdapter;
@@ -243,17 +242,21 @@ public class FDEMainWindow extends ApplicationWindow {
   @Override
   protected void configureShell(final Shell newShell) {
     newShell.setImage(SWTResourceManager.getImage(FDEMainWindow.class, "/img/actions/Burn.png"));
+
     newShell.addDisposeListener(new DisposeListener() {
       public void widgetDisposed(DisposeEvent e) {
         logStdout("Disposed");
       }
+
     });
     newShell.addShellListener(new ShellAdapter() {
       @Override
       public void shellClosed(ShellEvent e) {
         logStdout("Closed");
+
       }
     });
+
     super.configureShell(newShell);
     newShell.setText("Fox Documentation Editor - Dev 0.2");
   }
@@ -265,6 +268,7 @@ public class FDEMainWindow extends ApplicationWindow {
   protected Point getInitialSize() {
     return new Point(205, 215);
   }
+
   protected DataBindingContext initDataBindings() {
     DataBindingContext bindingContext = new DataBindingContext();
     //

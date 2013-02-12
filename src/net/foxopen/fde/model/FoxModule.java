@@ -56,14 +56,7 @@ public class FoxModule extends AbstractModelObject {
     return f_file.getName()+" "+(isDirty()?"*":"");
   }
   
-  public boolean isDirty(){
-    for(AbstractModelObject a:documentationEntriesSet){
-      if(((DocumentationEntriesSet) a).isDirty())
-        return true;
-    }
-    return false;
-  }
-  
+
   /**
    * Parse the XML content
    * 

@@ -88,6 +88,14 @@ public abstract class AbstractModelObject extends Observable {
     return getStatus() ? OK : MISSING;
   }
 
+  public boolean isDirty(){
+    for(AbstractModelObject a:getChildren()){
+      if(a.isDirty())
+        return true;
+    }
+    return false;
+  }
+  
   public void setDocumentation(String documentation) {
     // TODO Auto-generated method stub
   }
