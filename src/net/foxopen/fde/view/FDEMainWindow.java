@@ -53,7 +53,7 @@ public class FDEMainWindow extends ApplicationWindow {
   private Action action_refresh;
   private Action action_open;
   private CTabFolder tabFolder;
-  private TreeViewer treeViewer_1;
+  private TreeViewer treeViewerFileList;
 
   /**
    * Create the application window.
@@ -83,10 +83,10 @@ public class FDEMainWindow extends ApplicationWindow {
         Composite composite = new Composite(sashForm, SWT.NONE);
         composite.setLayout(new TreeColumnLayout());
         {
-          treeViewer_1 = new TreeViewer(composite, SWT.BORDER);
-          treeViewer_1.setExpandPreCheckFilters(true);
-          treeViewer_1.setAutoExpandLevel(3);
-          treeViewer_1.addDoubleClickListener(new IDoubleClickListener() {
+          treeViewerFileList = new TreeViewer(composite, SWT.BORDER);
+          treeViewerFileList.setExpandPreCheckFilters(true);
+          treeViewerFileList.setAutoExpandLevel(3);
+          treeViewerFileList.addDoubleClickListener(new IDoubleClickListener() {
 
             @Override
             public void doubleClick(DoubleClickEvent event) {
@@ -94,10 +94,12 @@ public class FDEMainWindow extends ApplicationWindow {
               Object selectedNode = thisSelection.getFirstElement();
               if (selectedNode instanceof FoxModule) {
                 Tab.open(tabFolder, (FoxModule) selectedNode);
+              } else {                
+                treeViewerFileList.expandToLevel(selectedNode, 1);
               }
             }
           });
-          Tree tree = treeViewer_1.getTree();
+          Tree tree = treeViewerFileList.getTree();
         }
       }
       {
@@ -275,11 +277,11 @@ public class FDEMainWindow extends ApplicationWindow {
     BeansListObservableFactory treeObservableFactory = new BeansListObservableFactory(AbstractModelObject.class, "children");
     TreeBeanAdvisor treeAdvisor = new TreeBeanAdvisor(AbstractModelObject.class, "name", "children", "firstLevel");
     ObservableListTreeContentProvider treeContentProvider = new ObservableListTreeContentProvider(treeObservableFactory, treeAdvisor);
-    treeViewer_1.setLabelProvider(new TreeObservableLabelProvider(treeContentProvider.getKnownElements(), AbstractModelObject.class, "name", "image"));
-    treeViewer_1.setContentProvider(treeContentProvider);
+    treeViewerFileList.setLabelProvider(new TreeObservableLabelProvider(treeContentProvider.getKnownElements(), AbstractModelObject.class, "name", "image"));
+    treeViewerFileList.setContentProvider(treeContentProvider);
     //
     IObservableList childrenRootObserveList = BeanProperties.list("children").observe(root);
-    treeViewer_1.setInput(childrenRootObserveList);
+    treeViewerFileList.setInput(childrenRootObserveList);
     //
     return bindingContext;
   }
