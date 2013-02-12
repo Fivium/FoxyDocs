@@ -1,5 +1,7 @@
 package net.foxopen.fde.model;
 
+import static net.foxopen.utils.Logger.logStdout;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -48,7 +50,7 @@ public class Directory extends AbstractModelObject {
     return true;
   }
 
-  private void populateContent(String path) throws IOException, JDOMException, ParserConfigurationException, SAXException {
+  private List<FoxModule> loadFoxModuleList(String path) throws IOException, JDOMException, ParserConfigurationException, SAXException {
     Logger.logStdout("Opening " + path);
     String files;
     File folder = new File(path);
@@ -68,18 +70,28 @@ public class Directory extends AbstractModelObject {
       files = listOfFiles[i].getName();
       if (listOfFiles[i].isFile()) {
         if (files.endsWith(".xml") || files.endsWith(".XML")) {
-          try {
-            addChild(new FoxModule(listOfFiles[i].getCanonicalPath(), this));
-          } catch (NotAFoxModuleException e) {
-            Logger.logStderr(e.getMessage());
-          }
+          addChild(new FoxModule(listOfFiles[i], this));
         }
       } else if (listOfFiles[i].isDirectory() && !files.startsWith(".svn")) {
         Directory d = new Directory(this);
-        d.populateContent(listOfFiles[i].getCanonicalPath());
+        d.loadFoxModuleList(listOfFiles[i].getCanonicalPath());
         addChild(d);
       }
     }
+
+    return getFoxModules();
+  }
+
+  public List<FoxModule> getFoxModules() {
+    List<FoxModule> buffer = new ArrayList<FoxModule>();
+    for (AbstractModelObject e : getChildren()) {
+      if (e instanceof FoxModule) {
+        buffer.add((FoxModule) e);
+      } else if (e instanceof Directory) {
+        buffer.addAll(((Directory) e).getFoxModules());
+      }
+    }
+    return buffer;
   }
 
   public static void Load(Directory target, String path) {
@@ -104,7 +116,11 @@ public class Directory extends AbstractModelObject {
 
     public void run() {
       try {
-        target.populateContent(target.getPath());
+        List<FoxModule> modules = target.loadFoxModuleList(target.getPath());
+        logStdout(modules.size() + " Fox Modules");
+        for(FoxModule f:modules) {
+          f.read();
+        }
       } catch (Exception e) {
         e.printStackTrace();
         Logger.logStderr("Failed to load " + target.getPath());

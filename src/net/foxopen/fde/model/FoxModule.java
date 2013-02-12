@@ -19,16 +19,16 @@ import org.xml.sax.SAXException;
 
 public class FoxModule extends AbstractModelObject {
 
-  private final List<AbstractModelObject> documentationEntriesSet;
-  private File f_file;
-  
-  public FoxModule(String path, AbstractModelObject parent) throws IOException, JDOMException, ParserConfigurationException, SAXException, NotAFoxModuleException {
-    Logger.logStdout("Loading module " + path);
-    
+  private final List<AbstractModelObject> documentationEntriesSet = new ArrayList<AbstractModelObject>();
+  private final File f_file;
+
+  public FoxModule(File file, AbstractModelObject parent) {
     this.parent = parent;
-    
-    // Open the file in the FS
-    this.f_file = new java.io.File(path);
+    this.f_file = file;
+  }
+
+  public void read() throws IOException, JDOMException, ParserConfigurationException, SAXException {
+    Logger.logStdout("Loading module " + f_file.getAbsolutePath());
 
     // Can we read the file ?
     if (!f_file.canRead()) {
@@ -36,7 +36,11 @@ public class FoxModule extends AbstractModelObject {
     }
 
     // If so, parse the content
-    documentationEntriesSet = parseContent(f_file);
+    try {
+      parseContent(f_file);
+    } catch (NotAFoxModuleException e) {
+      Logger.logStderr(e.getMessage());
+    }
   }
 
   /**
@@ -53,9 +57,8 @@ public class FoxModule extends AbstractModelObject {
   }
 
   public String getName() {
-    return f_file.getName()+" "+(isDirty()?"*":"");
+    return f_file.getName() + " " + (isDirty() ? "*" : "");
   }
-  
 
   /**
    * Parse the XML content
@@ -67,11 +70,10 @@ public class FoxModule extends AbstractModelObject {
    * @throws IOException
    * @throws SAXException
    * @throws JDOMException
-   * @throws NotAFoxModuleException 
+   * @throws NotAFoxModuleException
    */
-  private List<AbstractModelObject> parseContent(File f_file) throws ParserConfigurationException, SAXException, IOException, JDOMException, NotAFoxModuleException {
+  private void parseContent(File f_file) throws ParserConfigurationException, SAXException, IOException, JDOMException, NotAFoxModuleException {
     // Parse the data
-    List<AbstractModelObject> data = new ArrayList<AbstractModelObject>();
     DocumentBuilderFactory domfactory = DocumentBuilderFactory.newInstance();
     DOMBuilder builder = new DOMBuilder();
     domfactory.setNamespaceAware(false);
@@ -82,16 +84,15 @@ public class FoxModule extends AbstractModelObject {
     Logger.logStdout("File " + f_file + " loaded to " + jdomDoc);
 
     // Entries
-    addEntries(data, jdomDoc, "Header", "//fm:header");
-    addEntries(data, jdomDoc, "Entry Themes", "//fm:entry-theme");
-    addEntries(data, jdomDoc, "Actions", "//fm:action");
-    addEntries(data, jdomDoc, "Orphanes", "//*[./fm:documentation and name()!='fm:header' and name()!='fm:entry-theme' and name()!='fm:action']");
-    
-    if (data.size() == 0){
+    addEntries(documentationEntriesSet, jdomDoc, "Header", "//fm:header");
+    addEntries(documentationEntriesSet, jdomDoc, "Entry Themes", "//fm:entry-theme");
+    addEntries(documentationEntriesSet, jdomDoc, "Actions", "//fm:action");
+    addEntries(documentationEntriesSet, jdomDoc, "Orphanes", "//*[./fm:documentation and name()!='fm:header' and name()!='fm:entry-theme' and name()!='fm:action']");
+
+    if (documentationEntriesSet.size() == 0) {
       throw new NotAFoxModuleException(f_file.getName());
     }
 
-    return data;
   }
 
   private DocumentationEntriesSet parse(org.jdom2.Document document, String key, String xpath) {
@@ -114,13 +115,13 @@ public class FoxModule extends AbstractModelObject {
   public List<AbstractModelObject> getChildren() {
     return documentationEntriesSet;
   }
-  
+
   public static class NotAFoxModuleException extends Exception {
     private static final long serialVersionUID = -2209351415786369112L;
 
-    public NotAFoxModuleException(String name){
-      super(name+" is not a valid FoxModule");
+    public NotAFoxModuleException(String name) {
+      super(name + " is not a valid FoxModule");
     }
   }
- 
+
 }
