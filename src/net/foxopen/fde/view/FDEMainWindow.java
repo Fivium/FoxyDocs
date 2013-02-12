@@ -49,7 +49,7 @@ public class FDEMainWindow extends ApplicationWindow {
 
   // private static List<AbstractModelObject> d_modules = new
   // ArrayList<AbstractModelObject>();
-  private final static Directory root = new Directory();;
+  private final static Directory root = new Directory(null);;
   private Action action_refresh;
   private Action action_open;
   private CTabFolder tabFolder;

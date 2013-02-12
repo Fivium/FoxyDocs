@@ -19,12 +19,7 @@ public class Directory extends AbstractModelObject {
   private String name;
   private String path;
 
-  public Directory() {
-    parent = null;
-  }
-
-  private Directory(String path, Directory parent) throws IOException, JDOMException, ParserConfigurationException, SAXException {
-    getContent(path);
+  public Directory(Directory parent) {
     this.parent = parent;
   }
 
@@ -46,14 +41,14 @@ public class Directory extends AbstractModelObject {
 
   public void addChild(AbstractModelObject e) {
     contentList.add(e);
-    cascadeFirePropertyChange("children", null, contentList);
+    cascadeFirePropertyChange("children", null, getChildren());
   }
-  
-  public boolean getFirstLevel(){
+
+  public boolean getFirstLevel() {
     return true;
   }
 
-  private void getContent(String path) throws IOException, JDOMException, ParserConfigurationException, SAXException {
+  private void populateContent(String path) throws IOException, JDOMException, ParserConfigurationException, SAXException {
     Logger.logStdout("Opening " + path);
     String files;
     File folder = new File(path);
@@ -64,9 +59,9 @@ public class Directory extends AbstractModelObject {
     File[] listOfFiles = folder.listFiles();
     Logger.logStdout("Items : " + listOfFiles.length);
 
-    // Reset the content list
+    // Reset or init the content list
     contentList = new ArrayList<AbstractModelObject>();
-    firePropertyChange("children", null, null);
+    cascadeFirePropertyChange("children", null, getChildren());
 
     // Populate stuff
     for (int i = 0; i < listOfFiles.length; i++) {
@@ -80,7 +75,9 @@ public class Directory extends AbstractModelObject {
           }
         }
       } else if (listOfFiles[i].isDirectory() && !files.startsWith(".svn")) {
-        addChild(new Directory(listOfFiles[i].getCanonicalPath(),this));
+        Directory d = new Directory(this);
+        d.populateContent(listOfFiles[i].getCanonicalPath());
+        addChild(d);
       }
     }
   }
@@ -107,7 +104,7 @@ public class Directory extends AbstractModelObject {
 
     public void run() {
       try {
-        target.getContent(target.getPath());
+        target.populateContent(target.getPath());
       } catch (Exception e) {
         e.printStackTrace();
         Logger.logStderr("Failed to load " + target.getPath());
