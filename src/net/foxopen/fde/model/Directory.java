@@ -46,7 +46,7 @@ public class Directory extends AbstractModelObject {
 
   public void addChild(AbstractModelObject e) {
     contentList.add(e);
-    firePropertyChange("children", null, contentList);
+    cascadeFirePropertyChange("children", null, contentList);
   }
   
   public boolean getFirstLevel(){

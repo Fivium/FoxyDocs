@@ -5,23 +5,13 @@ import java.beans.PropertyChangeSupport;
 import java.util.List;
 import java.util.Observable;
 
-import net.foxopen.fde.view.FDEMainWindow;
+import static net.foxopen.utils.Constants.*;
 
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.wb.swt.ResourceManager;
 
 public abstract class AbstractModelObject extends Observable {
 
   private final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
-
-  private static final Image OK = getImage("/img/actions/ok.png");
-  private static final Image MISSING = getImage("/img/actions/no.png");
-
-  private static Image getImage(String file) {
-    ImageDescriptor image = ResourceManager.getImageDescriptor(FDEMainWindow.class, file);
-    return image.createImage();
-  }
 
   public void addPropertyChangeListener(PropertyChangeListener listener) {
     propertyChangeSupport.addPropertyChangeListener(listener);
@@ -85,17 +75,17 @@ public abstract class AbstractModelObject extends Observable {
   }
 
   public Image getImage() {
-    return getStatus() ? OK : MISSING;
+    return getStatus() ? IMAGE_OK : IMAGE_MISSING;
   }
 
-  public boolean isDirty(){
-    for(AbstractModelObject a:getChildren()){
-      if(a.isDirty())
+  public boolean isDirty() {
+    for (AbstractModelObject a : getChildren()) {
+      if (a.isDirty())
         return true;
     }
     return false;
   }
-  
+
   public void setDocumentation(String documentation) {
     // TODO Auto-generated method stub
   }
