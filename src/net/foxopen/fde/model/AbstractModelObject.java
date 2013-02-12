@@ -6,9 +6,8 @@ import java.beans.PropertyChangeSupport;
 import java.util.List;
 import java.util.Observable;
 
-import net.foxopen.fde.model.tree.TreeContentProvider.ITreeNode;
+public abstract class AbstractModelObject extends Observable {
 
-public abstract class AbstractModelObject extends Observable implements ITreeNode {
   private final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
 
   public void addPropertyChangeListener(PropertyChangeListener listener) {
@@ -31,54 +30,34 @@ public abstract class AbstractModelObject extends Observable implements ITreeNod
     propertyChangeSupport.firePropertyChange(propertyName, oldValue, newValue);
   }
 
-  @Override
-  public Image getImage() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-  
-  public List<AbstractModelObject> getChildren(){
-    throw new IllegalArgumentException("Shouldn't be there");
-  }
-  
-  public String getName(){
-    throw new IllegalArgumentException("Shouldn't be there");
-  }
-  
+  abstract public List<AbstractModelObject> getChildren();
+
+  abstract public String getName();
+
   public boolean getStatus() {
-    for(AbstractModelObject child :getChildren()){
-      if(!child.getStatus())
+    for (AbstractModelObject child : getChildren()) {
+      if (!child.getStatus())
         return false;
     }
     return true;
   }
 
-  @Override
   public boolean hasChildren() {
-    return getChildren().size()>0;
+    return getChildren().size() > 0;
   }
 
-  @Override
-  public ITreeNode getParent() {
-    return null;
-  }
-
-  @Override
   public String getDocumentation() {
     return null;
   }
 
-  @Override
   public String getCode() {
     return null;
   }
 
-  @Override
   public void setDocumentation(String documentation) {
     // TODO Auto-generated method stub
   }
 
-  @Override
   public void setCode(String code) {
     // TODO Auto-generated method stub
   }
