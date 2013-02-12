@@ -105,4 +105,5 @@ public class FoxModule extends AbstractModelObject {
   public List<AbstractModelObject> getChildren() {
     return documentationEntriesSet;
   }
+ 
 }

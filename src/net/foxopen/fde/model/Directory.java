@@ -14,29 +14,38 @@ import org.xml.sax.SAXException;
 
 public class Directory extends AbstractModelObject {
 
-  private List<AbstractModelObject> d_modules = new ArrayList<AbstractModelObject>();
+  private List<AbstractModelObject> contentList = new ArrayList<AbstractModelObject>();
+  private String name;
 
   public Directory(String path) throws IOException, JDOMException, ParserConfigurationException, SAXException {
     getContent(path);
   }
 
   public Directory() {
+    // Empty
+  }
 
+  public String getName() {
+    return name;
   }
 
   public List<AbstractModelObject> getChildren() {
-    return d_modules;
+    return contentList;
   }
 
   public void addChild(AbstractModelObject e) {
-    d_modules.add(e);
-    firePropertyChange("children", null, d_modules);
+    contentList.add(e);
+    firePropertyChange("children", null, contentList);
   }
 
   public void getContent(String path) throws IOException, JDOMException, ParserConfigurationException, SAXException {
     Logger.logStdout("Opening " + path);
     String files;
     File folder = new File(path);
+    if(folder.isFile()){
+      throw new IllegalArgumentException("You cannot load just one file : "+path);
+    }
+    name = folder.getName();
     File[] listOfFiles = folder.listFiles();
     Logger.logStdout("Items : " + listOfFiles.length);
 
@@ -47,7 +56,7 @@ public class Directory extends AbstractModelObject {
           addChild(new FoxModule(listOfFiles[i].getCanonicalPath()));
         }
       } else if (listOfFiles[i].isDirectory() && !files.startsWith(".svn")) {
-        Directory.Load(new Directory(), listOfFiles[i].getCanonicalPath());
+        addChild(new Directory(listOfFiles[i].getCanonicalPath()));
       }
     }
   }
@@ -59,7 +68,7 @@ public class Directory extends AbstractModelObject {
 
   private static class Loader extends Thread {
     private final Directory target;
-    final String path;
+    private final String path;
 
     public Loader(Directory target, String path) {
       this.target = target;
@@ -76,5 +85,4 @@ public class Directory extends AbstractModelObject {
       }
     }
   }
-
 }

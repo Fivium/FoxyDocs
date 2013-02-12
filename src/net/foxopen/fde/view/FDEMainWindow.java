@@ -1,39 +1,29 @@
 package net.foxopen.fde.view;
 
 import static net.foxopen.utils.Logger.logStdout;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import net.foxopen.fde.model.AbstractModelObject;
 import net.foxopen.fde.model.Directory;
 import net.foxopen.fde.model.FoxModule;
-import net.foxopen.fde.model.tree.TreeContentProvider.ITreeNode;
 
 import org.eclipse.core.databinding.DataBindingContext;
-import org.eclipse.core.databinding.beans.BeansObservables;
-import org.eclipse.core.databinding.beans.PojoProperties;
+import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.observable.Realm;
 import org.eclipse.core.databinding.observable.list.IObservableList;
-import org.eclipse.core.databinding.observable.map.IObservableMap;
-import org.eclipse.core.databinding.observable.value.IObservableValue;
-import org.eclipse.core.databinding.property.Properties;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.StatusLineManager;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.databinding.swt.SWTObservables;
-import org.eclipse.jface.databinding.swt.WidgetProperties;
-import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
-import org.eclipse.jface.databinding.viewers.ObservableMapLabelProvider;
-import org.eclipse.jface.databinding.viewers.ViewerProperties;
-import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.databinding.viewers.ObservableListTreeContentProvider;
+import org.eclipse.jface.layout.TreeColumnLayout;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.window.ApplicationWindow;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
-import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.DisposeEvent;
@@ -44,13 +34,14 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Tree;
+import org.eclipse.wb.rcp.databinding.BeansListObservableFactory;
+import org.eclipse.wb.rcp.databinding.TreeBeanAdvisor;
+import org.eclipse.wb.rcp.databinding.TreeObservableLabelProvider;
 import org.eclipse.wb.swt.ResourceManager;
-import org.eclipse.core.databinding.beans.BeanProperties;
 
 public class FDEMainWindow extends ApplicationWindow {
   private Action action_exit;
@@ -58,14 +49,10 @@ public class FDEMainWindow extends ApplicationWindow {
   // private static List<AbstractModelObject> d_modules = new
   // ArrayList<AbstractModelObject>();
   private static Directory root = new Directory();
-  private StyledText text_documentation;
-  private StyledText text_code;
-  private TreeViewer treeViewer;
-  private Table table;
-  private TableViewer tableViewer;
   private Action action_refresh;
   private Action action_open;
   private CTabFolder tabFolder;
+  private TreeViewer treeViewer_1;
 
   /**
    * Create the application window.
@@ -93,50 +80,30 @@ public class FDEMainWindow extends ApplicationWindow {
       sashForm.setSashWidth(4);
       {
         Composite composite = new Composite(sashForm, SWT.NONE);
-        composite.setLayout(new FillLayout(SWT.HORIZONTAL));
+        composite.setLayout(new TreeColumnLayout());
         {
-          tableViewer = new TableViewer(composite, SWT.BORDER | SWT.FULL_SELECTION);
-          table = tableViewer.getTable();
-          table.setLinesVisible(true);
+          treeViewer_1 = new TreeViewer(composite, SWT.BORDER);
+          treeViewer_1.setExpandPreCheckFilters(true);
+          treeViewer_1.setAutoExpandLevel(3);
+          treeViewer_1.addDoubleClickListener(new IDoubleClickListener() {
+
+            @Override
+            public void doubleClick(DoubleClickEvent event) {
+              IStructuredSelection thisSelection = (IStructuredSelection) event.getSelection();
+              Object selectedNode = thisSelection.getFirstElement();
+              if (selectedNode instanceof FoxModule) {
+                new Tab(tabFolder, (FoxModule) selectedNode);
+              }
+            }
+          });
+          Tree tree = treeViewer_1.getTree();
         }
       }
       {
         tabFolder = new CTabFolder(sashForm, SWT.BORDER | SWT.CLOSE);
         tabFolder.setSimple(false);
         tabFolder.setSelectionBackground(Display.getCurrent().getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));
-        {
-          CTabItem tbtmTab = new CTabItem(tabFolder, SWT.CLOSE);
-          tbtmTab.setText("Tab");
-          {
-            Composite composite = new Composite(tabFolder, SWT.NONE);
-            tbtmTab.setControl(composite);
-            composite.setLayout(new FillLayout(SWT.HORIZONTAL));
-            {
-              SashForm sashForm_1 = new SashForm(composite, SWT.NONE);
-
-              treeViewer = new TreeViewer(sashForm_1, SWT.BORDER);
-              treeViewer.setAutoExpandLevel(TreeViewer.ALL_LEVELS);
-              Tree tree = treeViewer.getTree();
-              {
-                Composite composite_1 = new Composite(sashForm_1, SWT.NONE);
-                composite_1.setLayout(new FillLayout(SWT.VERTICAL));
-
-                Group grpDocumentation = new Group(composite_1, SWT.NONE);
-                grpDocumentation.setText("Documentation");
-                grpDocumentation.setLayout(new FillLayout(SWT.HORIZONTAL));
-
-                text_documentation = new StyledText(grpDocumentation, SWT.BORDER);
-
-                Group grpCode = new Group(composite_1, SWT.NONE);
-                grpCode.setText("Code");
-                grpCode.setLayout(new FillLayout(SWT.HORIZONTAL));
-
-                text_code = new StyledText(grpCode, SWT.BORDER);
-              }
-              sashForm_1.setWeights(new int[] { 1, 3 });
-            }
-          }
-        }
+        // Tab here...
       }
       sashForm.setWeights(new int[] { 1, 3 });
     }
@@ -161,13 +128,7 @@ public class FDEMainWindow extends ApplicationWindow {
     {
       action_refresh = new Action("&Refresh") {
         public void run() {
-          // FIXME Change path
-          String path = "\\\\central.health\\dfsuserenv\\users\\User_07\\putalp\\Desktop\\Pierre\\PharmCIS\\CodeSource\\FoxModules\\CoreModules\\PharmCIS";
-          // String path =
-          // "\\\\central.health\\dfsuserenv\\users\\User_07\\putalp\\Desktop\\Pierre\\PharmCIS";
 
-          getStatusLineManager().setMessage("Loading " + path);
-          Directory.Load(root, path);
         }
       };
       action_refresh.setAccelerator(SWT.F5);
@@ -176,7 +137,13 @@ public class FDEMainWindow extends ApplicationWindow {
     {
       action_open = new Action("&Open") {
         public void run() {
-          new CTabItem(tabFolder, SWT.NONE, 1).setText("Test");
+          // User has selected to save a file
+          DirectoryDialog dlg = new DirectoryDialog(getShell(), SWT.OPEN);
+          String fn = dlg.open();
+          if (fn != null) {
+            getStatusLineManager().setMessage("Loading " + fn);
+            Directory.Load(root, fn);
+          }
         }
       };
       action_open.setAccelerator(SWT.CTRL | 'O');
@@ -277,7 +244,7 @@ public class FDEMainWindow extends ApplicationWindow {
       }
     });
     super.configureShell(newShell);
-    newShell.setText("Fox Documentation Editor - Dev 0.1");
+    newShell.setText("Fox Documentation Editor - Dev 0.2");
   }
 
   /**
@@ -291,14 +258,15 @@ public class FDEMainWindow extends ApplicationWindow {
   protected DataBindingContext initDataBindings() {
     DataBindingContext bindingContext = new DataBindingContext();
     //
-    ObservableListContentProvider listContentProvider = new ObservableListContentProvider();
-    IObservableMap observeMap = BeansObservables.observeMap(listContentProvider.getKnownElements(), AbstractModelObject.class, "name");
-    tableViewer.setLabelProvider(new ObservableMapLabelProvider(observeMap));
-    tableViewer.setContentProvider(listContentProvider);
+    BeansListObservableFactory treeObservableFactory = new BeansListObservableFactory(AbstractModelObject.class, "children");
+    TreeBeanAdvisor treeAdvisor = new TreeBeanAdvisor(AbstractModelObject.class, "name", "children", null);
+    ObservableListTreeContentProvider treeContentProvider = new ObservableListTreeContentProvider(treeObservableFactory, treeAdvisor);
+    treeViewer_1.setLabelProvider(new TreeObservableLabelProvider(treeContentProvider.getKnownElements(), AbstractModelObject.class, "name", null));
+    treeViewer_1.setContentProvider(treeContentProvider);
     //
     IObservableList childrenRootObserveList = BeanProperties.list("children").observe(root);
-    tableViewer.setInput(childrenRootObserveList);
-    //
+    treeViewer_1.setInput(childrenRootObserveList);
+
     return bindingContext;
   }
 }

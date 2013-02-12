@@ -2,6 +2,8 @@ package net.foxopen.fde.model;
 
 import static net.foxopen.utils.Logger.logStdout;
 
+import java.util.List;
+
 import org.jdom2.Element;
 import org.jdom2.Namespace;
 import org.jdom2.output.XMLOutputter;
@@ -11,7 +13,7 @@ public class DocumentationEntry extends AbstractModelObject {
   public static Namespace ns_fm = Namespace.getNamespace("fm", "http://www.og.dti.gov/fox_module");
   private static XMLOutputter serializer = new XMLOutputter();
 
-  private String status;
+  private boolean status;
   private String content;
   private String code;
   private String name;
@@ -22,9 +24,9 @@ public class DocumentationEntry extends AbstractModelObject {
 
     Element docNode = node.getChild("documentation", ns_fm);
     if (docNode == null) {
-      setStatus("missing");
+      setStatus(false);
     } else {
-      setStatus("ok");
+      setStatus(true);
       setContent(docNode.getChild("description", ns_fm).getTextNormalize());
     }
     setCode(serializer.outputString(node));
@@ -39,7 +41,7 @@ public class DocumentationEntry extends AbstractModelObject {
     logStdout(toString());
   }
 
-  public String getStatus() {
+  public boolean getStatus() {
     return status;
   }
 
@@ -55,7 +57,7 @@ public class DocumentationEntry extends AbstractModelObject {
     return name;
   }
 
-  public void setStatus(String status) {
+  public void setStatus(boolean status) {
     firePropertyChange("status", this.status, this.status = status);
   }
 
@@ -89,5 +91,15 @@ public class DocumentationEntry extends AbstractModelObject {
   @Override
   public void setDocumentation(String documentation) {
     setContent(documentation);
+  }
+
+  @Override
+  public List<AbstractModelObject> getChildren() {
+    // No children at this point
+    return null;
+  }
+  
+  public boolean hasChildren(){
+    return false;
   }
 }

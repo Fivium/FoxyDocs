@@ -32,21 +32,25 @@ public abstract class AbstractModelObject extends Observable implements ITreeNod
   }
 
   @Override
-  public List<AbstractModelObject> getChildren() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public String getName() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
   public Image getImage() {
     // TODO Auto-generated method stub
     return null;
+  }
+  
+  public List<AbstractModelObject> getChildren(){
+    throw new IllegalArgumentException("Shouldn't be there");
+  }
+  
+  public String getName(){
+    throw new IllegalArgumentException("Shouldn't be there");
+  }
+  
+  public boolean getStatus() {
+    for(AbstractModelObject child :getChildren()){
+      if(!child.getStatus())
+        return false;
+    }
+    return true;
   }
 
   @Override
@@ -56,32 +60,27 @@ public abstract class AbstractModelObject extends Observable implements ITreeNod
 
   @Override
   public ITreeNode getParent() {
-    // TODO Auto-generated method stub
     return null;
   }
 
   @Override
   public String getDocumentation() {
-    // TODO Auto-generated method stub
     return null;
   }
 
   @Override
   public String getCode() {
-    // TODO Auto-generated method stub
     return null;
   }
 
   @Override
   public void setDocumentation(String documentation) {
     // TODO Auto-generated method stub
-
   }
 
   @Override
   public void setCode(String code) {
     // TODO Auto-generated method stub
-
   }
 
 }
