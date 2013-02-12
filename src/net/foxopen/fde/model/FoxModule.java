@@ -22,7 +22,7 @@ public class FoxModule extends AbstractModelObject {
   private final List<AbstractModelObject> documentationEntriesSet;
   private File f_file;
 
-  public FoxModule(String path) throws IOException, JDOMException, ParserConfigurationException, SAXException {
+  public FoxModule(String path) throws IOException, JDOMException, ParserConfigurationException, SAXException, NotAFoxModuleException {
     Logger.logStdout("Loading module " + path);
     // Open the file in the FS
     this.f_file = new java.io.File(path);
@@ -63,8 +63,9 @@ public class FoxModule extends AbstractModelObject {
    * @throws IOException
    * @throws SAXException
    * @throws JDOMException
+   * @throws NotAFoxModuleException 
    */
-  private static List<AbstractModelObject> parseContent(File f_file) throws ParserConfigurationException, SAXException, IOException, JDOMException {
+  private static List<AbstractModelObject> parseContent(File f_file) throws ParserConfigurationException, SAXException, IOException, JDOMException, NotAFoxModuleException {
     // Parse the data
     List<AbstractModelObject> data = new ArrayList<AbstractModelObject>();
     DocumentBuilderFactory domfactory = DocumentBuilderFactory.newInstance();
@@ -81,6 +82,10 @@ public class FoxModule extends AbstractModelObject {
     addEntries(data, jdomDoc, "Entry Themes", "//fm:entry-theme");
     addEntries(data, jdomDoc, "Actions", "//fm:action");
     addEntries(data, jdomDoc, "Orphanes", "//*[./fm:documentation and name()!='fm:header' and name()!='fm:entry-theme' and name()!='fm:action']");
+    
+    if (data.size() == 0){
+      throw new NotAFoxModuleException(f_file.getName());
+    }
 
     return data;
   }
@@ -104,6 +109,14 @@ public class FoxModule extends AbstractModelObject {
   @Override
   public List<AbstractModelObject> getChildren() {
     return documentationEntriesSet;
+  }
+  
+  public static class NotAFoxModuleException extends Exception {
+    private static final long serialVersionUID = -2209351415786369112L;
+
+    public NotAFoxModuleException(String name){
+      super(name+" is not a valid FoxModule");
+    }
   }
  
 }

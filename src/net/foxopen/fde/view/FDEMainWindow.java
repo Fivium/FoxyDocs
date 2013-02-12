@@ -36,6 +36,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.wb.rcp.databinding.BeansListObservableFactory;
@@ -48,7 +49,7 @@ public class FDEMainWindow extends ApplicationWindow {
 
   // private static List<AbstractModelObject> d_modules = new
   // ArrayList<AbstractModelObject>();
-  private static Directory root = new Directory();
+  private final static Directory root = new Directory();;
   private Action action_refresh;
   private Action action_open;
   private CTabFolder tabFolder;
@@ -128,7 +129,15 @@ public class FDEMainWindow extends ApplicationWindow {
     {
       action_refresh = new Action("&Refresh") {
         public void run() {
-
+          if (root.getPath() != null) {
+            getStatusLineManager().setMessage("Refresh " + root.getPath());
+            Directory.Load(root);
+          } else {
+            MessageBox dialog = new MessageBox(getShell(), SWT.ICON_WARNING | SWT.OK);
+            dialog.setText("Warning");
+            dialog.setMessage("There is no root folder loaded");
+            dialog.open();
+          }
         }
       };
       action_refresh.setAccelerator(SWT.F5);
@@ -139,10 +148,10 @@ public class FDEMainWindow extends ApplicationWindow {
         public void run() {
           // User has selected to save a file
           DirectoryDialog dlg = new DirectoryDialog(getShell(), SWT.OPEN);
-          String fn = dlg.open();
-          if (fn != null) {
-            getStatusLineManager().setMessage("Loading " + fn);
-            Directory.Load(root, fn);
+          String path = dlg.open();
+          if (path != null) {
+            getStatusLineManager().setMessage("Loading " + path);
+            Directory.Load(root, path);
           }
         }
       };

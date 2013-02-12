@@ -23,26 +23,26 @@ import org.eclipse.wb.rcp.databinding.BeansListObservableFactory;
 import org.eclipse.wb.rcp.databinding.TreeBeanAdvisor;
 import org.eclipse.wb.rcp.databinding.TreeObservableLabelProvider;
 
-public class Tab {
-  
+public class Tab extends CTabItem {
+
   private final TreeViewer treeViewer;
   private final StyledText text_documentation;
   private final StyledText text_code;
- 
+
   public Tab(CTabFolder parent, FoxModule content) {
+    super(parent, SWT.CLOSE);
     {
-      CTabItem tbtmTab = new CTabItem(parent, SWT.CLOSE);
-      tbtmTab.setText(content.getName());
+      setText(content.getName());
       {
         Composite composite = new Composite(parent, SWT.NONE);
-        tbtmTab.setControl(composite);
+        setControl(composite);
         composite.setLayout(new FillLayout(SWT.HORIZONTAL));
         {
           SashForm sashFormTabContent = new SashForm(composite, SWT.NONE);
 
           treeViewer = new TreeViewer(sashFormTabContent, SWT.BORDER);
           treeViewer.setAutoExpandLevel(TreeViewer.ALL_LEVELS);
-          //Tree tree = treeViewer.getTree();
+          // Tree tree = treeViewer.getTree();
           {
             Composite composite_1 = new Composite(sashFormTabContent, SWT.NONE);
             composite_1.setLayout(new FillLayout(SWT.VERTICAL));
@@ -64,7 +64,7 @@ public class Tab {
       }
     }
     // Add Top Content
-    DataBindingContext bindingContext = new DataBindingContext();  
+    DataBindingContext bindingContext = new DataBindingContext();
     //
     BeansListObservableFactory treeObservableFactory = new BeansListObservableFactory(AbstractModelObject.class, "children");
     TreeBeanAdvisor treeAdvisor = new TreeBeanAdvisor(AbstractModelObject.class, "name", "children", null);
@@ -74,18 +74,20 @@ public class Tab {
     //
     IObservableList childrenRootObserveList = BeanProperties.list("children").observe(content);
     treeViewer.setInput(childrenRootObserveList);
-    
+
     //
-    IObservableValue observeTextText_documentationObserveWidget = WidgetProperties.text(new int[]{SWT.Modify, SWT.FocusOut, SWT.DefaultSelection}).observe(text_documentation);
+    IObservableValue observeTextText_documentationObserveWidget = WidgetProperties.text(new int[] { SWT.Modify, SWT.FocusOut, SWT.DefaultSelection }).observe(text_documentation);
     IObservableValue observeSingleSelectionTreeViewer = ViewerProperties.singleSelection().observe(treeViewer);
     IObservableValue treeViewerDocumentationObserveDetailValue = BeanProperties.value(AbstractModelObject.class, "documentation", String.class).observeDetail(observeSingleSelectionTreeViewer);
     bindingContext.bindValue(observeTextText_documentationObserveWidget, treeViewerDocumentationObserveDetailValue, null, null);
     //
-    IObservableValue observeTextText_codeObserveWidget = WidgetProperties.text(new int[]{SWT.Modify, SWT.FocusOut, SWT.DefaultSelection}).observe(text_code);
+    IObservableValue observeTextText_codeObserveWidget = WidgetProperties.text(new int[] { SWT.Modify, SWT.FocusOut, SWT.DefaultSelection }).observe(text_code);
     IObservableValue observeSingleSelectionTreeViewer_1 = ViewerProperties.singleSelection().observe(treeViewer);
     IObservableValue treeViewerCodeObserveDetailValue = BeanProperties.value(AbstractModelObject.class, "code", String.class).observeDetail(observeSingleSelectionTreeViewer_1);
     bindingContext.bindValue(observeTextText_codeObserveWidget, treeViewerCodeObserveDetailValue, null, null);
-    
+
+    // Set Focus
+    parent.setSelection(this);
   }
 
 }
