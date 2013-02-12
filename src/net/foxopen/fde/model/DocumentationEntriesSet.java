@@ -3,6 +3,8 @@ package net.foxopen.fde.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.foxopen.fde.model.abstractObject.AbstractModelObject;
+
 public class DocumentationEntriesSet extends AbstractModelObject {
 
   private String type;

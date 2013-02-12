@@ -1,9 +1,14 @@
 package net.foxopen.fde.view;
 
-import static net.foxopen.utils.Logger.logStdout;
-import net.foxopen.fde.model.AbstractModelObject;
+import static net.foxopen.utils.Logger.*;
+
+import java.io.IOException;
+
 import net.foxopen.fde.model.Directory;
 import net.foxopen.fde.model.FoxModule;
+import net.foxopen.fde.model.abstractObject.AbstractFSItem;
+import net.foxopen.fde.model.abstractObject.AbstractModelObject;
+import net.foxopen.utils.Loader;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
@@ -47,9 +52,7 @@ import org.eclipse.wb.swt.SWTResourceManager;
 public class FDEMainWindow extends ApplicationWindow {
   private Action action_exit;
 
-  // private static List<AbstractModelObject> d_modules = new
-  // ArrayList<AbstractModelObject>();
-  private final static Directory root = new Directory(null);;
+  private final static AbstractFSItem root = new Directory(null);
   private Action action_refresh;
   private Action action_open;
   private CTabFolder tabFolder;
@@ -94,7 +97,7 @@ public class FDEMainWindow extends ApplicationWindow {
               Object selectedNode = thisSelection.getFirstElement();
               if (selectedNode instanceof FoxModule) {
                 Tab.open(tabFolder, (FoxModule) selectedNode);
-              } else {                
+              } else {
                 treeViewerFileList.expandToLevel(selectedNode, 1);
               }
             }
@@ -133,7 +136,14 @@ public class FDEMainWindow extends ApplicationWindow {
         public void run() {
           if (root.getPath() != null) {
             getStatusLineManager().setMessage("Refresh " + root.getPath());
-            Directory.Load(root);
+            try {
+              Loader.LoadContent(root);
+            } catch (Exception e) {
+              MessageBox dialog = new MessageBox(getShell(), SWT.ICON_ERROR | SWT.OK);
+              dialog.setText("Error");
+              dialog.setMessage("Could not refresh the file : " + e.getMessage());
+              dialog.open();
+            }
           } else {
             MessageBox dialog = new MessageBox(getShell(), SWT.ICON_WARNING | SWT.OK);
             dialog.setText("Warning");
@@ -153,7 +163,16 @@ public class FDEMainWindow extends ApplicationWindow {
           String path = dlg.open();
           if (path != null) {
             getStatusLineManager().setMessage("Loading " + path);
-            Directory.Load(root, path);
+            try {
+              root.open(path);
+              Loader.LoadContent(root);
+            } catch (Exception e) {
+              logStderr(e.getMessage());
+              MessageBox dialog = new MessageBox(getShell(), SWT.ICON_ERROR | SWT.OK);
+              dialog.setText("Error");
+              dialog.setMessage("Could not open the directory : " + e.getMessage());
+              dialog.open();
+            }
           }
         }
       };
@@ -274,10 +293,10 @@ public class FDEMainWindow extends ApplicationWindow {
   protected DataBindingContext initDataBindings() {
     DataBindingContext bindingContext = new DataBindingContext();
     //
-    BeansListObservableFactory treeObservableFactory = new BeansListObservableFactory(AbstractModelObject.class, "children");
-    TreeBeanAdvisor treeAdvisor = new TreeBeanAdvisor(AbstractModelObject.class, "name", "children", "firstLevel");
+    BeansListObservableFactory treeObservableFactory = new BeansListObservableFactory(AbstractFSItem.class, "children");
+    TreeBeanAdvisor treeAdvisor = new TreeBeanAdvisor(AbstractFSItem.class, "parent", "children", "hasChildren");
     ObservableListTreeContentProvider treeContentProvider = new ObservableListTreeContentProvider(treeObservableFactory, treeAdvisor);
-    treeViewerFileList.setLabelProvider(new TreeObservableLabelProvider(treeContentProvider.getKnownElements(), AbstractModelObject.class, "name", "image"));
+    treeViewerFileList.setLabelProvider(new TreeObservableLabelProvider(treeContentProvider.getKnownElements(), AbstractFSItem.class, "name", "image"));
     treeViewerFileList.setContentProvider(treeContentProvider);
     //
     IObservableList childrenRootObserveList = BeanProperties.list("children").observe(root);

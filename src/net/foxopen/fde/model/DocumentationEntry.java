@@ -4,6 +4,8 @@ import static net.foxopen.utils.Logger.logStdout;
 
 import java.util.List;
 
+import net.foxopen.fde.model.abstractObject.AbstractModelObject;
+
 import org.jdom2.Element;
 import org.jdom2.Namespace;
 import org.jdom2.output.XMLOutputter;

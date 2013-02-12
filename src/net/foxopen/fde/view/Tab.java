@@ -1,7 +1,7 @@
 package net.foxopen.fde.view;
 
-import net.foxopen.fde.model.AbstractModelObject;
 import net.foxopen.fde.model.FoxModule;
+import net.foxopen.fde.model.abstractObject.AbstractModelObject;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
