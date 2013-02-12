@@ -14,9 +14,10 @@ public class DocumentationEntry extends AbstractModelObject {
   private static XMLOutputter serializer = new XMLOutputter();
 
   private boolean status;
-  private String content;
+  private String documentation;
   private String code;
   private String name;
+  private boolean dirty = false;
 
   public DocumentationEntry(Element node) {
     if (node == null)
@@ -27,7 +28,7 @@ public class DocumentationEntry extends AbstractModelObject {
       setStatus(false);
     } else {
       setStatus(true);
-      setContent(docNode.getChild("description", ns_fm).getTextNormalize());
+      documentation = docNode.getChild("description", ns_fm).getTextNormalize();
     }
     setCode(serializer.outputString(node));
 
@@ -45,26 +46,28 @@ public class DocumentationEntry extends AbstractModelObject {
     return status;
   }
 
-  public String getContent() {
-    return content;
-  }
-
   public String getCode() {
     return code;
   }
 
   public String getName() {
-    return name;
+    return name + " " + (isDirty() ? "*" : "");
+  }
+
+  public boolean isDirty() {
+    return dirty;
   }
 
   public void setStatus(boolean status) {
     firePropertyChange("status", this.status, this.status = status);
   }
 
-  public void setContent(String content) {
+  @Override
+  public void setDocumentation(String content) {
     if (content == null || content.trim() == "")
       throw new IllegalArgumentException("Documentation content cannot be empty if assigned");
-    firePropertyChange("docContent", this.content, this.content = content);
+    firePropertyChange("docContent", this.documentation, this.documentation = content);
+    setDirty(true);
   }
 
   public void setCode(String code) {
@@ -79,18 +82,17 @@ public class DocumentationEntry extends AbstractModelObject {
     firePropertyChange("name", this.name, this.name = name);
   }
 
+  public void setDirty(boolean dirty) {
+    firePropertyChange("dirty", this.dirty, this.dirty = dirty);
+  }
+
   public String toString() {
     return name + " : " + status;
   }
 
   @Override
   public String getDocumentation() {
-    return content;
-  }
-
-  @Override
-  public void setDocumentation(String documentation) {
-    setContent(documentation);
+    return documentation;
   }
 
   @Override
@@ -98,8 +100,8 @@ public class DocumentationEntry extends AbstractModelObject {
     // No children at this point
     return null;
   }
-  
-  public boolean hasChildren(){
+
+  public boolean hasChildren() {
     return false;
   }
 }

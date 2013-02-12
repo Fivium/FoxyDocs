@@ -47,6 +47,10 @@ public class Directory extends AbstractModelObject {
     contentList.add(e);
     firePropertyChange("children", null, contentList);
   }
+  
+  public boolean getFirstLevel(){
+    return true;
+  }
 
   private void getContent(String path) throws IOException, JDOMException, ParserConfigurationException, SAXException {
     Logger.logStdout("Opening " + path);

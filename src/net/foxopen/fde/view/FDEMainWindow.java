@@ -43,6 +43,7 @@ import org.eclipse.wb.rcp.databinding.BeansListObservableFactory;
 import org.eclipse.wb.rcp.databinding.TreeBeanAdvisor;
 import org.eclipse.wb.rcp.databinding.TreeObservableLabelProvider;
 import org.eclipse.wb.swt.ResourceManager;
+import org.eclipse.wb.swt.SWTResourceManager;
 
 public class FDEMainWindow extends ApplicationWindow {
   private Action action_exit;
@@ -191,8 +192,8 @@ public class FDEMainWindow extends ApplicationWindow {
   @Override
   protected ToolBarManager createToolBarManager(int style) {
     ToolBarManager toolBarManager = new ToolBarManager(SWT.WRAP);
-    toolBarManager.add(action_open);
     toolBarManager.add(action_exit);
+    toolBarManager.add(action_open);
     toolBarManager.add(action_refresh);
     return toolBarManager;
   }
@@ -241,6 +242,7 @@ public class FDEMainWindow extends ApplicationWindow {
    */
   @Override
   protected void configureShell(final Shell newShell) {
+    newShell.setImage(SWTResourceManager.getImage(FDEMainWindow.class, "/img/actions/Burn.png"));
     newShell.addDisposeListener(new DisposeListener() {
       public void widgetDisposed(DisposeEvent e) {
         logStdout("Disposed");
@@ -263,19 +265,18 @@ public class FDEMainWindow extends ApplicationWindow {
   protected Point getInitialSize() {
     return new Point(205, 215);
   }
-
   protected DataBindingContext initDataBindings() {
     DataBindingContext bindingContext = new DataBindingContext();
     //
     BeansListObservableFactory treeObservableFactory = new BeansListObservableFactory(AbstractModelObject.class, "children");
-    TreeBeanAdvisor treeAdvisor = new TreeBeanAdvisor(AbstractModelObject.class, "name", "children", null);
+    TreeBeanAdvisor treeAdvisor = new TreeBeanAdvisor(AbstractModelObject.class, "name", "children", "firstLevel");
     ObservableListTreeContentProvider treeContentProvider = new ObservableListTreeContentProvider(treeObservableFactory, treeAdvisor);
-    treeViewer_1.setLabelProvider(new TreeObservableLabelProvider(treeContentProvider.getKnownElements(), AbstractModelObject.class, "name", null));
+    treeViewer_1.setLabelProvider(new TreeObservableLabelProvider(treeContentProvider.getKnownElements(), AbstractModelObject.class, "name", "image"));
     treeViewer_1.setContentProvider(treeContentProvider);
     //
     IObservableList childrenRootObserveList = BeanProperties.list("children").observe(root);
     treeViewer_1.setInput(childrenRootObserveList);
-
+    //
     return bindingContext;
   }
 }

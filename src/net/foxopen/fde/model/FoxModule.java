@@ -21,7 +21,7 @@ public class FoxModule extends AbstractModelObject {
 
   private final List<AbstractModelObject> documentationEntriesSet;
   private File f_file;
-
+  
   public FoxModule(String path) throws IOException, JDOMException, ParserConfigurationException, SAXException, NotAFoxModuleException {
     Logger.logStdout("Loading module " + path);
     // Open the file in the FS
@@ -50,9 +50,17 @@ public class FoxModule extends AbstractModelObject {
   }
 
   public String getName() {
-    return f_file.getName();
+    return f_file.getName()+" "+(isDirty()?"*":"");
   }
-
+  
+  public boolean isDirty(){
+    for(AbstractModelObject a:documentationEntriesSet){
+      if(((DocumentationEntriesSet) a).isDirty())
+        return true;
+    }
+    return false;
+  }
+  
   /**
    * Parse the XML content
    * 

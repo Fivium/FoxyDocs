@@ -34,7 +34,7 @@ public class DocumentationEntriesSet extends AbstractModelObject {
 
   @Override
   public String getName() {
-    return getType();
+    return getType()+" "+(isDirty()?"*":"");
   }
 
   @Override
@@ -42,9 +42,12 @@ public class DocumentationEntriesSet extends AbstractModelObject {
     return getDocumentationEntries();
   }
 
-  @Override
-  public boolean hasChildren() {
-    return documentationEntries.size() > 0;
+  public boolean isDirty() {
+    for (AbstractModelObject a : documentationEntries) {
+      if (((DocumentationEntry) a).isDirty())
+        return true;
+    }
+    return false;
   }
 
   @Override
