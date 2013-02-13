@@ -1,5 +1,8 @@
 package net.foxopen.fde.view;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+
 import net.foxopen.fde.model.FoxModule;
 import net.foxopen.fde.model.abstractObject.AbstractModelObject;
 
@@ -30,11 +33,19 @@ public class Tab extends CTabItem {
   private final StyledText text_code;
   private final FoxModule content;
 
-  private Tab(CTabFolder parent, FoxModule content) {
+  private Tab(CTabFolder parent, final FoxModule content) {
     super(parent, SWT.CLOSE);
     this.content = content;
     {
       setText(content.getName());
+      content.addPropertyChangeListener("name", new PropertyChangeListener() {
+
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+          setText(content.getName());
+        }
+
+      });
       {
         Composite composite = new Composite(parent, SWT.NONE);
         setControl(composite);
