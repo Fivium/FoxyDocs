@@ -14,7 +14,6 @@ import net.foxopen.fde.model.abstractObject.AbstractModelObject;
 import net.foxopen.utils.Logger;
 import net.foxopen.utils.XPath;
 import net.xmlparser.XmlRegion;
-import net.xmlparser.XmlRegion.*;
 import net.xmlparser.XmlRegionAnalyzer;
 
 import org.jdom2.Element;
@@ -126,30 +125,6 @@ public class FoxModule extends AbstractFSItem {
 
   @Override
   public String getCode() {
-    XmlRegionAnalyzer analyzer = new XmlRegionAnalyzer();
-    List<XmlRegion> regions = analyzer.analyzeXml(code);
-    for (XmlRegion xr : regions) {
-      switch (xr.getXmlRegionType()) {
-      case MARKUP:
-        break;
-      case ATTRIBUTE:
-        break;
-      case ATTRIBUTE_VALUE:
-        break;
-      case MARKUP_VALUE:
-        break;
-      case COMMENT:
-        break;
-      case INSTRUCTION:
-        break;
-      case CDATA:
-        break;
-      case WHITESPACE:
-        break;
-      default:
-        break;
-      }
-    }
     return code;
   }
 
