@@ -12,7 +12,7 @@ import org.eclipse.wb.swt.ResourceManager;
 public class Constants {
  
     private Constants(){
-      
+      // Empty
     }
     
     public static final Image IMAGE_OK = getImage("/img/actions/ok.png");
@@ -23,9 +23,11 @@ public class Constants {
       return image.createImage();
     }
     
-    public static Device device = Display.getCurrent();
+    private static final Device device = Display.getCurrent();
     public static final Color RED = new Color(device, 255, 0, 0);
     public static final Color GREEN = new Color(device, 0, 255, 0);
     public static final Color CYAN = new Color(device, 0, 255, 255);
     public static final Color BLUE = new Color(device, 0, 0, 255);
+    public static final Color PURPLE = new Color(device, 255, 0, 255);
+    public static final Color YELLOW = new Color(device, 255, 255, 0);
 }
