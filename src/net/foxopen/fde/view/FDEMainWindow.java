@@ -1,14 +1,10 @@
 package net.foxopen.fde.view;
 
-import static net.foxopen.utils.Logger.*;
-
-import java.io.IOException;
-
+import static net.foxopen.utils.Logger.logStderr;
+import static net.foxopen.utils.Logger.logStdout;
 import net.foxopen.fde.model.Directory;
 import net.foxopen.fde.model.FoxModule;
 import net.foxopen.fde.model.abstractObject.AbstractFSItem;
-import net.foxopen.fde.model.abstractObject.AbstractModelObject;
-import net.foxopen.utils.Constants;
 import net.foxopen.utils.Loader;
 
 import org.eclipse.core.databinding.DataBindingContext;
@@ -23,11 +19,8 @@ import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.databinding.swt.SWTObservables;
 import org.eclipse.jface.databinding.viewers.ObservableListTreeContentProvider;
 import org.eclipse.jface.layout.TreeColumnLayout;
-import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.IDoubleClickListener;
-import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.window.ApplicationWindow;
@@ -38,7 +31,6 @@ import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.ShellAdapter;
 import org.eclipse.swt.events.ShellEvent;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -102,7 +94,7 @@ public class FDEMainWindow extends ApplicationWindow {
               if (selectedNode instanceof FoxModule) {
                 Tab.open(tabFolder, (FoxModule) selectedNode);
               } else {
-                treeViewerFileList.expandToLevel(selectedNode, 1);
+                treeViewerFileList.setExpandedState(selectedNode, !treeViewerFileList.getExpandedState(selectedNode));
               }
             }
           });

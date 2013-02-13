@@ -13,6 +13,9 @@ import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.databinding.viewers.ObservableListTreeContentProvider;
 import org.eclipse.jface.databinding.viewers.ViewerProperties;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
@@ -54,6 +57,14 @@ public class Tab extends CTabItem {
 
           treeViewer = new TreeViewer(sashFormTabContent, SWT.BORDER);
           treeViewer.setAutoExpandLevel(TreeViewer.ALL_LEVELS);
+          treeViewer.addDoubleClickListener(new IDoubleClickListener() {
+            @Override
+            public void doubleClick(DoubleClickEvent event) {
+              IStructuredSelection thisSelection = (IStructuredSelection) event.getSelection();
+              Object selectedNode = thisSelection.getFirstElement();
+              treeViewer.setExpandedState(selectedNode, !treeViewer.getExpandedState(selectedNode));
+            }
+          });
           {
             SashForm sashFormCodeDoc = new SashForm(sashFormTabContent, SWT.VERTICAL);
             sashFormCodeDoc.setLayout(new FillLayout(SWT.VERTICAL));
@@ -62,14 +73,14 @@ public class Tab extends CTabItem {
             grpDocumentation.setText("Documentation");
             grpDocumentation.setLayout(new FillLayout(SWT.HORIZONTAL));
 
-            text_documentation = new StyledText(grpDocumentation, SWT.BORDER | SWT.V_SCROLL| SWT.H_SCROLL);
+            text_documentation = new StyledText(grpDocumentation, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
 
             Group grpCode = new Group(sashFormCodeDoc, SWT.NONE);
             grpCode.setText("Code");
             grpCode.setLayout(new FillLayout(SWT.HORIZONTAL));
 
-            text_code = new StyledText(grpCode, SWT.BORDER | SWT.V_SCROLL| SWT.H_SCROLL);
-            
+            text_code = new StyledText(grpCode, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
+
             sashFormCodeDoc.setWeights(new int[] { 1, 2 });
           }
           sashFormTabContent.setWeights(new int[] { 1, 3 });
