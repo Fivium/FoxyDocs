@@ -3,8 +3,12 @@ package net.foxopen.utils;
 import static net.foxopen.utils.Logger.logStderr;
 import static net.foxopen.utils.Logger.logStdout;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 
 import net.foxopen.fde.model.FoxModule;
 import net.foxopen.fde.model.FoxModule.NotAFoxModuleException;
@@ -12,18 +16,18 @@ import net.foxopen.fde.model.abstractObject.AbstractFSItem;
 
 public class Loader {
 
-  public static void LoadContent(AbstractFSItem target) throws Exception {
+  public static IRunnableWithProgress LoadContent(AbstractFSItem target) {
     target.checkFile();
-    new ThreadPopulateStructure(target);
-  }
-  
-  public static void RefreshContent(AbstractFSItem target) throws Exception {
-    target.checkFile();
-    ThreadPopulateStructure.doneList = new HashMap<String, Boolean>();
-    new ThreadPopulateStructure(target);
+    return new ThreadPopulateStructure(target);
   }
 
-  private static class ThreadPopulateStructure extends Thread {
+  public static IRunnableWithProgress RefreshContent(AbstractFSItem target) {
+    target.checkFile();
+    ThreadPopulateStructure.doneList = new HashMap<String, Boolean>();
+    return new ThreadPopulateStructure(target);
+  }
+
+  private static class ThreadPopulateStructure implements IRunnableWithProgress {
     private final AbstractFSItem target;
     private static Integer nbThreads = 0;
     private static HashMap<String, Boolean> doneList = new HashMap<String, Boolean>();
@@ -32,13 +36,14 @@ public class Loader {
       this.target = target;
       if (!doneList.containsKey(target.getPath())) {
         doneList.put(target.getPath(), true);
-       this.start();
       } else {
         logStderr(target.getPath() + " has already been scanned");
       }
     }
 
-    public void run() {
+    @Override
+    public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+      monitor.beginTask("Opening "+target.getPath(), IProgressMonitor.UNKNOWN);
       logStdout(nbThreads + " Loader thread started");
       synchronized (nbThreads) {
         nbThreads++;
@@ -46,14 +51,19 @@ public class Loader {
       logStdout(nbThreads + " Loader thread running");
       try {
         target.readContent();
-        List<FoxModule> modules = target.getFoxModules();
+        List<FoxModule> modules = target.getFoxModules();  
+        monitor.beginTask("Parsing FoxModules", modules.size());
+        monitor.subTask("Parsing FoxModules");
         logStdout(modules.size() + " Fox Modules");
         for (FoxModule f : modules) {
+          if (monitor.isCanceled())
+            break;
           try {
             f.readContent();
           } catch (NotAFoxModuleException e) {
             f.delete();
           }
+         monitor.worked(1);
         }
       } catch (Exception e) {
         e.printStackTrace();
@@ -65,7 +75,10 @@ public class Loader {
       synchronized (nbThreads) {
         nbThreads--;
       }
-     
+      monitor.done();
+      if (monitor.isCanceled())
+        throw new InterruptedException("The long running operation was cancelled");
+
     }
 
   }

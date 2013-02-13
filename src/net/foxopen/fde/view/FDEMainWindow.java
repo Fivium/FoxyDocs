@@ -3,8 +3,7 @@ package net.foxopen.fde.view;
 import static net.foxopen.utils.Logger.logStderr;
 import static net.foxopen.utils.Logger.logStdout;
 
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
+import java.lang.reflect.InvocationTargetException;
 
 import net.foxopen.fde.model.Directory;
 import net.foxopen.fde.model.FoxModule;
@@ -22,6 +21,8 @@ import org.eclipse.jface.action.StatusLineManager;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.databinding.swt.SWTObservables;
 import org.eclipse.jface.databinding.viewers.ObservableListTreeContentProvider;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.layout.TreeColumnLayout;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -135,14 +136,14 @@ public class FDEMainWindow extends ApplicationWindow {
       action_refresh = new Action("&Refresh") {
         public void run() {
           if (root.getPath() != null) {
-            getStatusLineManager().setMessage("Refresh " + root.getPath());
             try {
-              Loader.RefreshContent(root);
+              new ProgressMonitorDialog(getShell()).run(true, true, Loader.RefreshContent(root));
+            } catch (InvocationTargetException e) {
+              MessageDialog.openError(getShell(), "Error", e.getMessage());
+            } catch (InterruptedException e) {
+              MessageDialog.openInformation(getShell(), "Cancelled", e.getMessage());
             } catch (Exception e) {
-              MessageBox dialog = new MessageBox(getShell(), SWT.ICON_ERROR | SWT.OK);
-              dialog.setText("Error");
-              dialog.setMessage("Could not refresh the file : " + e.getMessage());
-              dialog.open();
+              MessageDialog.openInformation(getShell(), "Error", e.getMessage());
             }
           } else {
             MessageBox dialog = new MessageBox(getShell(), SWT.ICON_WARNING | SWT.OK);
@@ -162,16 +163,15 @@ public class FDEMainWindow extends ApplicationWindow {
           DirectoryDialog dlg = new DirectoryDialog(getShell(), SWT.OPEN);
           String path = dlg.open();
           if (path != null) {
-            getStatusLineManager().setMessage("Loading " + path);
             try {
               root.open(path);
-              Loader.LoadContent(root);
+              new ProgressMonitorDialog(getShell()).run(true, true, Loader.LoadContent(root));
+            } catch (InvocationTargetException e) {
+              MessageDialog.openError(getShell(), "Error", e.getMessage());
+            } catch (InterruptedException e) {
+              MessageDialog.openInformation(getShell(), "Cancelled", e.getMessage());
             } catch (Exception e) {
-              logStderr(e.getMessage());
-              MessageBox dialog = new MessageBox(getShell(), SWT.ICON_ERROR | SWT.OK);
-              dialog.setText("Error");
-              dialog.setMessage("Could not open the directory : " + e.getMessage());
-              dialog.open();
+              MessageDialog.openInformation(getShell(), "Error", e.getMessage());
             }
           }
         }
@@ -236,20 +236,6 @@ public class FDEMainWindow extends ApplicationWindow {
    */
   public static void main(String args[]) {
     logStdout("FDE started");
-
-    try {
-      // Set System L&F
-      UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-    } catch (UnsupportedLookAndFeelException e) {
-      // handle exception
-    } catch (ClassNotFoundException e) {
-      // handle exception
-    } catch (InstantiationException e) {
-      // handle exception
-    } catch (IllegalAccessException e) {
-      // handle exception
-    }
-    
 
     // Create the interface
     Display display = Display.getDefault();
