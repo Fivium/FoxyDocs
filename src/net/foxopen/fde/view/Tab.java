@@ -1,19 +1,10 @@
 package net.foxopen.fde.view;
 
-import static net.foxopen.utils.Constants.BLUE;
-import static net.foxopen.utils.Constants.CYAN;
-import static net.foxopen.utils.Constants.GREEN;
-import static net.foxopen.utils.Constants.RED;
-
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.ArrayList;
-import java.util.List;
 
 import net.foxopen.fde.model.FoxModule;
 import net.foxopen.fde.model.abstractObject.AbstractModelObject;
-import net.xmlparser.XmlRegion;
-import net.xmlparser.XmlRegionAnalyzer;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
@@ -29,10 +20,7 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
-import org.eclipse.swt.custom.ExtendedModifyEvent;
-import org.eclipse.swt.custom.ExtendedModifyListener;
 import org.eclipse.swt.custom.SashForm;
-import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -57,6 +45,7 @@ public class Tab extends CTabItem {
 
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
+          // Update the tab name, for display the dirty star for instance
           setText(content.getName());
         }
       });
@@ -92,65 +81,18 @@ public class Tab extends CTabItem {
             grpCode.setLayout(new FillLayout(SWT.HORIZONTAL));
 
             text_code = new StyledText(grpCode, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.READ_ONLY);
-           
 
             // Add the syntax coloring handler
-            text_code.addExtendedModifyListener(new ExtendedModifyListener() {
-              public void modifyText(ExtendedModifyEvent event) {
-                int end = event.start + event.length - 1;
-                String text = text_code.getText(event.start, end);
+            SyntaxHighlighter.addSyntaxHighligherListener(text_code);
 
-                XmlRegionAnalyzer analyzer = new XmlRegionAnalyzer();
-                List<XmlRegion> regions = analyzer.analyzeXml(text);
-                for (XmlRegion xr : regions) {
-                  // Create a collection to hold the StyleRanges
-                  ArrayList<StyleRange> ranges = new ArrayList<StyleRange>();
-
-                  int regionLength = xr.getEnd() - xr.getStart();
-                  switch (xr.getXmlRegionType()) {
-                  case MARKUP:
-                    ranges.add(new StyleRange(xr.getStart(), regionLength, RED, null));
-                    break;
-                  case ATTRIBUTE:
-                    ranges.add(new StyleRange(xr.getStart(), regionLength, RED, null, SWT.BOLD));
-                    break;
-                  case ATTRIBUTE_VALUE:
-                    ranges.add(new StyleRange(xr.getStart(), regionLength, GREEN, null, SWT.BOLD));
-                    break;
-                  case MARKUP_VALUE:
-                    ranges.add(new StyleRange(xr.getStart(), regionLength, GREEN, null));
-                    break;
-                  case COMMENT:
-                    ranges.add(new StyleRange(xr.getStart(), regionLength, BLUE, null));
-                    break;
-                  case INSTRUCTION:
-                    ranges.add(new StyleRange(xr.getStart(), regionLength, CYAN, null));
-                    break;
-                  case CDATA:
-                    ranges.add(new StyleRange(xr.getStart(), regionLength, BLUE, null, SWT.BOLD));
-                    break;
-                  case WHITESPACE:
-                    break;
-                  default:
-                    break;
-                  }
-
-                  // If we have any ranges to set, set them
-                  if (!ranges.isEmpty()) {
-                    text_code.replaceStyleRanges(xr.getStart(), regionLength, (StyleRange[]) ranges.toArray(new StyleRange[0]));
-                  }
-                }
-
-              }
-            });
-
+            // Vertical Sash
             sashFormCodeDoc.setWeights(new int[] { 1, 2 });
           }
+          // Horizontal Sash
           sashFormTabContent.setWeights(new int[] { 1, 3 });
         }
       }
     }
-    // Add Top Content
     DataBindingContext bindingContext = new DataBindingContext();
     //
     BeansListObservableFactory treeObservableFactory = new BeansListObservableFactory(AbstractModelObject.class, "children");
@@ -173,24 +115,52 @@ public class Tab extends CTabItem {
     bindingContext.bindValue(observeTextText_documentationObserveWidget2, treeViewerDocumentationObserveDetailValue2, null, null);
   }
 
+  /**
+   * Is the content of the tab equals that FoxModule ?
+   * 
+   * @param that
+   *          The FoxModule to compare
+   * @return True if the content equals that, False otherwise
+   */
   public boolean equals(FoxModule that) {
     return content.equals(that);
   }
 
-  public static void open(CTabFolder parent, FoxModule selectedNode) {
-    Tab tab = exists(parent, selectedNode);
-
+  /**
+   * Open a new tab or set the focus to a open one
+   * 
+   * @param parent
+   *          The parent Tab Folder
+   * @param content
+   *          The FoxModule to open in a tab
+   */
+  public static void open(CTabFolder parent, FoxModule content) {
+    // Check if the tab is already open. If so, set selection to it. If not,
+    // open a new one.
+    Tab tab = getOpenedTab(parent, content);
     if (tab == null) {
-      tab = new Tab(parent, selectedNode);
+      tab = new Tab(parent, content);
     }
 
     // Set Focus
     parent.setSelection(tab);
+
+    // Open code
+    tab.text_code.setText(content.getCode());
   }
 
-  public static Tab exists(CTabFolder folder, FoxModule selectedNode) {
+  /**
+   * Return an open tab with the selected content
+   * 
+   * @param folder
+   *          The parent Tab Folder
+   * @param content
+   *          The content module
+   * @return The tab, or null if there is no open tab with this content
+   */
+  public static Tab getOpenedTab(CTabFolder folder, FoxModule content) {
     for (CTabItem f : folder.getItems()) {
-      if (f instanceof Tab && ((Tab) f).equals(selectedNode))
+      if (f instanceof Tab && ((Tab) f).equals(content))
         return (Tab) f;
     }
     return null;
