@@ -1,6 +1,7 @@
 package net.foxopen.utils;
 
-import static net.foxopen.utils.Logger.*;
+import static net.foxopen.utils.Logger.logStderr;
+import static net.foxopen.utils.Logger.logStdout;
 
 import java.util.HashMap;
 import java.util.List;
@@ -15,6 +16,12 @@ public class Loader {
     target.checkFile();
     new ThreadPopulateStructure(target);
   }
+  
+  public static void RefreshContent(AbstractFSItem target) throws Exception {
+    target.checkFile();
+    ThreadPopulateStructure.doneList = new HashMap<String, Boolean>();
+    new ThreadPopulateStructure(target);
+  }
 
   private static class ThreadPopulateStructure extends Thread {
     private final AbstractFSItem target;
@@ -25,7 +32,7 @@ public class Loader {
       this.target = target;
       if (!doneList.containsKey(target.getPath())) {
         doneList.put(target.getPath(), true);
-        this.start();
+       this.start();
       } else {
         logStderr(target.getPath() + " has already been scanned");
       }
@@ -58,6 +65,7 @@ public class Loader {
       synchronized (nbThreads) {
         nbThreads--;
       }
+     
     }
 
   }

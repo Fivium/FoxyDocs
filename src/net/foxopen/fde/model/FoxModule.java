@@ -13,6 +13,9 @@ import net.foxopen.fde.model.abstractObject.AbstractFSItem;
 import net.foxopen.fde.model.abstractObject.AbstractModelObject;
 import net.foxopen.utils.Logger;
 import net.foxopen.utils.XPath;
+import net.xmlparser.XmlRegion;
+import net.xmlparser.XmlRegion.*;
+import net.xmlparser.XmlRegionAnalyzer;
 
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
@@ -62,7 +65,7 @@ public class FoxModule extends AbstractFSItem {
    * @throws JDOMException
    * @throws NotAFoxModuleException
    */
-  public void readContent() throws ParserConfigurationException, SAXException, IOException, JDOMException, NotAFoxModuleException {
+  public synchronized void readContent() throws ParserConfigurationException, SAXException, IOException, JDOMException, NotAFoxModuleException {
     Logger.logStdout("Loading module " + f_file.getAbsolutePath());
     // Parse the data
     DocumentBuilderFactory domfactory = DocumentBuilderFactory.newInstance();
@@ -72,7 +75,7 @@ public class FoxModule extends AbstractFSItem {
     DocumentBuilder dombuilder = domfactory.newDocumentBuilder();
     org.w3c.dom.Document domDoc = dombuilder.parse(f_file);
     org.jdom2.Document jdomDoc = builder.build(domDoc);
-    
+
     code = serializer.outputString(jdomDoc);
 
     // Entries
@@ -84,7 +87,7 @@ public class FoxModule extends AbstractFSItem {
     if (documentationEntriesSet.size() == 0) {
       throw new NotAFoxModuleException(f_file.getName());
     }
-    
+
     cascadeFirePropertyChange("status", null, getStatus());
   }
 
@@ -120,9 +123,33 @@ public class FoxModule extends AbstractFSItem {
     buffer.add(this);
     return buffer;
   }
-  
+
   @Override
-  public String getCode(){
+  public String getCode() {
+    XmlRegionAnalyzer analyzer = new XmlRegionAnalyzer();
+    List<XmlRegion> regions = analyzer.analyzeXml(code);
+    for (XmlRegion xr : regions) {
+      switch (xr.getXmlRegionType()) {
+      case MARKUP:
+        break;
+      case ATTRIBUTE:
+        break;
+      case ATTRIBUTE_VALUE:
+        break;
+      case MARKUP_VALUE:
+        break;
+      case COMMENT:
+        break;
+      case INSTRUCTION:
+        break;
+      case CDATA:
+        break;
+      case WHITESPACE:
+        break;
+      default:
+        break;
+      }
+    }
     return code;
   }
 

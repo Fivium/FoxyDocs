@@ -2,6 +2,10 @@ package net.foxopen.fde.view;
 
 import static net.foxopen.utils.Logger.logStderr;
 import static net.foxopen.utils.Logger.logStdout;
+
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
+
 import net.foxopen.fde.model.Directory;
 import net.foxopen.fde.model.FoxModule;
 import net.foxopen.fde.model.abstractObject.AbstractFSItem;
@@ -133,7 +137,7 @@ public class FDEMainWindow extends ApplicationWindow {
           if (root.getPath() != null) {
             getStatusLineManager().setMessage("Refresh " + root.getPath());
             try {
-              Loader.LoadContent(root);
+              Loader.RefreshContent(root);
             } catch (Exception e) {
               MessageBox dialog = new MessageBox(getShell(), SWT.ICON_ERROR | SWT.OK);
               dialog.setText("Error");
@@ -232,6 +236,20 @@ public class FDEMainWindow extends ApplicationWindow {
    */
   public static void main(String args[]) {
     logStdout("FDE started");
+
+    try {
+      // Set System L&F
+      UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+    } catch (UnsupportedLookAndFeelException e) {
+      // handle exception
+    } catch (ClassNotFoundException e) {
+      // handle exception
+    } catch (InstantiationException e) {
+      // handle exception
+    } catch (IllegalAccessException e) {
+      // handle exception
+    }
+    
 
     // Create the interface
     Display display = Display.getDefault();

@@ -42,7 +42,7 @@ public class Directory extends AbstractFSItem {
     // Reset or init the content list
     contentList = new ArrayList<AbstractFSItem>();
     cascadeFirePropertyChange("children", null, getChildren());
-
+    
     // Populate stuff
     for (File file : listOfFiles) {
       files = file.getName().toUpperCase();

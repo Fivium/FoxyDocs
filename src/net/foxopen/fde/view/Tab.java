@@ -1,7 +1,13 @@
 package net.foxopen.fde.view;
 
+import java.awt.BorderLayout;
+import java.awt.Frame;
+import java.awt.Panel;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.Arrays;
+
+import javax.swing.JRootPane;
 
 import net.foxopen.fde.model.FoxModule;
 import net.foxopen.fde.model.abstractObject.AbstractModelObject;
@@ -18,6 +24,8 @@ import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.awt.SWT_AWT;
+import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.SashForm;
@@ -28,6 +36,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.wb.rcp.databinding.BeansListObservableFactory;
 import org.eclipse.wb.rcp.databinding.TreeBeanAdvisor;
 import org.eclipse.wb.rcp.databinding.TreeObservableLabelProvider;
+
 
 public class Tab extends CTabItem {
 
@@ -78,9 +87,9 @@ public class Tab extends CTabItem {
             Group grpCode = new Group(sashFormCodeDoc, SWT.NONE);
             grpCode.setText("Code");
             grpCode.setLayout(new FillLayout(SWT.HORIZONTAL));
-
+         
             text_code = new StyledText(grpCode, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
-
+            
             sashFormCodeDoc.setWeights(new int[] { 1, 2 });
           }
           sashFormTabContent.setWeights(new int[] { 1, 3 });
@@ -104,11 +113,10 @@ public class Tab extends CTabItem {
     IObservableValue treeViewerDocumentationObserveDetailValue = BeanProperties.value(AbstractModelObject.class, "documentation", String.class).observeDetail(observeSingleSelectionTreeViewer);
     bindingContext.bindValue(observeTextText_documentationObserveWidget, treeViewerDocumentationObserveDetailValue, null, null);
     //
-    IObservableValue observeTextText_codeObserveWidget = WidgetProperties.text(new int[] { SWT.Modify, SWT.FocusOut, SWT.DefaultSelection }).observe(text_code);
-    IObservableValue observeSingleSelectionTreeViewer_1 = ViewerProperties.singleSelection().observe(treeViewer);
-    IObservableValue treeViewerCodeObserveDetailValue = BeanProperties.value(AbstractModelObject.class, "code", String.class).observeDetail(observeSingleSelectionTreeViewer_1);
-    bindingContext.bindValue(observeTextText_codeObserveWidget, treeViewerCodeObserveDetailValue, null, null);
-
+    IObservableValue observeTextText_documentationObserveWidget2 = WidgetProperties.text(new int[] { SWT.Modify, SWT.FocusOut, SWT.DefaultSelection }).observe(text_code);
+    IObservableValue observeSingleSelectionTreeViewer2 = ViewerProperties.singleSelection().observe(treeViewer);
+    IObservableValue treeViewerDocumentationObserveDetailValue2 = BeanProperties.value(AbstractModelObject.class, "code", String.class).observeDetail(observeSingleSelectionTreeViewer2);
+    bindingContext.bindValue(observeTextText_documentationObserveWidget2, treeViewerDocumentationObserveDetailValue2, null, null);
   }
 
   public boolean equals(FoxModule that) {
