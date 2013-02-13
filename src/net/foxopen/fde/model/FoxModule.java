@@ -17,11 +17,14 @@ import net.foxopen.utils.XPath;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.input.DOMBuilder;
+import org.jdom2.output.XMLOutputter;
 import org.xml.sax.SAXException;
 
 public class FoxModule extends AbstractFSItem {
 
   private final List<AbstractModelObject> documentationEntriesSet = new ArrayList<AbstractModelObject>();
+  private static XMLOutputter serializer = new XMLOutputter();
+  private String code;
 
   public FoxModule(File file, AbstractFSItem parent) {
     super(file, parent);
@@ -39,9 +42,7 @@ public class FoxModule extends AbstractFSItem {
    * @throws IOException
    */
   public boolean isReadOnly() throws IOException {
-    if (!f_file.canRead()) {
-      throw new IOException("Cannot read " + f_file.getAbsolutePath());
-    }
+    checkFile();
     return !f_file.canWrite();
   }
 
@@ -71,7 +72,9 @@ public class FoxModule extends AbstractFSItem {
     DocumentBuilder dombuilder = domfactory.newDocumentBuilder();
     org.w3c.dom.Document domDoc = dombuilder.parse(f_file);
     org.jdom2.Document jdomDoc = builder.build(domDoc);
-   
+    
+    code = serializer.outputString(jdomDoc);
+
     // Entries
     addEntries(documentationEntriesSet, jdomDoc, "Header", "//fm:header");
     addEntries(documentationEntriesSet, jdomDoc, "Entry Themes", "//fm:entry-theme");
@@ -81,6 +84,8 @@ public class FoxModule extends AbstractFSItem {
     if (documentationEntriesSet.size() == 0) {
       throw new NotAFoxModuleException(f_file.getName());
     }
+    
+    cascadeFirePropertyChange("status", null, getStatus());
   }
 
   private DocumentationEntriesSet parse(org.jdom2.Document document, String key, String xpath) {
@@ -98,8 +103,8 @@ public class FoxModule extends AbstractFSItem {
       data.add(tmp);
     }
   }
-  
-  public void delete(){
+
+  public void delete() {
     getParent().getChildren().remove(this);
     getParent().cascadeFirePropertyChange("children", null, getParent().getChildren());
   }
@@ -114,6 +119,11 @@ public class FoxModule extends AbstractFSItem {
     ArrayList<FoxModule> buffer = new ArrayList<FoxModule>();
     buffer.add(this);
     return buffer;
+  }
+  
+  @Override
+  public String getCode(){
+    return code;
   }
 
   public static class NotAFoxModuleException extends Exception {

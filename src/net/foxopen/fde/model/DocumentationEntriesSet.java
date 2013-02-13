@@ -49,18 +49,15 @@ public class DocumentationEntriesSet extends AbstractModelObject {
   public String getDocumentation() {
     String buffer = "";
     for (AbstractModelObject doc : getChildren()) {
-      buffer += doc.getDocumentation() + "\n";
+      buffer += "- "+doc.getName() + "\n";
+      buffer += doc.getDocumentation() + "\n\n";
     }
     return buffer;
   }
 
   @Override
   public String getCode() {
-    String buffer = "";
-    for (AbstractModelObject doc : getChildren()) {
-      buffer += doc.getCode() + "\n";
-    }
-    return buffer;
+    return getParent().getCode();
   }
 
   @Override
@@ -68,11 +65,4 @@ public class DocumentationEntriesSet extends AbstractModelObject {
     // TODO Auto-generated method stub
 
   }
-
-  @Override
-  public void setCode(String code) {
-    // TODO Auto-generated method stub
-
-  }
-
 }

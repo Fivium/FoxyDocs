@@ -1,29 +1,23 @@
 package net.foxopen.fde.model;
 
-import static net.foxopen.utils.Logger.logStdout;
-
 import java.util.List;
 
 import net.foxopen.fde.model.abstractObject.AbstractModelObject;
 
 import org.jdom2.Element;
 import org.jdom2.Namespace;
-import org.jdom2.output.XMLOutputter;
 
 public class DocumentationEntry extends AbstractModelObject {
   // TODO make generic
   public static Namespace ns_fm = Namespace.getNamespace("fm", "http://www.og.dti.gov/fox_module");
-  private static XMLOutputter serializer = new XMLOutputter();
 
-  private boolean status;
-  private String documentation;
-  private String code;
+  private String documentation = "";
   private String name;
   private boolean dirty = false;
 
   public DocumentationEntry(Element node, AbstractModelObject parent) {
     if (node == null)
-      throw new IllegalArgumentException("The node cannob be null");
+      throw new IllegalArgumentException("The node cannot be null");
     
     this.parent = parent;
 
@@ -34,8 +28,7 @@ public class DocumentationEntry extends AbstractModelObject {
       setStatus(true);
       documentation = docNode.getChild("description", ns_fm).getTextNormalize();
     }
-    setCode(serializer.outputString(node));
-
+    
     String name = node.getAttributeValue("name");
     if (name == null) {
       setName(node.getName());
@@ -45,11 +38,12 @@ public class DocumentationEntry extends AbstractModelObject {
   }
 
   public boolean getStatus() {
-    return status;
+    return documentation.trim().length()>0;
   }
 
   public String getCode() {
-    return code;
+    return getParent().getCode();
+    // TODO Hightlight the code
   }
 
   public String getName() {
@@ -61,7 +55,7 @@ public class DocumentationEntry extends AbstractModelObject {
   }
 
   public void setStatus(boolean status) {
-    firePropertyChange("status", this.status, this.status = status);
+    firePropertyChange("status", false, getStatus());
   }
 
   @Override
@@ -70,12 +64,7 @@ public class DocumentationEntry extends AbstractModelObject {
       throw new IllegalArgumentException("Documentation content cannot be empty if assigned");
     firePropertyChange("docContent", this.documentation, this.documentation = content);
     setDirty(true);
-  }
-
-  public void setCode(String code) {
-    if (code == null || code.trim() == "")
-      throw new IllegalArgumentException("Code cannot be empty");
-    firePropertyChange("code", this.code, this.code = code);
+    cascadeFirePropertyChange("status", null, getStatus());
   }
 
   public void setName(String name) {
@@ -89,10 +78,6 @@ public class DocumentationEntry extends AbstractModelObject {
     cascadeFirePropertyChange("name", this.name, getName());
   }
 
-  public String toString() {
-    return name + " : " + status;
-  }
-
   @Override
   public String getDocumentation() {
     return documentation;
@@ -103,8 +88,9 @@ public class DocumentationEntry extends AbstractModelObject {
     // No children at this point
     return null;
   }
-
-  public boolean hasChildren() {
+  
+  @Override
+  public boolean getHasChildren() {
     return false;
   }
 }

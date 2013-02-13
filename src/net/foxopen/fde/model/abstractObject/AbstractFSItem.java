@@ -8,11 +8,6 @@ import net.foxopen.fde.model.FoxModule;
 public abstract class AbstractFSItem extends AbstractModelObject {
   protected File f_file;
 
-  public AbstractFSItem(String path, AbstractFSItem parent) {
-    this.parent = parent;
-    open(path);
-  }
-
   public AbstractFSItem(File file, AbstractFSItem parent) {
     this.parent = parent;
     f_file = file;
@@ -51,6 +46,7 @@ public abstract class AbstractFSItem extends AbstractModelObject {
     }
   }
   
+  @Override
   public boolean getHasChildren() {
     return super.getHasChildren() && getChildren().get(0) instanceof AbstractFSItem;
   }

@@ -44,7 +44,6 @@ public class Tab extends CTabItem {
         public void propertyChange(PropertyChangeEvent evt) {
           setText(content.getName());
         }
-
       });
       {
         Composite composite = new Composite(parent, SWT.NONE);
@@ -55,22 +54,23 @@ public class Tab extends CTabItem {
 
           treeViewer = new TreeViewer(sashFormTabContent, SWT.BORDER);
           treeViewer.setAutoExpandLevel(TreeViewer.ALL_LEVELS);
-          // Tree tree = treeViewer.getTree();
           {
-            Composite composite_1 = new Composite(sashFormTabContent, SWT.NONE);
-            composite_1.setLayout(new FillLayout(SWT.VERTICAL));
+            SashForm sashFormCodeDoc = new SashForm(sashFormTabContent, SWT.VERTICAL);
+            sashFormCodeDoc.setLayout(new FillLayout(SWT.VERTICAL));
 
-            Group grpDocumentation = new Group(composite_1, SWT.NONE);
+            Group grpDocumentation = new Group(sashFormCodeDoc, SWT.NONE);
             grpDocumentation.setText("Documentation");
             grpDocumentation.setLayout(new FillLayout(SWT.HORIZONTAL));
 
-            text_documentation = new StyledText(grpDocumentation, SWT.BORDER);
+            text_documentation = new StyledText(grpDocumentation, SWT.BORDER | SWT.V_SCROLL| SWT.H_SCROLL);
 
-            Group grpCode = new Group(composite_1, SWT.NONE);
+            Group grpCode = new Group(sashFormCodeDoc, SWT.NONE);
             grpCode.setText("Code");
             grpCode.setLayout(new FillLayout(SWT.HORIZONTAL));
 
-            text_code = new StyledText(grpCode, SWT.BORDER);
+            text_code = new StyledText(grpCode, SWT.BORDER | SWT.V_SCROLL| SWT.H_SCROLL);
+            
+            sashFormCodeDoc.setWeights(new int[] { 1, 2 });
           }
           sashFormTabContent.setWeights(new int[] { 1, 3 });
         }
@@ -82,13 +82,11 @@ public class Tab extends CTabItem {
     BeansListObservableFactory treeObservableFactory = new BeansListObservableFactory(AbstractModelObject.class, "children");
     TreeBeanAdvisor treeAdvisor = new TreeBeanAdvisor(AbstractModelObject.class, "name", "children", null);
     ObservableListTreeContentProvider treeContentProvider = new ObservableListTreeContentProvider(treeObservableFactory, treeAdvisor);
-    treeViewer.setLabelProvider(new TreeObservableLabelProvider(treeContentProvider.getKnownElements(), AbstractModelObject.class, "name", null));
     treeViewer.setLabelProvider(new TreeObservableLabelProvider(treeContentProvider.getKnownElements(), AbstractModelObject.class, "name", "image"));
     treeViewer.setContentProvider(treeContentProvider);
     //
     IObservableList childrenRootObserveList = BeanProperties.list("children").observe(content);
     treeViewer.setInput(childrenRootObserveList);
-
     //
     IObservableValue observeTextText_documentationObserveWidget = WidgetProperties.text(new int[] { SWT.Modify, SWT.FocusOut, SWT.DefaultSelection }).observe(text_documentation);
     IObservableValue observeSingleSelectionTreeViewer = ViewerProperties.singleSelection().observe(treeViewer);

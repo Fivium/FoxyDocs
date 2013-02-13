@@ -15,10 +15,6 @@ public class Directory extends AbstractFSItem {
     super(parent);
   }
 
-  public Directory(String path, Directory parent) {
-    super(path, parent);
-  }
-
   public Directory(File file, Directory parent) {
     super(file, parent);
   }

@@ -12,6 +12,8 @@ import org.eclipse.swt.graphics.Image;
 public abstract class AbstractModelObject extends Observable {
 
   private final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
+  protected AbstractModelObject parent;
+  protected Image image;
 
   public void addPropertyChangeListener(PropertyChangeListener listener) {
     propertyChangeSupport.addPropertyChangeListener(listener);
@@ -40,8 +42,7 @@ public abstract class AbstractModelObject extends Observable {
     }
   }
 
-  protected AbstractModelObject parent;
-
+  
   abstract public List<? extends AbstractModelObject> getChildren();
 
   abstract public String getName();
@@ -73,7 +74,7 @@ public abstract class AbstractModelObject extends Observable {
   public Image getImage() {
     return getStatus() ? IMAGE_OK : IMAGE_MISSING;
   }
-
+  
   public boolean isDirty() {
     for (AbstractModelObject a : getChildren()) {
       if (a.isDirty())
@@ -83,10 +84,6 @@ public abstract class AbstractModelObject extends Observable {
   }
 
   public void setDocumentation(String documentation) {
-    // TODO Auto-generated method stub
-  }
-
-  public void setCode(String code) {
     // TODO Auto-generated method stub
   }
 
