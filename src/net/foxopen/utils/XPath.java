@@ -14,7 +14,6 @@ public class XPath {
   public static List<Element> run(String xpath, org.jdom2.Document document) {
     XPathExpression<Element> actionsXPath = XPathFactory.instance().compile(xpath, Filters.element(), null, ns_fm);
     List<Element> results = actionsXPath.evaluate(document);
-    Logger.logStdout("[XPATH] " + xpath + " : " + results.size() + " hits");
     return results;
   }
 }

@@ -71,8 +71,7 @@ public class FoxModule extends AbstractFSItem {
     DocumentBuilder dombuilder = domfactory.newDocumentBuilder();
     org.w3c.dom.Document domDoc = dombuilder.parse(f_file);
     org.jdom2.Document jdomDoc = builder.build(domDoc);
-    Logger.logStdout("File " + f_file + " loaded to " + jdomDoc);
-
+   
     // Entries
     addEntries(documentationEntriesSet, jdomDoc, "Header", "//fm:header");
     addEntries(documentationEntriesSet, jdomDoc, "Entry Themes", "//fm:entry-theme");

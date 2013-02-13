@@ -42,8 +42,6 @@ public class DocumentationEntry extends AbstractModelObject {
     } else {
       setName(name);
     }
-
-    logStdout(toString());
   }
 
   public boolean getStatus() {
