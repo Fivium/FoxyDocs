@@ -64,13 +64,11 @@ public class SyntaxHighlighter {
           default:
             break;
           }
-
           // If we have any ranges to set, set them
           if (!ranges.isEmpty()) {
             target.replaceStyleRanges(xr.getStart(), regionLength, (StyleRange[]) ranges.toArray(new StyleRange[0]));
           }
         }
-
       }
     });
   }

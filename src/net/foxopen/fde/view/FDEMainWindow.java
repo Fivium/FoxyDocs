@@ -1,6 +1,5 @@
 package net.foxopen.fde.view;
 
-import static net.foxopen.utils.Logger.logStderr;
 import static net.foxopen.utils.Logger.logStdout;
 
 import java.lang.reflect.InvocationTargetException;
@@ -8,6 +7,7 @@ import java.lang.reflect.InvocationTargetException;
 import net.foxopen.fde.model.Directory;
 import net.foxopen.fde.model.FoxModule;
 import net.foxopen.fde.model.abstractObject.AbstractFSItem;
+import net.foxopen.utils.Constants;
 import net.foxopen.utils.Loader;
 
 import org.eclipse.core.databinding.DataBindingContext;
@@ -42,7 +42,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.wb.rcp.databinding.BeansListObservableFactory;
@@ -55,10 +54,9 @@ public class FDEMainWindow extends ApplicationWindow {
   private Action action_exit;
 
   private final static AbstractFSItem root = new Directory(null);
-  private Action action_refresh;
+  private TreeViewer treeViewerFileList;
   private Action action_open;
   private CTabFolder tabFolder;
-  private TreeViewer treeViewerFileList;
 
   /**
    * Create the application window.
@@ -133,30 +131,6 @@ public class FDEMainWindow extends ApplicationWindow {
       action_exit.setAccelerator(SWT.CTRL | 'Q');
     }
     {
-      action_refresh = new Action("&Refresh") {
-        public void run() {
-          if (root.getPath() != null) {
-            try {
-              new ProgressMonitorDialog(getShell()).run(true, true, Loader.RefreshContent(root));
-            } catch (InvocationTargetException e) {
-              MessageDialog.openError(getShell(), "Error", e.getMessage());
-            } catch (InterruptedException e) {
-              MessageDialog.openInformation(getShell(), "Cancelled", e.getMessage());
-            } catch (Exception e) {
-              MessageDialog.openInformation(getShell(), "Error", e.getMessage());
-            }
-          } else {
-            MessageBox dialog = new MessageBox(getShell(), SWT.ICON_WARNING | SWT.OK);
-            dialog.setText("Warning");
-            dialog.setMessage("There is no root folder loaded");
-            dialog.open();
-          }
-        }
-      };
-      action_refresh.setAccelerator(SWT.F5);
-      action_refresh.setImageDescriptor(ResourceManager.getImageDescriptor(FDEMainWindow.class, "/img/actions/start.png"));
-    }
-    {
       action_open = new Action("&Open") {
         public void run() {
           // User has selected to save a file
@@ -167,17 +141,20 @@ public class FDEMainWindow extends ApplicationWindow {
               root.open(path);
               new ProgressMonitorDialog(getShell()).run(true, true, Loader.LoadContent(root));
             } catch (InvocationTargetException e) {
+              e.printStackTrace();
               MessageDialog.openError(getShell(), "Error", e.getMessage());
             } catch (InterruptedException e) {
+              e.printStackTrace();
               MessageDialog.openInformation(getShell(), "Cancelled", e.getMessage());
             } catch (Exception e) {
+              e.printStackTrace();
               MessageDialog.openInformation(getShell(), "Error", e.getMessage());
             }
           }
         }
       };
       action_open.setAccelerator(SWT.CTRL | 'O');
-      action_open.setImageDescriptor(ResourceManager.getImageDescriptor(FDEMainWindow.class, "/img/actions/fileopen.png"));
+      action_open.setImageDescriptor(ResourceManager.getImageDescriptor(FDEMainWindow.class, "/img/actions/folder_new.png"));
     }
   }
 
@@ -199,7 +176,6 @@ public class FDEMainWindow extends ApplicationWindow {
     {
       MenuManager menu_edit = new MenuManager("&Edit");
       menuManager.add(menu_edit);
-      menu_edit.add(action_refresh);
     }
     return menuManager;
   }
@@ -214,7 +190,6 @@ public class FDEMainWindow extends ApplicationWindow {
     ToolBarManager toolBarManager = new ToolBarManager(SWT.WRAP);
     toolBarManager.add(action_exit);
     toolBarManager.add(action_open);
-    toolBarManager.add(action_refresh);
     return toolBarManager;
   }
 
@@ -236,7 +211,8 @@ public class FDEMainWindow extends ApplicationWindow {
    */
   public static void main(String args[]) {
     logStdout("FDE started");
-
+    // Initialise statics constants
+    Constants.init();
     // Create the interface
     Display display = Display.getDefault();
     Realm.runWithDefault(SWTObservables.getRealm(display), new Runnable() {
@@ -245,7 +221,7 @@ public class FDEMainWindow extends ApplicationWindow {
           final FDEMainWindow window = new FDEMainWindow();
           window.setBlockOnOpen(true);
           window.open();
-          Display.getCurrent().dispose();
+          Display.getCurrent().dispose();    
         } catch (Exception e) {
           e.printStackTrace();
         }

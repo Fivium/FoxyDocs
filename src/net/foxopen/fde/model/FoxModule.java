@@ -1,31 +1,31 @@
 package net.foxopen.fde.model;
 
+import static net.foxopen.utils.Constants.DOC_BUILDER;
+import static net.foxopen.utils.Constants.DOM_BUILDER;
+import static net.foxopen.utils.Constants.XML_SERIALISER;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import net.foxopen.fde.model.abstractObject.AbstractFSItem;
 import net.foxopen.fde.model.abstractObject.AbstractModelObject;
+import net.foxopen.utils.Constants;
 import net.foxopen.utils.Logger;
-import net.foxopen.utils.XPath;
-import net.xmlparser.XmlRegion;
-import net.xmlparser.XmlRegionAnalyzer;
 
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
-import org.jdom2.input.DOMBuilder;
-import org.jdom2.output.XMLOutputter;
+import org.jdom2.filter.Filters;
+import org.jdom2.xpath.XPathExpression;
+import org.jdom2.xpath.XPathFactory;
 import org.xml.sax.SAXException;
 
 public class FoxModule extends AbstractFSItem {
 
   private final List<AbstractModelObject> documentationEntriesSet = new ArrayList<AbstractModelObject>();
-  private static XMLOutputter serializer = new XMLOutputter();
   private String code;
 
   public FoxModule(File file, AbstractFSItem parent) {
@@ -66,16 +66,9 @@ public class FoxModule extends AbstractFSItem {
    */
   public synchronized void readContent() throws ParserConfigurationException, SAXException, IOException, JDOMException, NotAFoxModuleException {
     Logger.logStdout("Loading module " + f_file.getAbsolutePath());
-    // Parse the data
-    DocumentBuilderFactory domfactory = DocumentBuilderFactory.newInstance();
-    DOMBuilder builder = new DOMBuilder();
-    domfactory.setNamespaceAware(false);
 
-    DocumentBuilder dombuilder = domfactory.newDocumentBuilder();
-    org.w3c.dom.Document domDoc = dombuilder.parse(f_file);
-    org.jdom2.Document jdomDoc = builder.build(domDoc);
-
-    code = serializer.outputString(jdomDoc);
+    
+    org.jdom2.Document jdomDoc = DOM_BUILDER.build(DOC_BUILDER.parse(f_file));
 
     // Entries
     addEntries(documentationEntriesSet, jdomDoc, "Header", "//fm:header");
@@ -87,28 +80,22 @@ public class FoxModule extends AbstractFSItem {
       throw new NotAFoxModuleException(f_file.getName());
     }
 
-    cascadeFirePropertyChange("status", null, getStatus());
-  }
-
-  private DocumentationEntriesSet parse(org.jdom2.Document document, String key, String xpath) {
-    // Actions
-    DocumentationEntriesSet set = new DocumentationEntriesSet(key, this);
-    for (Element e : XPath.run(xpath, document)) {
-      set.add(new DocumentationEntry(e, set));
-    }
-    return set;
+    code = XML_SERIALISER.outputString(jdomDoc);
   }
 
   private void addEntries(List<AbstractModelObject> data, org.jdom2.Document document, String key, String xpath) {
-    DocumentationEntriesSet tmp = parse(document, key, xpath);
-    if (tmp.size() > 0) {
-      data.add(tmp);
+    DocumentationEntriesSet set = new DocumentationEntriesSet(key, this);
+    for (Element e : runXpath(xpath, document)) {
+      set.add(new DocumentationEntry(e, set));
+    }
+    if (set.size() > 0) {
+      data.add(set);
     }
   }
 
   public void delete() {
     getParent().getChildren().remove(this);
-    getParent().cascadeFirePropertyChange("children", null, getParent().getChildren());
+    getParent().firePropertyChange("children", null, getParent().getChildren());
   }
 
   @Override
@@ -126,6 +113,12 @@ public class FoxModule extends AbstractFSItem {
   @Override
   public String getCode() {
     return code;
+  }
+
+  public static List<Element> runXpath(String xpath, org.jdom2.Document document) {
+    XPathExpression<Element> actionsXPath = XPathFactory.instance().compile(xpath, Filters.element(), null, Constants.NAMESPACE_FM);
+    List<Element> results = actionsXPath.evaluate(document);
+    return results;
   }
 
   public static class NotAFoxModuleException extends Exception {

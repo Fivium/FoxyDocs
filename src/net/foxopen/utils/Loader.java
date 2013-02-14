@@ -21,12 +21,6 @@ public class Loader {
     return new ThreadPopulateStructure(target);
   }
 
-  public static IRunnableWithProgress RefreshContent(AbstractFSItem target) {
-    target.checkFile();
-    ThreadPopulateStructure.doneList = new HashMap<String, Boolean>();
-    return new ThreadPopulateStructure(target);
-  }
-
   private static class ThreadPopulateStructure implements IRunnableWithProgress {
     private final AbstractFSItem target;
     private static Integer nbThreads = 0;
@@ -43,7 +37,7 @@ public class Loader {
 
     @Override
     public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-      monitor.beginTask("Opening "+target.getPath(), IProgressMonitor.UNKNOWN);
+      monitor.beginTask("Opening " + target.getPath(), IProgressMonitor.UNKNOWN);
       logStdout(nbThreads + " Loader thread started");
       synchronized (nbThreads) {
         nbThreads++;
@@ -51,7 +45,7 @@ public class Loader {
       logStdout(nbThreads + " Loader thread running");
       try {
         target.readContent();
-        List<FoxModule> modules = target.getFoxModules();  
+        List<FoxModule> modules = target.getFoxModules();
         monitor.beginTask("Parsing FoxModules", modules.size());
         monitor.subTask("Parsing FoxModules");
         logStdout(modules.size() + " Fox Modules");
@@ -63,7 +57,8 @@ public class Loader {
           } catch (NotAFoxModuleException e) {
             f.delete();
           }
-         monitor.worked(1);
+          f.firePropertyChange("status", true, f.getStatus());
+          monitor.worked(1);
         }
       } catch (Exception e) {
         e.printStackTrace();

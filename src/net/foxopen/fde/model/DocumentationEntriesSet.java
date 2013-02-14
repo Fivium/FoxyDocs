@@ -59,10 +59,4 @@ public class DocumentationEntriesSet extends AbstractModelObject {
   public String getCode() {
     return getParent().getCode();
   }
-
-  @Override
-  public void setDocumentation(String documentation) {
-    // TODO Auto-generated method stub
-
-  }
 }

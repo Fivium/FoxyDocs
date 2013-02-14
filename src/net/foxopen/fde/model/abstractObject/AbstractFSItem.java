@@ -20,6 +20,7 @@ public abstract class AbstractFSItem extends AbstractModelObject {
   public void open(String path) {
     f_file = new File(path);
     checkFile();
+    clear();
   }
 
   public String getName() {

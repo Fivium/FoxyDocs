@@ -25,7 +25,7 @@ public class Directory extends AbstractFSItem {
 
   public void addChild(AbstractFSItem e) {
     contentList.add(e);
-    cascadeFirePropertyChange("children", null, getChildren());
+    firePropertyChange("children", null, getChildren());
   }
 
   @Override
@@ -41,7 +41,7 @@ public class Directory extends AbstractFSItem {
 
     // Reset or init the content list
     contentList = new ArrayList<AbstractFSItem>();
-    cascadeFirePropertyChange("children", null, getChildren());
+    firePropertyChange("children", null, getChildren());
     
     // Populate stuff
     for (File file : listOfFiles) {
