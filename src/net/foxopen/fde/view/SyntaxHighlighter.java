@@ -1,10 +1,11 @@
 package net.foxopen.fde.view;
 
 import static net.foxopen.utils.Constants.BLUE;
-import static net.foxopen.utils.Constants.CYAN;
+import static net.foxopen.utils.Constants.DARK_RED;
 import static net.foxopen.utils.Constants.GREEN;
 import static net.foxopen.utils.Constants.PURPLE;
 import static net.foxopen.utils.Constants.RED;
+import static net.foxopen.utils.Constants.GREY;
 
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
@@ -50,31 +51,49 @@ public class SyntaxHighlighter {
 
     ArrayList<StyleRange> ranges = new ArrayList<StyleRange>();
     XmlRegionAnalyzer analyzer = new XmlRegionAnalyzer();
-    List<XmlRegion> regions = analyzer.analyzeXml(target.getText());
+    String xml = target.getText();
+    List<XmlRegion> regions = analyzer.analyzeXml(xml);
     for (XmlRegion xr : regions) {
       // Create a collection to hold the StyleRanges
       int regionLength = xr.getEnd() - xr.getStart();
       switch (xr.getXmlRegionType()) {
       case MARKUP:
-        ranges.add(new StyleRange(xr.getStart(), regionLength, RED, null));
+        // Name is red
+        ranges.add(new StyleRange(xr.getStart(), regionLength, DARK_RED, null));
+        // <, > and / in blue
+        char[] cArray = xml.substring(xr.getStart(), xr.getEnd()).toCharArray();
+        for (int i = 0; i < cArray.length; i++) {
+          switch (cArray[i]) {
+          case '<':
+          case '>':
+          case '/':
+            ranges.add(new StyleRange(xr.getStart() + i, 0, BLUE, null)); // Last
+            break;
+          default:
+            break;
+          }
+        }
+
         break;
       case ATTRIBUTE:
-        ranges.add(new StyleRange(xr.getStart(), regionLength, RED, null, SWT.BOLD));
+        ranges.add(new StyleRange(xr.getStart(), regionLength, RED, null));
         break;
       case ATTRIBUTE_VALUE:
-        ranges.add(new StyleRange(xr.getStart(), regionLength, GREEN, null, SWT.BOLD));
+        // Color the two first and the last char in blue
+        ranges.add(new StyleRange(xr.getStart(), 2, BLUE, null));
+        ranges.add(new StyleRange(xr.getStart() + regionLength - 1, 1, BLUE, null));
         break;
       case MARKUP_VALUE:
-        ranges.add(new StyleRange(xr.getStart(), regionLength, GREEN, null));
+        // Default
         break;
       case COMMENT:
-        ranges.add(new StyleRange(xr.getStart(), regionLength, BLUE, null));
+        ranges.add(new StyleRange(xr.getStart(), regionLength, GREY, null));
         break;
       case INSTRUCTION:
-        ranges.add(new StyleRange(xr.getStart(), regionLength, CYAN, null));
+        ranges.add(new StyleRange(xr.getStart(), regionLength, GREEN, null));
         break;
       case CDATA:
-        ranges.add(new StyleRange(xr.getStart(), regionLength, BLUE, null, SWT.BOLD));
+        // Default
         break;
       case WHITESPACE:
         // Nothing

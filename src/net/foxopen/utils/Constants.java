@@ -35,7 +35,9 @@ public class Constants {
   }
 
   private static final Device device = Display.getCurrent();
+  public static final Color GREY = new Color(device, 200, 200, 200);
   public static final Color RED = new Color(device, 255, 0, 0);
+  public static final Color DARK_RED = new Color(device, 200, 50, 50);
   public static final Color GREEN = new Color(device, 0, 255, 0);
   public static final Color CYAN = new Color(device, 0, 255, 255);
   public static final Color BLUE = new Color(device, 0, 0, 255);
