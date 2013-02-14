@@ -19,12 +19,10 @@ public class DocumentationEntry extends AbstractModelObject {
     this.parent = parent;
 
     Element docNode = node.getChild("documentation", NAMESPACE_FM);
-    boolean oldStatus = getStatus();
     if (docNode != null) {
       firePropertyChange("docContent", this.documentation, this.documentation = docNode.getChild("description", NAMESPACE_FM).getTextNormalize());
     }
-    firePropertyChange("status", oldStatus, getStatus());
-  
+   
     String name = node.getAttributeValue("name");
     if (name == null) {
       setName(node.getName());

@@ -33,6 +33,7 @@ public abstract class AbstractModelObject extends Observable {
     addPropertyChangeListener("status", new PropertyChangeListener() {
       @Override
       public void propertyChange(PropertyChangeEvent evt) {
+        firePropertyChange("name", null, getName());
         if (getParent() != null) {
           // Cascade propagate the change
           getParent().firePropertyChange("status", evt.getOldValue(), evt.getNewValue());

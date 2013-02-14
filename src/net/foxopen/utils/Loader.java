@@ -69,7 +69,6 @@ public class Loader {
           } catch (NotAFoxModuleException e) {
             f.delete();
           }
-          f.firePropertyChange("status", true, f.getStatus());
           monitor.worked(1);
         }
       } catch (Exception e) {
