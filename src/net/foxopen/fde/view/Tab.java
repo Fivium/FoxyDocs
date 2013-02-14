@@ -5,6 +5,7 @@ import java.beans.PropertyChangeListener;
 
 import net.foxopen.fde.model.FoxModule;
 import net.foxopen.fde.model.abstractObject.AbstractModelObject;
+import static net.foxopen.utils.Constants.*;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
@@ -75,12 +76,14 @@ public class Tab extends CTabItem {
             grpDocumentation.setLayout(new FillLayout(SWT.HORIZONTAL));
 
             text_documentation = new StyledText(grpDocumentation, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
+            text_documentation.setFont(FONT_DEFAULT);
 
             Group grpCode = new Group(sashFormCodeDoc, SWT.NONE);
             grpCode.setText("Code");
             grpCode.setLayout(new FillLayout(SWT.HORIZONTAL));
 
             text_code = new StyledText(grpCode, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.READ_ONLY);
+            text_code.setFont(FONT_DEFAULT);
 
             // Add the syntax coloring handler
             SyntaxHighlighter.addSyntaxHighligherListener(text_code);

@@ -48,7 +48,6 @@ public class SyntaxHighlighter {
     if (hash != "" && cache.containsKey(hash)) {
       return cache.get(hash);
     }
-
     ArrayList<StyleRange> ranges = new ArrayList<StyleRange>();
     XmlRegionAnalyzer analyzer = new XmlRegionAnalyzer();
     String xml = target.getText();

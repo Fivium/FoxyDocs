@@ -7,8 +7,10 @@ import javax.xml.parsers.ParserConfigurationException;
 import net.foxopen.fde.view.FDEMainWindow;
 
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Device;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.wb.swt.ResourceManager;
@@ -43,6 +45,8 @@ public class Constants {
   public static final Color BLUE = new Color(device, 0, 0, 255);
   public static final Color PURPLE = new Color(device, 255, 0, 255);
   public static final Color YELLOW = new Color(device, 255, 255, 0);
+  
+  public static final Font FONT_DEFAULT = new Font(Display.getCurrent(), "Courier New", 10, SWT.NORMAL);
 
   public static final Namespace NAMESPACE_FM = Namespace.getNamespace("fm", "http://www.og.dti.gov/fox_module");
 
