@@ -66,12 +66,12 @@ public abstract class AbstractModelObject extends Observable {
     propertyChangeSupport.firePropertyChange(propertyName, oldValue, newValue);
   }
 
-  public boolean getStatus() {
+  public int getStatus() {
+    int status = STATUS_UNKNOWN;
     for (AbstractModelObject child : getChildren()) {
-      if (!child.getStatus())
-        return false;
+      status |= child.getStatus(); 
     }
-    return true;
+    return status;
   }
 
   public void clear() {
@@ -101,7 +101,16 @@ public abstract class AbstractModelObject extends Observable {
   }
 
   public Image getImage() {
-    return getStatus() ? IMAGE_OK : IMAGE_MISSING;
+    switch (getStatus()) {
+    case STATUS_OK:
+      return IMAGE_OK;
+    case STATUS_MISSING:
+      return IMAGE_MISSING;
+    case STATUS_PARTIAL:
+      return IMAGE_PARTIAL;
+    default:
+      return IMAGE_UNKNOWN;
+    }
   }
 
   public boolean isDirty() {

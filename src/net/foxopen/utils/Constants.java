@@ -27,9 +27,16 @@ public class Constants {
   public static void init() {
     Logger.logStdout("Init constants");
   }
+  
+  public final static int STATUS_UNKNOWN = 0x0;
+  public final static int STATUS_MISSING = 0x01;
+  public final static int STATUS_OK = 0x02;
+  public final static int STATUS_PARTIAL = 0x03;
 
   public static final Image IMAGE_OK = getImage("/img/actions/ok.png");
-  public static final Image IMAGE_MISSING = getImage("/img/actions/no.png");
+  public static final Image IMAGE_MISSING = getImage("/img/actions/cancel.png");
+  public static final Image IMAGE_PARTIAL = getImage("/img/actions/edit_remove.png");
+  public static final Image IMAGE_UNKNOWN = getImage("/img/actions/messagebox_question.png");
 
   private static Image getImage(String file) {
     ImageDescriptor image = ResourceManager.getImageDescriptor(FDEMainWindow.class, file);

@@ -38,21 +38,6 @@ public class FoxModule extends AbstractFSItem {
   }
 
   /**
-   * Is the file read only ?
-   * 
-   * @return true if the file is not writable, false otherwise
-   * @throws IOException
-   */
-  public boolean isReadOnly() throws IOException {
-    checkFile();
-    return !f_file.canWrite();
-  }
-
-  public String getName() {
-    return f_file.getName() + " " + (isDirty() ? "*" : "");
-  }
-
-  /**
    * Parse the XML content
    * 
    * @param f_file

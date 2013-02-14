@@ -1,7 +1,12 @@
 package net.foxopen.fde.model.abstractObject;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Display;
 
 import net.foxopen.fde.model.FoxModule;
 
@@ -27,6 +32,24 @@ public abstract class AbstractFSItem extends AbstractModelObject {
     checkFile();
     return f_file.getName() + " " + (isDirty() ? "*" : "");
   }
+  
+  /**
+   * Is the file read only ?
+   * 
+   * @return true if the file is not writable, false otherwise
+   * @throws IOException
+   */
+  public boolean isReadOnly() {
+    checkFile();
+    return !f_file.canWrite();
+  }
+
+  public Image getImage() {
+    if (isReadOnly())
+      return new Image(Display.getCurrent(), super.getImage(), SWT.IMAGE_DISABLE);
+    else
+      return super.getImage();
+  }
 
   public String getPath() {
     checkFile();
@@ -46,14 +69,14 @@ public abstract class AbstractFSItem extends AbstractModelObject {
       throw new IllegalArgumentException("Cannot read " + f_file.getAbsolutePath());
     }
   }
-  
+
   @Override
   public boolean getHasChildren() {
     return super.getHasChildren() && getChildren().get(0) instanceof AbstractFSItem;
   }
 
   abstract public void readContent() throws Exception;
-  
+
   abstract public List<FoxModule> getFoxModules();
 
 }

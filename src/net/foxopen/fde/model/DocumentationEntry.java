@@ -1,7 +1,7 @@
 package net.foxopen.fde.model;
 
 import java.util.List;
-import static net.foxopen.utils.Constants.NAMESPACE_FM;
+import static net.foxopen.utils.Constants.*;
 
 import net.foxopen.fde.model.abstractObject.AbstractModelObject;
 
@@ -22,7 +22,7 @@ public class DocumentationEntry extends AbstractModelObject {
     if (docNode != null) {
       firePropertyChange("docContent", this.documentation, this.documentation = docNode.getChild("description", NAMESPACE_FM).getTextNormalize());
     }
-   
+
     String name = node.getAttributeValue("name");
     if (name == null) {
       setName(node.getName());
@@ -31,8 +31,8 @@ public class DocumentationEntry extends AbstractModelObject {
     }
   }
 
-  public boolean getStatus() {
-    return documentation.trim().length() > 0;
+  public int getStatus() {
+    return documentation.trim().length() > 0 ? STATUS_OK : STATUS_MISSING;
   }
 
   public String getCode() {
@@ -49,7 +49,7 @@ public class DocumentationEntry extends AbstractModelObject {
 
   @Override
   public void setDocumentation(String content) {
-    boolean oldStatus = getStatus();
+    int oldStatus = getStatus();
     firePropertyChange("docContent", this.documentation, this.documentation = content);
     setDirty(true);
     firePropertyChange("status", oldStatus, getStatus());
