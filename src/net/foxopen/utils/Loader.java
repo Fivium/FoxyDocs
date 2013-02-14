@@ -7,12 +7,15 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.operation.IRunnableWithProgress;
-
 import net.foxopen.fde.model.FoxModule;
 import net.foxopen.fde.model.FoxModule.NotAFoxModuleException;
 import net.foxopen.fde.model.abstractObject.AbstractFSItem;
+import net.foxopen.fde.model.abstractObject.AbstractModelObject;
+import net.foxopen.fde.view.FDEMainWindow;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.swt.widgets.Display;
 
 public class Loader {
 
@@ -35,6 +38,16 @@ public class Loader {
       }
     }
 
+    private void refreshUI() {
+      Display.getDefault().asyncExec(new Runnable() {
+        public void run() {
+          for (AbstractModelObject o : FDEMainWindow.getRoot().getChildren()) {
+            o.firePropertyChange("name", null, false);
+          }
+        }
+      });
+    }
+
     @Override
     public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
       monitor.beginTask("Opening " + target.getPath(), IProgressMonitor.UNKNOWN);
@@ -47,8 +60,7 @@ public class Loader {
         target.readContent();
         List<FoxModule> modules = target.getFoxModules();
         monitor.beginTask("Parsing FoxModules", modules.size());
-        monitor.subTask("Parsing FoxModules");
-        logStdout(modules.size() + " Fox Modules");
+        monitor.subTask("Parsing " + modules.size() + " FoxModules");
         for (FoxModule f : modules) {
           if (monitor.isCanceled())
             break;
@@ -71,9 +83,9 @@ public class Loader {
         nbThreads--;
       }
       monitor.done();
+      refreshUI();
       if (monitor.isCanceled())
         throw new InterruptedException("The long running operation was cancelled");
-
     }
 
   }

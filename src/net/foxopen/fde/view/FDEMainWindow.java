@@ -69,6 +69,10 @@ public class FDEMainWindow extends ApplicationWindow {
     addStatusLine();
   }
 
+  public static AbstractFSItem getRoot() {
+    return root;
+  }
+
   /**
    * Create contents of the application window.
    * 
@@ -221,7 +225,7 @@ public class FDEMainWindow extends ApplicationWindow {
           final FDEMainWindow window = new FDEMainWindow();
           window.setBlockOnOpen(true);
           window.open();
-          Display.getCurrent().dispose();    
+          Display.getCurrent().dispose();
         } catch (Exception e) {
           e.printStackTrace();
         }

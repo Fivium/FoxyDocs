@@ -25,7 +25,7 @@ public abstract class AbstractFSItem extends AbstractModelObject {
 
   public String getName() {
     checkFile();
-    return f_file.getName();
+    return f_file.getName() + " " + (isDirty() ? "*" : "");
   }
 
   public String getPath() {
