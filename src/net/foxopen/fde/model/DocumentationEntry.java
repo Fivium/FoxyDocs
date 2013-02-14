@@ -9,8 +9,8 @@ import org.jdom2.Element;
 
 public class DocumentationEntry extends AbstractModelObject {
   private String documentation = "";
+  private String oldDocumentation = "";
   private String name;
-  private boolean dirty = false;
 
   public DocumentationEntry(Element node, AbstractModelObject parent) {
     if (node == null)
@@ -21,6 +21,7 @@ public class DocumentationEntry extends AbstractModelObject {
     Element docNode = node.getChild("documentation", NAMESPACE_FM);
     if (docNode != null) {
       firePropertyChange("docContent", this.documentation, this.documentation = docNode.getChild("description", NAMESPACE_FM).getTextNormalize());
+      oldDocumentation = documentation;
     }
 
     String name = node.getAttributeValue("name");
@@ -44,14 +45,14 @@ public class DocumentationEntry extends AbstractModelObject {
   }
 
   public boolean isDirty() {
-    return dirty;
+    return !documentation.equals(oldDocumentation);
   }
 
   @Override
   public void setDocumentation(String content) {
     int oldStatus = getStatus();
     firePropertyChange("docContent", this.documentation, this.documentation = content);
-    setDirty(true);
+    firePropertyChange("dirty", oldDocumentation, isDirty());
     firePropertyChange("status", oldStatus, getStatus());
   }
 
@@ -59,10 +60,6 @@ public class DocumentationEntry extends AbstractModelObject {
     if (name == null || name.trim() == "")
       throw new IllegalArgumentException("Entry name is null");
     firePropertyChange("name", this.name, this.name = name);
-  }
-
-  public void setDirty(boolean dirty) {
-    firePropertyChange("dirty", this.dirty, this.dirty = dirty);
   }
 
   @Override
