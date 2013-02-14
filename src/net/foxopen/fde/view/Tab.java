@@ -89,10 +89,10 @@ public class Tab extends CTabItem {
             SyntaxHighlighter.addSyntaxHighligherListener(text_code);
 
             // Vertical Sash
-            sashFormCodeDoc.setWeights(new int[] { 1, 2 });
+            sashFormCodeDoc.setWeights(new int[] { 1, 3 });
           }
           // Horizontal Sash
-          sashFormTabContent.setWeights(new int[] { 1, 3 });
+          sashFormTabContent.setWeights(new int[] { 1, 5 });
         }
       }
     }

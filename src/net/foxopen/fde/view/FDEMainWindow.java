@@ -114,7 +114,7 @@ public class FDEMainWindow extends ApplicationWindow {
         tabFolder.setSelectionBackground(Display.getCurrent().getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));
         // Tab here...
       }
-      sashForm.setWeights(new int[] { 1, 3 });
+      sashForm.setWeights(new int[] { 1, 5 });
     }
     initDataBindings();
 
