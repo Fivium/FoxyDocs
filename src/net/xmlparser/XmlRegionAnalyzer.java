@@ -78,7 +78,7 @@ public class XmlRegionAnalyzer {
       }
 
       // ">" and "/" can only indicate a mark-up
-      else if( c == '>' || c == '/' ) {
+      else if( c == '/' && xml.charAt( this.offset+1 ) == '>' || c == '>' ) {
         if( analyzeMarkup( xml, positions ))
           continue;
 
@@ -257,7 +257,7 @@ public class XmlRegionAnalyzer {
     char c;
     while( newPos < xml.length()
         && (c = xml.charAt( newPos )) != '='
-        && c != '/'
+        && c != '/' 
         && c != '>'
         && ! Character.isWhitespace( c ))
       newPos ++;
@@ -280,7 +280,7 @@ public class XmlRegionAnalyzer {
    * @return true if it recognized a XML instruction
    */
   boolean analyzeMarkupValue( String xml, List<XmlRegion> positions ) {
-
+    
     // A mark-up value follows a mark-up
     for( int i=positions.size() - 1; i >=0; i-- ) {
       XmlRegion xr = positions.get( i );
