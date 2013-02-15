@@ -4,6 +4,7 @@ import static net.foxopen.utils.Constants.DOM_BUILDER;
 import static net.foxopen.utils.Constants.XML_SERIALISER;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +16,7 @@ import net.foxopen.fde.model.abstractObject.AbstractModelObject;
 import net.foxopen.utils.Constants;
 import net.foxopen.utils.Logger;
 
+import org.apache.commons.io.IOUtils;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.filter.Filters;
@@ -62,8 +64,13 @@ public class FoxModule extends AbstractFSItem {
     if (documentationEntriesSet.size() == 0) {
       throw new NotAFoxModuleException(f_file.getName());
     }
-
-    code = XML_SERIALISER.outputString(jdomDoc);
+    FileInputStream inputStream = new FileInputStream(f_file);
+    try {
+      code = IOUtils.toString(inputStream);
+    } finally {
+        inputStream.close();
+    }
+    //XML_SERIALISER.outputString(jdomDoc);
   }
 
   private void addEntries(List<AbstractModelObject> data, org.jdom2.Document document, String key, String xpath) {
