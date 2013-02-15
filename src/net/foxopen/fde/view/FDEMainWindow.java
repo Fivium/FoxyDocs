@@ -57,6 +57,12 @@ public class FDEMainWindow extends ApplicationWindow {
   private TreeViewer treeViewerFileList;
   private Action action_open;
   private CTabFolder tabFolder;
+  private Action action_close;
+  private Action action_about;
+  private Action action_nextentry;
+  private Action action_previousentry;
+  private Action action_openlevel;
+  private Action action_closelevel;
 
   /**
    * Create the application window.
@@ -160,6 +166,45 @@ public class FDEMainWindow extends ApplicationWindow {
       action_open.setAccelerator(SWT.CTRL | 'O');
       action_open.setImageDescriptor(ResourceManager.getImageDescriptor(FDEMainWindow.class, "/img/actions/folder_new.png"));
     }
+    {
+      action_close = new Action("Close Tab") {
+        public void run() {
+          if (tabFolder.getSelection() != null) {
+            tabFolder.getSelection().dispose();
+          }
+        }
+      };
+      action_close.setAccelerator(SWT.CTRL | 'W');
+    }
+    {
+      action_about = new Action("About...") {
+        public void run() {
+          MessageDialog.openInformation(getShell(), "About", "A Fox Documentation Editor\n\npierredominique.putallaz@fivium.co.uk\n\nhttps://github.com/Akkenar/FoxyDocs");
+        }
+
+      };
+      action_about.setImageDescriptor(ResourceManager.getImageDescriptor(FDEMainWindow.class, "/img/actions/about_kde.png"));
+    }
+    {
+      action_nextentry = new Action("Next Entry") {
+      };
+      action_nextentry.setAccelerator(SWT.ALT | 'S');
+    }
+    {
+      action_previousentry = new Action("Previous Entry") {
+      };
+      action_previousentry.setAccelerator(SWT.ALT | 'W');
+    }
+    {
+      action_openlevel = new Action("Open Level") {
+      };
+      action_openlevel.setAccelerator(SWT.ALT | 'D');
+    }
+    {
+      action_closelevel = new Action("Close Level") {
+      };
+      action_closelevel.setAccelerator(SWT.ALT | 'A');
+    }
   }
 
   /**
@@ -181,6 +226,20 @@ public class FDEMainWindow extends ApplicationWindow {
       MenuManager menu_edit = new MenuManager("&Edit");
       menuManager.add(menu_edit);
     }
+
+    MenuManager menu_entries = new MenuManager("Browse");
+    menuManager.add(menu_entries);
+    menu_entries.add(action_previousentry);
+    menu_entries.add(action_nextentry);
+    menu_entries.add(new Separator());
+    menu_entries.add(action_openlevel);
+    menu_entries.add(action_closelevel);
+    menu_entries.add(new Separator());
+    menu_entries.add(action_close);
+
+    MenuManager menu_help = new MenuManager("Help");
+    menuManager.add(menu_help);
+    menu_help.add(action_about);
     return menuManager;
   }
 
