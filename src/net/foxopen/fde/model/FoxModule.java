@@ -1,6 +1,5 @@
 package net.foxopen.fde.model;
 
-import static net.foxopen.utils.Constants.DOC_BUILDER;
 import static net.foxopen.utils.Constants.DOM_BUILDER;
 import static net.foxopen.utils.Constants.XML_SERIALISER;
 
@@ -52,7 +51,7 @@ public class FoxModule extends AbstractFSItem {
   public synchronized void readContent() throws ParserConfigurationException, SAXException, IOException, JDOMException, NotAFoxModuleException {
     Logger.logStdout("Loading module " + f_file.getAbsolutePath());
  
-    org.jdom2.Document jdomDoc = DOM_BUILDER.build(DOC_BUILDER.parse(f_file));
+    org.jdom2.Document jdomDoc = DOM_BUILDER.build(f_file);
 
     // Entries
     addEntries(documentationEntriesSet, jdomDoc, "Header", "//fm:header");

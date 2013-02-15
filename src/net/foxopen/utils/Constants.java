@@ -16,7 +16,13 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.wb.swt.ResourceManager;
 import org.jdom2.Namespace;
 import org.jdom2.input.DOMBuilder;
+import org.jdom2.input.SAXBuilder;
+import org.jdom2.input.sax.XMLReaderSAX2Factory;
+import org.jdom2.located.LocatedJDOMFactory;
 import org.jdom2.output.XMLOutputter;
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 public class Constants {
 
@@ -27,7 +33,7 @@ public class Constants {
   public static void init() {
     Logger.logStdout("Init constants");
   }
-  
+
   public final static int STATUS_UNKNOWN = 0x0;
   public final static int STATUS_MISSING = 0x01;
   public final static int STATUS_OK = 0x02;
@@ -52,25 +58,33 @@ public class Constants {
   public static final Color BLUE = new Color(device, 0, 0, 255);
   public static final Color PURPLE = new Color(device, 255, 0, 255);
   public static final Color YELLOW = new Color(device, 255, 255, 0);
-  
+
   public static final Font FONT_DEFAULT = new Font(Display.getCurrent(), "Courier New", 10, SWT.NORMAL);
 
   public static final Namespace NAMESPACE_FM = Namespace.getNamespace("fm", "http://www.og.dti.gov/fox_module");
 
-  public static final DocumentBuilderFactory DOM_FACTORY;
-  public static final DOMBuilder DOM_BUILDER;
+  public static final SAXBuilder DOM_BUILDER;
   public static final XMLOutputter XML_SERIALISER;
-  public static DocumentBuilder DOC_BUILDER;
 
   static {
-    DOM_FACTORY = DocumentBuilderFactory.newInstance();
-    DOM_FACTORY.setNamespaceAware(false);
-    DOM_BUILDER = new DOMBuilder();
-    try {
-      DOC_BUILDER = DOM_FACTORY.newDocumentBuilder();
-    } catch (ParserConfigurationException e) {
-      e.printStackTrace();
-    }
+
+    DOM_BUILDER = new SAXBuilder(new XMLReaderSAX2Factory(false, "net.sf.saxon.aelfred.SAXDriver"));
+    DOM_BUILDER.setJDOMFactory(new LocatedJDOMFactory());
+    DOM_BUILDER.setErrorHandler(new ErrorHandler() {
+
+      @Override
+      public void warning(SAXParseException exception) throws SAXException {
+      }
+
+      @Override
+      public void fatalError(SAXParseException exception) throws SAXException {
+      }
+
+      @Override
+      public void error(SAXParseException exception) throws SAXException {
+      }
+    });
+
     XML_SERIALISER = new XMLOutputter();
   }
 }
