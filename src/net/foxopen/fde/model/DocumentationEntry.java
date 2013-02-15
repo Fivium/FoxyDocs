@@ -6,15 +6,23 @@ import static net.foxopen.utils.Constants.*;
 import net.foxopen.fde.model.abstractObject.AbstractModelObject;
 
 import org.jdom2.Element;
+import org.jdom2.located.Located;
 
 public class DocumentationEntry extends AbstractModelObject {
   private String documentation = "";
   private String oldDocumentation = "";
   private String name;
+  private int lineNumber = -1;
 
   public DocumentationEntry(Element node, AbstractModelObject parent) {
     if (node == null)
       throw new IllegalArgumentException("The node cannot be null");
+    
+    // Extract the line number. Must use SAX and a located element
+    if(node instanceof Located){
+      Located locatedNode = (Located) node;
+      lineNumber = locatedNode.getLine();
+    }
 
     this.parent = parent;
 
@@ -30,6 +38,10 @@ public class DocumentationEntry extends AbstractModelObject {
     } else {
       setName(name);
     }
+  }
+  
+  public int getLineNumber(){
+    return lineNumber;
   }
 
   public int getStatus() {

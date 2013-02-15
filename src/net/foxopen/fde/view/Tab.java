@@ -3,6 +3,7 @@ package net.foxopen.fde.view;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import net.foxopen.fde.model.DocumentationEntry;
 import net.foxopen.fde.model.FoxModule;
 import net.foxopen.fde.model.abstractObject.AbstractModelObject;
 import static net.foxopen.utils.Constants.*;
@@ -64,7 +65,17 @@ public class Tab extends CTabItem {
             public void doubleClick(DoubleClickEvent event) {
               IStructuredSelection thisSelection = (IStructuredSelection) event.getSelection();
               Object selectedNode = thisSelection.getFirstElement();
-              treeViewer.setExpandedState(selectedNode, !treeViewer.getExpandedState(selectedNode));
+              if (selectedNode instanceof DocumentationEntry) {
+                DocumentationEntry entry = (DocumentationEntry) selectedNode;
+                // Reset background
+                text_code.setLineBackground(0, text_code.getLineCount(), text_code.getBackground());
+                // Set background
+                text_code.setLineBackground(entry.getLineNumber() - 1, 1, GREY);
+                // Scroll to
+                text_code.setTopIndex(entry.getLineNumber() - 7);
+              } else {
+                treeViewer.setExpandedState(selectedNode, !treeViewer.getExpandedState(selectedNode));
+              }
             }
           });
           {

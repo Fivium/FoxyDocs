@@ -1,9 +1,5 @@
 package net.foxopen.utils;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
 import net.foxopen.fde.view.FDEMainWindow;
 
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -15,7 +11,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.wb.swt.ResourceManager;
 import org.jdom2.Namespace;
-import org.jdom2.input.DOMBuilder;
 import org.jdom2.input.SAXBuilder;
 import org.jdom2.input.sax.XMLReaderSAX2Factory;
 import org.jdom2.located.LocatedJDOMFactory;
@@ -70,18 +65,23 @@ public class Constants {
 
     DOM_BUILDER = new SAXBuilder(new XMLReaderSAX2Factory(false, "net.sf.saxon.aelfred.SAXDriver"));
     DOM_BUILDER.setJDOMFactory(new LocatedJDOMFactory());
+    // Bullet proof-ish parser as a FoxModule is not a valid XML due to
+    // duplicate namespaces
     DOM_BUILDER.setErrorHandler(new ErrorHandler() {
 
       @Override
       public void warning(SAXParseException exception) throws SAXException {
+        throw exception;
       }
 
       @Override
       public void fatalError(SAXParseException exception) throws SAXException {
+        // Empty
       }
 
       @Override
       public void error(SAXParseException exception) throws SAXException {
+        // Empty
       }
     });
 

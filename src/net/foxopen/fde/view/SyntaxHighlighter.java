@@ -110,7 +110,6 @@ public class SyntaxHighlighter {
   }
 
   public static void addSyntaxHighligherListener(final StyledText target) {
-
     // Line number
     target.addLineStyleListener(new LineStyleListener() {
 
@@ -125,7 +124,7 @@ public class SyntaxHighlighter {
         event.styles = getStyle(target);
       }
     });
-
+   
   }
 
 }

@@ -50,14 +50,14 @@ public class FoxModule extends AbstractFSItem {
    */
   public synchronized void readContent() throws ParserConfigurationException, SAXException, IOException, JDOMException, NotAFoxModuleException {
     Logger.logStdout("Loading module " + f_file.getAbsolutePath());
- 
+
     org.jdom2.Document jdomDoc = DOM_BUILDER.build(f_file);
 
     // Entries
     addEntries(documentationEntriesSet, jdomDoc, "Header", "//fm:header");
     addEntries(documentationEntriesSet, jdomDoc, "Entry Themes", "//fm:entry-theme");
     addEntries(documentationEntriesSet, jdomDoc, "Actions", "//fm:action");
-    addEntries(documentationEntriesSet, jdomDoc, "Orphanes", "//*[./fm:documentation and name()!='fm:header' and name()!='fm:entry-theme' and name()!='fm:action']");
+    addEntries(documentationEntriesSet, jdomDoc, "Orphans", "//*[./fm:documentation and name()!='fm:header' and name()!='fm:entry-theme' and name()!='fm:action']");
 
     if (documentationEntriesSet.size() == 0) {
       throw new NotAFoxModuleException(f_file.getName());
