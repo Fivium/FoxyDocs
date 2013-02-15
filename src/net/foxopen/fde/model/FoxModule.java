@@ -1,7 +1,6 @@
 package net.foxopen.fde.model;
 
 import static net.foxopen.utils.Constants.DOM_BUILDER;
-import static net.foxopen.utils.Constants.XML_SERIALISER;
 
 import java.io.File;
 import java.io.FileInputStream;

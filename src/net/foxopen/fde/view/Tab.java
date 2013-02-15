@@ -1,12 +1,16 @@
 package net.foxopen.fde.view;
 
+import static net.foxopen.utils.Constants.FONT_DEFAULT;
+import static net.foxopen.utils.Constants.GREY;
+
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import net.foxopen.fde.model.DocumentationEntriesSet;
 import net.foxopen.fde.model.DocumentationEntry;
 import net.foxopen.fde.model.FoxModule;
 import net.foxopen.fde.model.abstractObject.AbstractModelObject;
-import static net.foxopen.utils.Constants.*;
+import net.foxopen.utils.Constants;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
@@ -15,21 +19,20 @@ import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.databinding.viewers.ObservableListTreeContentProvider;
 import org.eclipse.jface.databinding.viewers.ViewerProperties;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.StyledText;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Listener;
@@ -71,16 +74,27 @@ public class Tab extends CTabItem {
             public void doubleClick(DoubleClickEvent event) {
               IStructuredSelection thisSelection = (IStructuredSelection) event.getSelection();
               Object selectedNode = thisSelection.getFirstElement();
-              if (selectedNode instanceof DocumentationEntry) {
-                DocumentationEntry entry = (DocumentationEntry) selectedNode;
-                // Reset background
-                text_code.setLineBackground(0, text_code.getLineCount(), text_code.getBackground());
-                // Set background
-                text_code.setLineBackground(entry.getLineNumber() - 1, 1, GREY);
-                // Scroll to
-                text_code.setTopIndex(entry.getLineNumber() - 7);
-              } else {
+              goToCode(selectedNode);
+              if (selectedNode instanceof DocumentationEntriesSet) {
                 treeViewer.setExpandedState(selectedNode, !treeViewer.getExpandedState(selectedNode));
+              }
+            }
+          });
+          treeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+            @Override
+            public void selectionChanged(SelectionChangedEvent event) {
+              IStructuredSelection thisSelection = (IStructuredSelection) event.getSelection();
+              Object selectedNode = thisSelection.getFirstElement();
+              goToCode(selectedNode);
+
+              // Set focus and editable
+              if (selectedNode instanceof DocumentationEntry) {
+                text_documentation.setEditable(true);
+                text_documentation.setEnabled(true);
+                text_documentation.setFocus();
+              } else if (selectedNode instanceof DocumentationEntriesSet) {
+                text_documentation.setEditable(false);
+                text_documentation.setEnabled(true);
               }
             }
           });
@@ -102,8 +116,21 @@ public class Tab extends CTabItem {
             text_code = new StyledText(grpCode, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.READ_ONLY);
             text_code.setFont(FONT_DEFAULT);
 
-            // Add the syntax coloring handler
+            // Add the syntax colouring handler
             SyntaxHighlighter.addSyntaxHighligherListener(text_code);
+
+            // Browse Listener
+            this.addListener(Constants.EVENT_DOWN, new Listener() {
+              @Override
+              public void handleEvent(Event event) {
+                if (treeViewer.getSelection().isEmpty()) {
+                  // Set the selection to the first item
+                  treeViewer.setSelection(new StructuredSelection(treeViewer.getVisibleExpandedElements()[0]), true);
+                } else {
+                  // TODO
+                }
+              }
+            });
 
             // Vertical Sash
             sashFormCodeDoc.setWeights(new int[] { 1, 3 });
@@ -144,6 +171,18 @@ public class Tab extends CTabItem {
    */
   public boolean equals(FoxModule that) {
     return content.equals(that);
+  }
+
+  private void goToCode(Object selectedNode) {
+    if (selectedNode instanceof DocumentationEntry) {
+      DocumentationEntry entry = (DocumentationEntry) selectedNode;
+      // Reset background
+      text_code.setLineBackground(0, text_code.getLineCount(), text_code.getBackground());
+      // Set background
+      text_code.setLineBackground(entry.getLineNumber() - 1, 1, GREY);
+      // Scroll to
+      text_code.setTopIndex(entry.getLineNumber() - 7);
+    }
   }
 
   /**

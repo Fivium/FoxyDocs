@@ -42,6 +42,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.wb.rcp.databinding.BeansListObservableFactory;
@@ -55,14 +56,14 @@ public class FDEMainWindow extends ApplicationWindow {
 
   private final static AbstractFSItem root = new Directory(null);
   private TreeViewer treeViewerFileList;
-  private Action action_open;
   private CTabFolder tabFolder;
+  private Action action_open;
   private Action action_close;
   private Action action_about;
   private Action action_nextentry;
   private Action action_previousentry;
-  private Action action_openlevel;
-  private Action action_closelevel;
+  private Action action_nextfile;
+  private Action action_previousfile;
 
   /**
    * Create the application window.
@@ -174,6 +175,7 @@ public class FDEMainWindow extends ApplicationWindow {
           }
         }
       };
+      action_close.setImageDescriptor(ResourceManager.getImageDescriptor(FDEMainWindow.class, "/img/actions/cancel.png"));
       action_close.setAccelerator(SWT.CTRL | 'W');
     }
     {
@@ -186,24 +188,33 @@ public class FDEMainWindow extends ApplicationWindow {
       action_about.setImageDescriptor(ResourceManager.getImageDescriptor(FDEMainWindow.class, "/img/actions/about_kde.png"));
     }
     {
-      action_nextentry = new Action("Next Entry") {
+      action_nextentry = new Action("Next Entry") {
+        public void run(){
+          if (tabFolder.getSelection() != null) {
+            tabFolder.getSelection().notifyListeners(Constants.EVENT_DOWN, new Event());
+          }
+        }
       };
+      action_nextentry.setImageDescriptor(ResourceManager.getImageDescriptor(FDEMainWindow.class, "/img/actions/adept_reinstall.png"));
       action_nextentry.setAccelerator(SWT.ALT | 'S');
     }
     {
       action_previousentry = new Action("Previous Entry") {
       };
+      action_previousentry.setImageDescriptor(ResourceManager.getImageDescriptor(FDEMainWindow.class, "/img/actions/up.png"));
       action_previousentry.setAccelerator(SWT.ALT | 'W');
     }
     {
-      action_openlevel = new Action("Open Level") {
+      action_nextfile = new Action("Next File") {
       };
-      action_openlevel.setAccelerator(SWT.ALT | 'D');
+      action_nextfile.setImageDescriptor(ResourceManager.getImageDescriptor(FDEMainWindow.class, "/img/actions/finish.png"));
+      action_nextfile.setAccelerator(SWT.ALT | 'D');
     }
     {
-      action_closelevel = new Action("Close Level") {
+      action_previousfile = new Action("Previous File") {
       };
-      action_closelevel.setAccelerator(SWT.ALT | 'A');
+      action_previousfile.setImageDescriptor(ResourceManager.getImageDescriptor(FDEMainWindow.class, "/img/actions/start.png"));
+      action_previousfile.setAccelerator(SWT.ALT | 'A');
     }
   }
 
@@ -232,8 +243,8 @@ public class FDEMainWindow extends ApplicationWindow {
     menu_entries.add(action_previousentry);
     menu_entries.add(action_nextentry);
     menu_entries.add(new Separator());
-    menu_entries.add(action_openlevel);
-    menu_entries.add(action_closelevel);
+    menu_entries.add(action_previousfile);
+    menu_entries.add(action_nextfile);
     menu_entries.add(new Separator());
     menu_entries.add(action_close);
 

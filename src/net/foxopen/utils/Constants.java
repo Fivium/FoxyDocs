@@ -60,6 +60,8 @@ public class Constants {
 
   public static final SAXBuilder DOM_BUILDER;
   public static final XMLOutputter XML_SERIALISER;
+  
+  public static final int EVENT_DOWN = 5402;
 
   static {
 
