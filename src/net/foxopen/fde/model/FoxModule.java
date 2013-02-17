@@ -4,6 +4,7 @@ import static net.foxopen.utils.Constants.DOM_BUILDER;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +17,7 @@ import net.foxopen.utils.Constants;
 import net.foxopen.utils.Logger;
 
 import org.apache.commons.io.IOUtils;
+import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.filter.Filters;
@@ -26,7 +28,7 @@ import org.xml.sax.SAXException;
 public class FoxModule extends AbstractFSItem {
 
   private final List<AbstractModelObject> documentationEntriesSet = new ArrayList<AbstractModelObject>();
-  private String code;
+  private Document jdomDoc;
 
   public FoxModule(File file, AbstractFSItem parent) {
     super(file, parent);
@@ -52,7 +54,7 @@ public class FoxModule extends AbstractFSItem {
   public synchronized void readContent() throws ParserConfigurationException, SAXException, IOException, JDOMException, NotAFoxModuleException {
     Logger.logStdout("Loading module " + f_file.getAbsolutePath());
 
-    org.jdom2.Document jdomDoc = DOM_BUILDER.build(f_file);
+    jdomDoc = DOM_BUILDER.build(f_file);
 
     // Entries
     addEntries(documentationEntriesSet, jdomDoc, "Header", "//fm:header");
@@ -63,13 +65,6 @@ public class FoxModule extends AbstractFSItem {
     if (documentationEntriesSet.size() == 0) {
       throw new NotAFoxModuleException(f_file.getName());
     }
-    FileInputStream inputStream = new FileInputStream(f_file);
-    try {
-      code = IOUtils.toString(inputStream);
-    } finally {
-        inputStream.close();
-    }
-    //XML_SERIALISER.outputString(jdomDoc);
   }
 
   private void addEntries(List<AbstractModelObject> data, org.jdom2.Document document, String key, String xpath) {
@@ -101,7 +96,22 @@ public class FoxModule extends AbstractFSItem {
 
   @Override
   public String getCode() {
-    return code;
+    try {
+      FileInputStream inputStream = new FileInputStream(f_file);
+      String buffer = IOUtils.toString(inputStream);
+      inputStream.close();
+      return buffer;
+    } catch (FileNotFoundException e) {
+      e.printStackTrace();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    return null;
+  }
+
+  @Override
+  public String toString() {
+    return Constants.XML_SERIALISER.outputString(jdomDoc);
   }
 
   public static List<Element> runXpath(String xpath, org.jdom2.Document document) {

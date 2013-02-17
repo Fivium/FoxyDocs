@@ -16,6 +16,7 @@ public abstract class AbstractFSItem extends AbstractModelObject {
   public AbstractFSItem(File file, AbstractFSItem parent) {
     this.parent = parent;
     f_file = file;
+    watch();
   }
 
   public AbstractFSItem(AbstractFSItem parent) {
@@ -26,13 +27,24 @@ public abstract class AbstractFSItem extends AbstractModelObject {
     f_file = new File(path);
     checkFile();
     clear();
+    watch();
   }
 
   public String getName() {
     checkFile();
     return f_file.getName() + " " + (isDirty() ? "*" : "");
   }
-  
+
+  private void watch() {
+    checkFile();
+    // TODO
+  }
+
+  public void save() {
+    checkFile();
+    // TODO
+  }
+
   /**
    * Is the file read only ?
    * 

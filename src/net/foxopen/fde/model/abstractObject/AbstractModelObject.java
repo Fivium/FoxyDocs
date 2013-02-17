@@ -120,5 +120,5 @@ public abstract class AbstractModelObject extends Observable {
     }
     return false;
   }
-
+  
 }
