@@ -20,14 +20,8 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
 public class Constants {
-
-  private Constants() {
-    // Empty
-  }
-
-  public static void init() {
-    Logger.logStdout("Init constants");
-  }
+  
+  public static WatchDog WATCHDOG;
 
   public final static int STATUS_UNKNOWN = 0x0;
   public final static int STATUS_MISSING = 0x01;
@@ -38,11 +32,6 @@ public class Constants {
   public static final Image IMAGE_MISSING = getImage("/img/actions/cancel.png");
   public static final Image IMAGE_PARTIAL = getImage("/img/actions/edit_remove.png");
   public static final Image IMAGE_UNKNOWN = getImage("/img/actions/messagebox_question.png");
-
-  private static Image getImage(String file) {
-    ImageDescriptor image = ResourceManager.getImageDescriptor(FDEMainWindow.class, file);
-    return image.createImage();
-  }
 
   private static final Device device = Display.getCurrent();
   public static final Color GREY = new Color(device, 200, 200, 200);
@@ -60,7 +49,7 @@ public class Constants {
 
   public static final SAXBuilder DOM_BUILDER;
   public static final XMLOutputter XML_SERIALISER;
-  
+
   public static final int EVENT_DOWN = 5402;
 
   static {
@@ -89,4 +78,18 @@ public class Constants {
 
     XML_SERIALISER = new XMLOutputter();
   }
+
+  private Constants() {
+    // Empty
+  }
+
+  public static void init() {
+    Logger.logStdout("Init constants");
+  }
+
+  private static Image getImage(String file) {
+    ImageDescriptor image = ResourceManager.getImageDescriptor(FDEMainWindow.class, file);
+    return image.createImage();
+  }
+
 }

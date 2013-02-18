@@ -1,14 +1,22 @@
 package net.foxopen.fde.model.abstractObject;
 
+import static net.foxopen.utils.Constants.IMAGE_MISSING;
+import static net.foxopen.utils.Constants.IMAGE_OK;
+import static net.foxopen.utils.Constants.IMAGE_PARTIAL;
+import static net.foxopen.utils.Constants.IMAGE_UNKNOWN;
+import static net.foxopen.utils.Constants.STATUS_MISSING;
+import static net.foxopen.utils.Constants.STATUS_OK;
+import static net.foxopen.utils.Constants.STATUS_PARTIAL;
+import static net.foxopen.utils.Constants.STATUS_UNKNOWN;
+
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.List;
 import java.util.Observable;
 
-import static net.foxopen.utils.Constants.*;
-
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Display;
 
 public abstract class AbstractModelObject extends Observable {
 
@@ -17,6 +25,7 @@ public abstract class AbstractModelObject extends Observable {
   protected Image image;
 
   protected AbstractModelObject() {
+
     // Dirty property : does the file need saving ?
     addPropertyChangeListener("dirty", new PropertyChangeListener() {
       @Override
@@ -42,7 +51,7 @@ public abstract class AbstractModelObject extends Observable {
     });
   }
 
-  abstract public List<? extends AbstractModelObject> getChildren();
+  abstract public List<?> getChildren();
 
   abstract public String getName();
 
@@ -68,8 +77,11 @@ public abstract class AbstractModelObject extends Observable {
 
   public int getStatus() {
     int status = STATUS_UNKNOWN;
-    for (AbstractModelObject child : getChildren()) {
-      status |= child.getStatus(); 
+    for (Object child : getChildren()) {
+      if (child instanceof AbstractModelObject) {
+        AbstractModelObject c = (AbstractModelObject) child;
+        status |= c.getStatus();
+      }
     }
     return status;
   }
@@ -114,11 +126,25 @@ public abstract class AbstractModelObject extends Observable {
   }
 
   public boolean isDirty() {
-    for (AbstractModelObject a : getChildren()) {
-      if (a.isDirty())
-        return true;
+    for (Object child : getChildren()) {
+      if (child instanceof AbstractModelObject) {
+        AbstractModelObject c = (AbstractModelObject) child;
+        if (c.isDirty())
+          return true;
+      }
     }
     return false;
   }
   
+  public void refreshUI() {
+    Display.getDefault().asyncExec(new Runnable() {
+      public void run() {
+        firePropertyChange("name", null, getName());
+        firePropertyChange("status", null, getStatus());
+        getParent().firePropertyChange("children", null, getParent().getChildren());
+        firePropertyChange("children", null, getChildren());
+      }
+    });
+  }
+
 }

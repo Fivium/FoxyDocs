@@ -2,11 +2,11 @@ package net.foxopen.fde.model;
 
 import static net.foxopen.utils.Constants.DOM_BUILDER;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -30,13 +30,13 @@ public class FoxModule extends AbstractFSItem {
   private final List<AbstractModelObject> documentationEntriesSet = new ArrayList<AbstractModelObject>();
   private Document jdomDoc;
 
-  public FoxModule(File file, AbstractFSItem parent) {
-    super(file, parent);
+  public FoxModule(String path, AbstractFSItem parent) throws IOException {
+    super(path, parent);
     checkFile();
-    if (!f_file.isFile())
+    if (!f_file.toFile().isFile())
       throw new IllegalArgumentException("A Fox Module must be a file");
-    if (!f_file.getName().toUpperCase().endsWith(".XML"))
-      throw new IllegalArgumentException("Invalid XML file " + f_file.getName());
+    if (!getPath().toUpperCase().endsWith(".XML"))
+      throw new IllegalArgumentException("Invalid XML file " + getPath());
   }
 
   /**
@@ -51,20 +51,24 @@ public class FoxModule extends AbstractFSItem {
    * @throws JDOMException
    * @throws NotAFoxModuleException
    */
-  public synchronized void readContent() throws ParserConfigurationException, SAXException, IOException, JDOMException, NotAFoxModuleException {
-    Logger.logStdout("Loading module " + f_file.getAbsolutePath());
+  public synchronized HashMap<String, AbstractFSItem> readContent() throws ParserConfigurationException, SAXException, IOException, JDOMException,
+      NotAFoxModuleException {
+    Logger.logStdout("Loading module " + getPath());
 
-    jdomDoc = DOM_BUILDER.build(f_file);
+    jdomDoc = DOM_BUILDER.build(f_file.toFile());
 
     // Entries
     addEntries(documentationEntriesSet, jdomDoc, "Header", "//fm:header");
     addEntries(documentationEntriesSet, jdomDoc, "Entry Themes", "//fm:entry-theme");
     addEntries(documentationEntriesSet, jdomDoc, "Actions", "//fm:action");
-    addEntries(documentationEntriesSet, jdomDoc, "Orphans", "//*[./fm:documentation and name()!='fm:header' and name()!='fm:entry-theme' and name()!='fm:action']");
+    addEntries(documentationEntriesSet, jdomDoc, "Orphans",
+        "//*[./fm:documentation and name()!='fm:header' and name()!='fm:entry-theme' and name()!='fm:action']");
 
     if (documentationEntriesSet.size() == 0) {
-      throw new NotAFoxModuleException(f_file.getName());
+      throw new NotAFoxModuleException(getName());
     }
+
+    return null;
   }
 
   private void addEntries(List<AbstractModelObject> data, org.jdom2.Document document, String key, String xpath) {
@@ -88,16 +92,16 @@ public class FoxModule extends AbstractFSItem {
   }
 
   @Override
-  public List<FoxModule> getFoxModules() {
-    ArrayList<FoxModule> buffer = new ArrayList<FoxModule>();
-    buffer.add(this);
+  public HashMap<String, FoxModule> getFoxModules() {
+    HashMap<String, FoxModule> buffer = new HashMap<String, FoxModule>();
+    buffer.put(getPath(), this);
     return buffer;
   }
 
   @Override
   public String getCode() {
     try {
-      FileInputStream inputStream = new FileInputStream(f_file);
+      FileInputStream inputStream = new FileInputStream(f_file.toFile());
       String buffer = IOUtils.toString(inputStream);
       inputStream.close();
       return buffer;
@@ -116,8 +120,7 @@ public class FoxModule extends AbstractFSItem {
 
   public static List<Element> runXpath(String xpath, org.jdom2.Document document) {
     XPathExpression<Element> actionsXPath = XPathFactory.instance().compile(xpath, Filters.element(), null, Constants.NAMESPACE_FM);
-    List<Element> results = actionsXPath.evaluate(document);
-    return results;
+    return actionsXPath.evaluate(document);
   }
 
   public static class NotAFoxModuleException extends Exception {
@@ -127,5 +130,4 @@ public class FoxModule extends AbstractFSItem {
       super(name + " is not a valid FoxModule");
     }
   }
-
 }

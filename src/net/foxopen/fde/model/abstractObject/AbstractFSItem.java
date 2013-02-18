@@ -1,48 +1,53 @@
 package net.foxopen.fde.model.abstractObject;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.List;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.WatchEvent;
+import java.util.HashMap;
+
+import net.foxopen.fde.model.FoxModule;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 
-import net.foxopen.fde.model.FoxModule;
-
 public abstract class AbstractFSItem extends AbstractModelObject {
-  protected File f_file;
-
-  public AbstractFSItem(File file, AbstractFSItem parent) {
-    this.parent = parent;
-    f_file = file;
-    watch();
+  protected Path f_file;
+    
+  public AbstractFSItem(String path, AbstractFSItem parent) throws IOException {
+    this(parent);
+    f_file = Paths.get(path);
+    checkFile();
   }
 
-  public AbstractFSItem(AbstractFSItem parent) {
+  public AbstractFSItem(AbstractFSItem parent) throws IOException {
     this.parent = parent;
   }
 
   public void open(String path) {
-    f_file = new File(path);
+    f_file = Paths.get(path);
     checkFile();
     clear();
-    watch();
   }
 
   public String getName() {
     checkFile();
-    return f_file.getName() + " " + (isDirty() ? "*" : "");
-  }
-
-  private void watch() {
-    checkFile();
-    // TODO
+    return f_file.getFileName() + " " + (isDirty() ? "*" : "");
   }
 
   public void save() {
     checkFile();
     // TODO
+  }
+
+  public void reload() {
+    try {
+      f_file = Paths.get(f_file.toFile().getCanonicalPath());
+      firePropertyChange("status", null, getStatus());
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 
   /**
@@ -53,7 +58,7 @@ public abstract class AbstractFSItem extends AbstractModelObject {
    */
   public boolean isReadOnly() {
     checkFile();
-    return !f_file.canWrite();
+    return !f_file.toFile().canWrite();
   }
 
   public Image getImage() {
@@ -65,20 +70,19 @@ public abstract class AbstractFSItem extends AbstractModelObject {
 
   public String getPath() {
     checkFile();
-    return f_file.getPath();
+    return f_file.toFile().getAbsolutePath().toString();
   }
 
-  public void refresh() throws Exception {
-    checkFile();
-    readContent();
+  public Path getFile() {
+    return f_file;
   }
 
   public void checkFile() {
     if (f_file == null)
       throw new IllegalArgumentException("The file system item must be loaded");
     // Can we read the file ?
-    if (!f_file.canRead()) {
-      throw new IllegalArgumentException("Cannot read " + f_file.getAbsolutePath());
+    if (!f_file.toFile().canRead()) {
+      throw new IllegalArgumentException("Cannot read the file");
     }
   }
 
@@ -87,8 +91,12 @@ public abstract class AbstractFSItem extends AbstractModelObject {
     return super.getHasChildren() && getChildren().get(0) instanceof AbstractFSItem;
   }
 
-  abstract public void readContent() throws Exception;
+  public void sendSignal(WatchEvent<?> event) {
+    reload();
+  }
+  
+  abstract public HashMap<String, AbstractFSItem> readContent() throws Exception;
 
-  abstract public List<FoxModule> getFoxModules();
+  abstract public HashMap<String, FoxModule> getFoxModules();
 
 }

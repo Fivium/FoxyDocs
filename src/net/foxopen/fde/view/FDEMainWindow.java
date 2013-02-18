@@ -2,6 +2,7 @@ package net.foxopen.fde.view;
 
 import static net.foxopen.utils.Logger.logStdout;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
 import net.foxopen.fde.model.Directory;
@@ -44,7 +45,6 @@ import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Tree;
 import org.eclipse.wb.rcp.databinding.BeansListObservableFactory;
 import org.eclipse.wb.rcp.databinding.TreeBeanAdvisor;
 import org.eclipse.wb.rcp.databinding.TreeObservableLabelProvider;
@@ -54,7 +54,7 @@ import org.eclipse.wb.swt.SWTResourceManager;
 public class FDEMainWindow extends ApplicationWindow {
   private Action action_exit;
 
-  private final static AbstractFSItem root = new Directory(null);
+  private static AbstractFSItem root;
   private TreeViewer treeViewerFileList;
   private CTabFolder tabFolder;
   private Action action_open;
@@ -64,6 +64,14 @@ public class FDEMainWindow extends ApplicationWindow {
   private Action action_previousentry;
   private Action action_nextfile;
   private Action action_previousfile;
+
+  static {
+    try {
+      root = new Directory(null);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
 
   /**
    * Create the application window.
@@ -112,7 +120,7 @@ public class FDEMainWindow extends ApplicationWindow {
               }
             }
           });
-          Tree tree = treeViewerFileList.getTree();
+          //Tree tree = treeViewerFileList.getTree();
         }
       }
       {
@@ -189,29 +197,33 @@ public class FDEMainWindow extends ApplicationWindow {
     }
     {
       action_nextentry = new Action("Next Entry") {
-        public void run(){
+        public void run() {
           if (tabFolder.getSelection() != null) {
             tabFolder.getSelection().notifyListeners(Constants.EVENT_DOWN, new Event());
           }
-        }
+        }
+
       };
       action_nextentry.setImageDescriptor(ResourceManager.getImageDescriptor(FDEMainWindow.class, "/img/actions/adept_reinstall.png"));
       action_nextentry.setAccelerator(SWT.ALT | 'S');
     }
     {
-      action_previousentry = new Action("Previous Entry") {
+      action_previousentry = new Action("Previous Entry") {
+
       };
       action_previousentry.setImageDescriptor(ResourceManager.getImageDescriptor(FDEMainWindow.class, "/img/actions/up.png"));
       action_previousentry.setAccelerator(SWT.ALT | 'W');
     }
     {
-      action_nextfile = new Action("Next File") {
+      action_nextfile = new Action("Next File") {
+
       };
       action_nextfile.setImageDescriptor(ResourceManager.getImageDescriptor(FDEMainWindow.class, "/img/actions/finish.png"));
       action_nextfile.setAccelerator(SWT.ALT | 'D');
     }
     {
-      action_previousfile = new Action("Previous File") {
+      action_previousfile = new Action("Previous File") {
+
       };
       action_previousfile.setImageDescriptor(ResourceManager.getImageDescriptor(FDEMainWindow.class, "/img/actions/start.png"));
       action_previousfile.setAccelerator(SWT.ALT | 'A');
@@ -323,8 +335,8 @@ public class FDEMainWindow extends ApplicationWindow {
     newShell.addShellListener(new ShellAdapter() {
       @Override
       public void shellClosed(ShellEvent e) {
+        Constants.WATCHDOG.interrupt();
         logStdout("Closed");
-
       }
     });
 
@@ -339,7 +351,6 @@ public class FDEMainWindow extends ApplicationWindow {
   protected Point getInitialSize() {
     return new Point(205, 215);
   }
-
   protected DataBindingContext initDataBindings() {
     DataBindingContext bindingContext = new DataBindingContext();
     //

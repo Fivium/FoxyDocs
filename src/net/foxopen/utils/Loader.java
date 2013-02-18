@@ -3,9 +3,9 @@ package net.foxopen.utils;
 import static net.foxopen.utils.Logger.logStderr;
 import static net.foxopen.utils.Logger.logStdout;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
-import java.util.List;
 
 import net.foxopen.fde.model.FoxModule;
 import net.foxopen.fde.model.FoxModule.NotAFoxModuleException;
@@ -41,27 +41,40 @@ public class Loader {
     private void refreshUI() {
       Display.getDefault().asyncExec(new Runnable() {
         public void run() {
-          for (AbstractModelObject o : FDEMainWindow.getRoot().getChildren()) {
-            o.firePropertyChange("name", null, false);
+          for (Object o : FDEMainWindow.getRoot().getChildren()) {
+            AbstractModelObject c = (AbstractModelObject) o;
+            c.firePropertyChange("name", null, c.getName());
+            c.firePropertyChange("status", null, c.getStatus());
           }
         }
       });
     }
 
     @Override
-    public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+    public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
       monitor.beginTask("Opening " + target.getPath(), IProgressMonitor.UNKNOWN);
       logStdout(nbThreads + " Loader thread started");
+      HashMap<String, AbstractFSItem> monitorList = new HashMap<String, AbstractFSItem>();
+
       synchronized (nbThreads) {
         nbThreads++;
       }
       logStdout(nbThreads + " Loader thread running");
       try {
-        target.readContent();
-        List<FoxModule> modules = target.getFoxModules();
+        // Walk into the root directory
+        HashMap<String, AbstractFSItem> dirs = target.readContent();
+        monitorList.putAll(dirs);
+        for (AbstractFSItem dir : dirs.values()) {
+          if (monitor.isCanceled())
+            break;
+          monitorList.putAll(dir.readContent());
+        }
+        // Get all modules
+        HashMap<String, FoxModule> modules = target.getFoxModules();
+        // Parse modules
         monitor.beginTask("Parsing FoxModules", modules.size());
         monitor.subTask("Parsing " + modules.size() + " FoxModules");
-        for (FoxModule f : modules) {
+        for (FoxModule f : modules.values()) {
           if (monitor.isCanceled())
             break;
           try {
@@ -71,6 +84,9 @@ public class Loader {
           }
           monitor.worked(1);
         }
+        // Assign a WatchDog
+        monitorList.putAll(modules);
+
       } catch (Exception e) {
         e.printStackTrace();
         logStderr("Failed to load " + target.getPath());
@@ -85,6 +101,31 @@ public class Loader {
       refreshUI();
       if (monitor.isCanceled())
         throw new InterruptedException("The long running operation was cancelled");
+      try {
+        Constants.WATCHDOG = new WatchDog(target.getFile(), monitorList, new WatchDogEventHandler() {
+
+          @Override
+          public void modified(AbstractFSItem entry) {
+            entry.getParent().firePropertyChange("children", null, entry.getParent().getChildren());
+            entry.refreshUI();
+          }
+
+          @Override
+          public void deleted(AbstractFSItem entry) {
+            entry.getParent().getChildren().remove(entry);
+            entry.refreshUI();
+          }
+
+          @Override
+          public void created(AbstractModelObject parent, AbstractFSItem entry) {
+            entry.refreshUI();
+            parent.refreshUI();
+          }
+        });
+        Constants.WATCHDOG.start();
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
     }
 
   }
