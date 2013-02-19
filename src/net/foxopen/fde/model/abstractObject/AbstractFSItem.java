@@ -43,6 +43,7 @@ public abstract class AbstractFSItem extends AbstractModelObject {
   }
 
   public void save() {
+    reload();
     checkFile();
     // TODO
   }

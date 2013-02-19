@@ -52,8 +52,7 @@ public class FoxModule extends AbstractFSItem {
    * @throws JDOMException
    * @throws NotAFoxModuleException
    */
-  public synchronized HashMap<String, AbstractFSItem> readContent() throws ParserConfigurationException, SAXException, IOException, JDOMException,
-      NotAFoxModuleException {
+  public synchronized HashMap<String, AbstractFSItem> readContent() throws ParserConfigurationException, SAXException, IOException, JDOMException, NotAFoxModuleException {
     Logger.logStdout("Loading module " + getPath());
 
     jdomDoc = DOM_BUILDER.build(internalPath.toFile());
@@ -62,8 +61,7 @@ public class FoxModule extends AbstractFSItem {
     addEntries(documentationEntriesSet, jdomDoc, "Header", "//fm:header");
     addEntries(documentationEntriesSet, jdomDoc, "Entry Themes", "//fm:entry-theme");
     addEntries(documentationEntriesSet, jdomDoc, "Actions", "//fm:action");
-    addEntries(documentationEntriesSet, jdomDoc, "Orphans",
-        "//*[./fm:documentation and name()!='fm:header' and name()!='fm:entry-theme' and name()!='fm:action']");
+    addEntries(documentationEntriesSet, jdomDoc, "Orphans", "//*[./fm:documentation and name()!='fm:header' and name()!='fm:entry-theme' and name()!='fm:action']");
 
     if (documentationEntriesSet.size() == 0) {
       throw new NotAFoxModuleException(getName());
@@ -111,7 +109,7 @@ public class FoxModule extends AbstractFSItem {
     } catch (IOException e) {
       e.printStackTrace();
     }
-    return null;
+    return toString();
   }
 
   @Override

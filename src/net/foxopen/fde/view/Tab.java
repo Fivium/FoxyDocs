@@ -74,7 +74,6 @@ public class Tab extends CTabItem {
             public void doubleClick(DoubleClickEvent event) {
               IStructuredSelection thisSelection = (IStructuredSelection) event.getSelection();
               Object selectedNode = thisSelection.getFirstElement();
-              goToCode(selectedNode);
               if (selectedNode instanceof DocumentationEntriesSet) {
                 treeViewer.setExpandedState(selectedNode, !treeViewer.getExpandedState(selectedNode));
               }
@@ -155,11 +154,6 @@ public class Tab extends CTabItem {
     IObservableValue observeSingleSelectionTreeViewer = ViewerProperties.singleSelection().observe(treeViewer);
     IObservableValue treeViewerDocumentationObserveDetailValue = BeanProperties.value(AbstractModelObject.class, "documentation", String.class).observeDetail(observeSingleSelectionTreeViewer);
     bindingContext.bindValue(observeTextText_documentationObserveWidget, treeViewerDocumentationObserveDetailValue, null, null);
-    //
-    IObservableValue observeTextText_documentationObserveWidget2 = WidgetProperties.text(new int[] { SWT.Modify, SWT.FocusOut, SWT.DefaultSelection }).observe(text_code);
-    IObservableValue observeSingleSelectionTreeViewer2 = ViewerProperties.singleSelection().observe(treeViewer);
-    IObservableValue treeViewerDocumentationObserveDetailValue2 = BeanProperties.value(AbstractModelObject.class, "code", String.class).observeDetail(observeSingleSelectionTreeViewer2);
-    bindingContext.bindValue(observeTextText_documentationObserveWidget2, treeViewerDocumentationObserveDetailValue2, null, null);
   }
 
   /**
