@@ -1,7 +1,7 @@
 package net.foxopen;
 
 import static net.foxopen.utils.Logger.logStdout;
-import net.foxopen.fde.view.FDEMainWindow;
+import net.foxopen.foxydocs.view.FDEMainWindow;
 import net.foxopen.utils.WatchDog;
 
 import org.eclipse.core.databinding.observable.Realm;

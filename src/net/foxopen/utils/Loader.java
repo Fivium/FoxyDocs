@@ -9,11 +9,11 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import net.foxopen.fde.view.FDEMainWindow;
 import net.foxopen.foxydocs.model.FoxModule;
 import net.foxopen.foxydocs.model.FoxModule.NotAFoxModuleException;
 import net.foxopen.foxydocs.model.abstractObject.AbstractFSItem;
 import net.foxopen.foxydocs.model.abstractObject.AbstractModelObject;
+import net.foxopen.foxydocs.view.FDEMainWindow;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
