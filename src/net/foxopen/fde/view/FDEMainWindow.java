@@ -363,7 +363,7 @@ public class FDEMainWindow extends ApplicationWindow {
     });
 
     super.configureShell(newShell);
-    newShell.setText("Fox Documentation Editor - Dev 0.2");
+    newShell.setText("Fox Documentation Editor - Dev 0.3");
   }
 
   /**
