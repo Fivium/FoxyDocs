@@ -1,13 +1,13 @@
 package net.foxopen.fde.model.abstractObject;
 
-import static net.foxopen.utils.Constants.IMAGE_MISSING;
-import static net.foxopen.utils.Constants.IMAGE_OK;
-import static net.foxopen.utils.Constants.IMAGE_PARTIAL;
-import static net.foxopen.utils.Constants.IMAGE_UNKNOWN;
-import static net.foxopen.utils.Constants.STATUS_MISSING;
-import static net.foxopen.utils.Constants.STATUS_OK;
-import static net.foxopen.utils.Constants.STATUS_PARTIAL;
-import static net.foxopen.utils.Constants.STATUS_UNKNOWN;
+import static net.foxopen.utils.FoxyDocs.IMAGE_MISSING;
+import static net.foxopen.utils.FoxyDocs.IMAGE_OK;
+import static net.foxopen.utils.FoxyDocs.IMAGE_PARTIAL;
+import static net.foxopen.utils.FoxyDocs.IMAGE_UNKNOWN;
+import static net.foxopen.utils.FoxyDocs.STATUS_MISSING;
+import static net.foxopen.utils.FoxyDocs.STATUS_OK;
+import static net.foxopen.utils.FoxyDocs.STATUS_PARTIAL;
+import static net.foxopen.utils.FoxyDocs.STATUS_UNKNOWN;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;

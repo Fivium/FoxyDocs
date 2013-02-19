@@ -1,7 +1,7 @@
 package net.foxopen.fde.view;
 
-import static net.foxopen.utils.Constants.FONT_DEFAULT;
-import static net.foxopen.utils.Constants.GREY;
+import static net.foxopen.utils.FoxyDocs.FONT_DEFAULT;
+import static net.foxopen.utils.FoxyDocs.GREY;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -10,7 +10,7 @@ import net.foxopen.fde.model.DocumentationEntriesSet;
 import net.foxopen.fde.model.DocumentationEntry;
 import net.foxopen.fde.model.FoxModule;
 import net.foxopen.fde.model.abstractObject.AbstractModelObject;
-import net.foxopen.utils.Constants;
+import net.foxopen.utils.FoxyDocs;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
@@ -119,7 +119,7 @@ public class Tab extends CTabItem {
             SyntaxHighlighter.addSyntaxHighligherListener(text_code);
 
             // Browse Listener
-            this.addListener(Constants.EVENT_DOWN, new Listener() {
+            this.addListener(FoxyDocs.EVENT_DOWN, new Listener() {
               @Override
               public void handleEvent(Event event) {
                 if (treeViewer.getSelection().isEmpty()) {

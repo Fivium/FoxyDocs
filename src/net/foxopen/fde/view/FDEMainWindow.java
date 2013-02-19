@@ -8,7 +8,7 @@ import java.lang.reflect.InvocationTargetException;
 import net.foxopen.fde.model.Directory;
 import net.foxopen.fde.model.FoxModule;
 import net.foxopen.fde.model.abstractObject.AbstractFSItem;
-import net.foxopen.utils.Constants;
+import net.foxopen.utils.FoxyDocs;
 import net.foxopen.utils.Loader;
 
 import org.eclipse.core.databinding.DataBindingContext;
@@ -199,7 +199,7 @@ public class FDEMainWindow extends ApplicationWindow {
       action_nextentry = new Action("Next Entry") {
         public void run() {
           if (tabFolder.getSelection() != null) {
-            tabFolder.getSelection().notifyListeners(Constants.EVENT_DOWN, new Event());
+            tabFolder.getSelection().notifyListeners(FoxyDocs.EVENT_DOWN, new Event());
           }
         }
 
@@ -298,7 +298,7 @@ public class FDEMainWindow extends ApplicationWindow {
   public static void main(String args[]) {
     logStdout("FDE started");
     // Initialise statics constants
-    Constants.init();
+    FoxyDocs.init();
     // Create the interface
     Display display = Display.getDefault();
     Realm.runWithDefault(SWTObservables.getRealm(display), new Runnable() {
@@ -335,7 +335,7 @@ public class FDEMainWindow extends ApplicationWindow {
     newShell.addShellListener(new ShellAdapter() {
       @Override
       public void shellClosed(ShellEvent e) {
-        Constants.WATCHDOG.interrupt();
+        FoxyDocs.WATCHDOG.interrupt();
         logStdout("Closed");
       }
     });

@@ -1,6 +1,6 @@
 package net.foxopen.fde.model;
 
-import static net.foxopen.utils.Constants.DOM_BUILDER;
+import static net.foxopen.utils.FoxyDocs.DOM_BUILDER;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -14,7 +14,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import net.foxopen.fde.model.abstractObject.AbstractFSItem;
 import net.foxopen.fde.model.abstractObject.AbstractModelObject;
-import net.foxopen.utils.Constants;
+import net.foxopen.utils.FoxyDocs;
 import net.foxopen.utils.Logger;
 
 import org.apache.commons.io.IOUtils;
@@ -114,11 +114,11 @@ public class FoxModule extends AbstractFSItem {
 
   @Override
   public String toString() {
-    return Constants.XML_SERIALISER.outputString(jdomDoc);
+    return FoxyDocs.XML_SERIALISER.outputString(jdomDoc);
   }
 
   public static List<Element> runXpath(String xpath, org.jdom2.Document document) {
-    XPathExpression<Element> actionsXPath = XPathFactory.instance().compile(xpath, Filters.element(), null, Constants.NAMESPACE_FM);
+    XPathExpression<Element> actionsXPath = XPathFactory.instance().compile(xpath, Filters.element(), null, FoxyDocs.NAMESPACE_FM);
     return actionsXPath.evaluate(document);
   }
 

@@ -103,7 +103,7 @@ public class Loader {
       if (monitor.isCanceled())
         throw new InterruptedException("The long running operation was cancelled");
       try {
-        Constants.WATCHDOG = new WatchDog(target.getFile(), monitorList, new WatchDogEventHandler() {
+        FoxyDocs.WATCHDOG = new WatchDog(target.getFile(), monitorList, new WatchDogEventHandler() {
 
           @Override
           public void modified(AbstractFSItem entry) {
@@ -132,7 +132,7 @@ public class Loader {
 
           }
         });
-        Constants.WATCHDOG.start();
+        FoxyDocs.WATCHDOG.start();
       } catch (IOException e) {
         e.printStackTrace();
       }

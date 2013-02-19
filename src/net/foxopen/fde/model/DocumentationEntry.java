@@ -1,7 +1,7 @@
 package net.foxopen.fde.model;
 
 import java.util.List;
-import static net.foxopen.utils.Constants.*;
+import static net.foxopen.utils.FoxyDocs.*;
 
 import net.foxopen.fde.model.abstractObject.AbstractModelObject;
 
