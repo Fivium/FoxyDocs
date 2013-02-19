@@ -14,13 +14,17 @@ import org.eclipse.swt.widgets.Display;
 
 public abstract class AbstractFSItem extends AbstractModelObject {
   protected Path internalPath;
-    
+
+  abstract public HashMap<String, AbstractFSItem> readContent() throws Exception;
+
+  abstract public HashMap<String, FoxModule> getFoxModules();
+
   public AbstractFSItem(String path, AbstractFSItem parent) throws IOException {
     this(parent);
     internalPath = Paths.get(path);
     checkFile();
   }
-  
+
   public AbstractFSItem(Path path, AbstractFSItem parent) throws IOException {
     this(parent);
     internalPath = path;
@@ -101,9 +105,5 @@ public abstract class AbstractFSItem extends AbstractModelObject {
   public void sendSignal(WatchEvent<?> event) {
     reload();
   }
-  
-  abstract public HashMap<String, AbstractFSItem> readContent() throws Exception;
-
-  abstract public HashMap<String, FoxModule> getFoxModules();
 
 }

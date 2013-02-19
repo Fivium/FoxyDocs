@@ -13,13 +13,16 @@ public class DocumentationEntry extends AbstractModelObject {
   private String oldDocumentation = "";
   private String name;
   private int lineNumber = -1;
+  private final Element node;
 
   public DocumentationEntry(Element node, AbstractModelObject parent) {
     if (node == null)
       throw new IllegalArgumentException("The node cannot be null");
-    
+
+    this.node = node;
+
     // Extract the line number. Must use SAX and a located element
-    if(node instanceof Located){
+    if (node instanceof Located) {
       Located locatedNode = (Located) node;
       lineNumber = locatedNode.getLine();
     }
@@ -39,8 +42,8 @@ public class DocumentationEntry extends AbstractModelObject {
       setName(name);
     }
   }
-  
-  public int getLineNumber(){
+
+  public int getLineNumber() {
     return lineNumber;
   }
 
@@ -66,6 +69,27 @@ public class DocumentationEntry extends AbstractModelObject {
     firePropertyChange("docContent", this.documentation, this.documentation = content);
     firePropertyChange("dirty", oldDocumentation, isDirty());
     firePropertyChange("status", oldStatus, getStatus());
+  }
+
+  public void save() {
+    // Update or create the documentation node
+    Element documentation = node.getChild("documentation", NAMESPACE_FM);
+    if (documentation == null) {
+      documentation = getDocumentationStructure();
+      node.addContent(documentation);
+    }
+    documentation.getChild("description", NAMESPACE_FM).addContent(getDocumentation());
+
+    // New become old
+    oldDocumentation = getDocumentation();
+    setDocumentation(getDocumentation());
+  }
+
+  public Element getDocumentationStructure() {
+    Element description = new Element("description", NAMESPACE_FM);
+    Element documentation = new Element("documentation", NAMESPACE_FM);
+    documentation.addContent(description);
+    return documentation;
   }
 
   public void setName(String name) {

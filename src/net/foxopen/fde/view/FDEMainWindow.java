@@ -64,6 +64,7 @@ public class FDEMainWindow extends ApplicationWindow {
   private Action action_previousentry;
   private Action action_nextfile;
   private Action action_previousfile;
+  private Action action_save;
 
   static {
     try {
@@ -150,7 +151,7 @@ public class FDEMainWindow extends ApplicationWindow {
       action_exit.setAccelerator(SWT.CTRL | 'Q');
     }
     {
-      action_open = new Action("&Open") {
+      action_open = new Action("&Open...") {
         public void run() {
           // User has selected to save a file
           DirectoryDialog dlg = new DirectoryDialog(getShell(), SWT.OPEN);
@@ -176,7 +177,7 @@ public class FDEMainWindow extends ApplicationWindow {
       action_open.setImageDescriptor(ResourceManager.getImageDescriptor(FDEMainWindow.class, "/img/actions/folder_new.png"));
     }
     {
-      action_close = new Action("Close Tab") {
+      action_close = new Action("&Close Tab") {
         public void run() {
           if (tabFolder.getSelection() != null) {
             tabFolder.getSelection().dispose();
@@ -187,7 +188,7 @@ public class FDEMainWindow extends ApplicationWindow {
       action_close.setAccelerator(SWT.CTRL | 'W');
     }
     {
-      action_about = new Action("About...") {
+      action_about = new Action("&About...") {
         public void run() {
           MessageDialog.openInformation(getShell(), "About", "A Fox Documentation Editor\n\npierredominique.putallaz@fivium.co.uk\n\nhttps://github.com/Akkenar/FoxyDocs");
         }
@@ -228,6 +229,13 @@ public class FDEMainWindow extends ApplicationWindow {
       action_previousfile.setImageDescriptor(ResourceManager.getImageDescriptor(FDEMainWindow.class, "/img/actions/start.png"));
       action_previousfile.setAccelerator(SWT.ALT | 'A');
     }
+    {
+      action_save = new Action("&Save") {
+
+      };
+      action_save.setImageDescriptor(ResourceManager.getImageDescriptor(FDEMainWindow.class, "/img/actions/save_all.png"));
+      action_save.setAccelerator(SWT.CTRL | 'S');
+    }
   }
 
   /**
@@ -242,6 +250,7 @@ public class FDEMainWindow extends ApplicationWindow {
       MenuManager menu_file = new MenuManager("&File");
       menuManager.add(menu_file);
       menu_file.add(action_open);
+      menu_file.add(action_save);
       menu_file.add(new Separator());
       menu_file.add(action_exit);
     }
@@ -274,8 +283,8 @@ public class FDEMainWindow extends ApplicationWindow {
   @Override
   protected ToolBarManager createToolBarManager(int style) {
     ToolBarManager toolBarManager = new ToolBarManager(SWT.WRAP);
-    toolBarManager.add(action_exit);
     toolBarManager.add(action_open);
+    toolBarManager.add(action_save);
     return toolBarManager;
   }
 
@@ -335,7 +344,8 @@ public class FDEMainWindow extends ApplicationWindow {
     newShell.addShellListener(new ShellAdapter() {
       @Override
       public void shellClosed(ShellEvent e) {
-        FoxyDocs.WATCHDOG.interrupt();
+        if (FoxyDocs.WATCHDOG != null)
+          FoxyDocs.WATCHDOG.interrupt();
         logStdout("Closed");
       }
     });

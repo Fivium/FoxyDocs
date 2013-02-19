@@ -37,7 +37,7 @@ public class DocumentationEntriesSet extends AbstractModelObject {
 
   @Override
   public String getName() {
-    return getType()+" "+(isDirty()?"*":"");
+    return getType() + " " + (isDirty() ? "*" : "");
   }
 
   @Override
@@ -49,7 +49,7 @@ public class DocumentationEntriesSet extends AbstractModelObject {
   public String getDocumentation() {
     String buffer = "";
     for (AbstractModelObject doc : getChildren()) {
-      buffer += "- "+doc.getName() + "\n";
+      buffer += "- " + doc.getName() + "\n";
       buffer += doc.getDocumentation() + "\n\n";
     }
     return buffer;
@@ -58,5 +58,12 @@ public class DocumentationEntriesSet extends AbstractModelObject {
   @Override
   public String getCode() {
     return getParent().getCode();
+  }
+
+  @Override
+  public void save() {
+    for (AbstractModelObject child : getChildren()) {
+      child.save();
+    }
   }
 }

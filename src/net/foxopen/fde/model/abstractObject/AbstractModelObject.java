@@ -27,6 +27,8 @@ public abstract class AbstractModelObject extends Observable {
   abstract public List<AbstractModelObject> getChildren();
 
   abstract public String getName();
+  
+  abstract public void save();
 
   public void addChild(AbstractModelObject child) {
     getChildren().add(child);
