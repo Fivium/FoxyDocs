@@ -228,6 +228,9 @@ public class Tab extends CTabItem {
 
     // Open code
     tab.text_code.setText(content.getCode());
+    
+    // Open the first entry
+    tab.treeViewer.setSelection(new StructuredSelection(tab.docEntries.get(0)), true);
   }
 
   /**
