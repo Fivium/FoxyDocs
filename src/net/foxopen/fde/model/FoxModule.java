@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
@@ -52,7 +53,7 @@ public class FoxModule extends AbstractFSItem {
    * @throws JDOMException
    * @throws NotAFoxModuleException
    */
-  public synchronized HashMap<String, AbstractFSItem> readContent() throws ParserConfigurationException, SAXException, IOException, JDOMException, NotAFoxModuleException {
+  public synchronized Collection<AbstractFSItem> readContent() throws ParserConfigurationException, SAXException, IOException, JDOMException, NotAFoxModuleException {
     Logger.logStdout("Loading module " + getPath());
 
     jdomDoc = DOM_BUILDER.build(internalPath.toFile());
@@ -115,6 +116,13 @@ public class FoxModule extends AbstractFSItem {
   @Override
   public String toString() {
     return FoxyDocs.XML_SERIALISER.outputString(jdomDoc);
+  }
+  
+  @Override
+  public void save(){
+    super.save();
+    reload();
+   // System.out.println(this);
   }
 
   public static List<Element> runXpath(String xpath, org.jdom2.Document document) {

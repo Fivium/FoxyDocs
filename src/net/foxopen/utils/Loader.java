@@ -1,12 +1,11 @@
 package net.foxopen.utils;
 
 import static net.foxopen.utils.Logger.logStderr;
-import static net.foxopen.utils.Logger.logStdout;
-
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import net.foxopen.fde.model.FoxModule;
 import net.foxopen.fde.model.FoxModule.NotAFoxModuleException;
@@ -27,7 +26,6 @@ public class Loader {
 
   private static class ThreadPopulateStructure implements IRunnableWithProgress {
     private final AbstractFSItem target;
-    private static Integer nbThreads = 0;
     private static HashMap<String, Boolean> doneList = new HashMap<String, Boolean>();
 
     public ThreadPopulateStructure(AbstractFSItem target) {
@@ -54,24 +52,18 @@ public class Loader {
     @Override
     public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
       monitor.beginTask("Opening " + target.getPath(), IProgressMonitor.UNKNOWN);
-      logStdout(nbThreads + " Loader thread started");
       final HashMap<String, AbstractFSItem> monitorList = new HashMap<String, AbstractFSItem>();
 
-      synchronized (nbThreads) {
-        nbThreads++;
-      }
-      logStdout(nbThreads + " Loader thread running");
       try {
         // Walk into the root directory
-        HashMap<String, AbstractFSItem> dirs = target.readContent();
-        monitorList.putAll(dirs);
-        for (AbstractFSItem dir : dirs.values()) {
-          if (monitor.isCanceled())
-            break;
-          monitorList.putAll(dir.readContent());
+        ConcurrentLinkedQueue<AbstractFSItem> directories = new ConcurrentLinkedQueue<AbstractFSItem>();
+        directories.addAll(target.readContent());
+        while (!directories.isEmpty()) {
+          directories.addAll(directories.poll().readContent());
         }
         // Get all modules
         HashMap<String, FoxModule> modules = target.getFoxModules();
+
         // Parse modules
         monitor.beginTask("Parsing FoxModules", modules.size());
         monitor.subTask("Parsing " + modules.size() + " FoxModules");
@@ -94,10 +86,6 @@ public class Loader {
         logStderr(e.getMessage());
       }
 
-      logStdout(nbThreads + " Loader thread done");
-      synchronized (nbThreads) {
-        nbThreads--;
-      }
       monitor.done();
       refreshUI();
       if (monitor.isCanceled())

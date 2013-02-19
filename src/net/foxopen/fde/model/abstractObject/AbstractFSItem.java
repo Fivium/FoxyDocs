@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.WatchEvent;
+import java.util.Collection;
 import java.util.HashMap;
 
 import net.foxopen.fde.model.FoxModule;
@@ -15,7 +16,7 @@ import org.eclipse.swt.widgets.Display;
 public abstract class AbstractFSItem extends AbstractModelObject {
   protected Path internalPath;
 
-  abstract public HashMap<String, AbstractFSItem> readContent() throws Exception;
+  abstract public Collection<AbstractFSItem> readContent() throws Exception;
 
   abstract public HashMap<String, FoxModule> getFoxModules();
 
@@ -46,15 +47,10 @@ public abstract class AbstractFSItem extends AbstractModelObject {
     return internalPath.getFileName() + " " + (isDirty() ? "*" : "");
   }
 
-  public void save() {
-    reload();
-    checkFile();
-    // TODO
-  }
-
   public void reload() {
     try {
       internalPath = Paths.get(internalPath.toFile().getCanonicalPath());
+      checkFile();
       firePropertyChange("status", null, getStatus());
     } catch (IOException e) {
       e.printStackTrace();

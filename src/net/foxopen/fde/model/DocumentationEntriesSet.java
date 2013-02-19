@@ -59,11 +59,4 @@ public class DocumentationEntriesSet extends AbstractModelObject {
   public String getCode() {
     return getParent().getCode();
   }
-
-  @Override
-  public void save() {
-    for (AbstractModelObject child : getChildren()) {
-      child.save();
-    }
-  }
 }

@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
@@ -35,14 +36,14 @@ public class Directory extends AbstractFSItem {
     refreshUI();
   }
 
-  public void walk(Directory entry, HashMap<String, AbstractFSItem> directories) throws IOException {
+  public void walk(Directory entry, Collection<AbstractFSItem> directories) throws IOException {
     for (Path p : Files.newDirectoryStream(entry.internalPath)) {
       BasicFileAttributes attr = Files.getFileAttributeView(p, BasicFileAttributeView.class).readAttributes();
       if (attr.isDirectory()) {
         Directory d = new Directory(p, this);
         entry.addChild(d);
-        directories.put(p.toFile().getAbsolutePath(), d);
-        entry.walk(d, directories);
+        directories.add(d);
+        //entry.walk(d, directories);
       } else if (attr.isRegularFile()) {
         try {
           FoxModule fox = new FoxModule(p, this);
@@ -55,8 +56,8 @@ public class Directory extends AbstractFSItem {
   }
 
   @Override
-  public synchronized HashMap<String, AbstractFSItem> readContent() throws IOException {
-    HashMap<String, AbstractFSItem> directories = new HashMap<String, AbstractFSItem>();
+  public synchronized Collection<AbstractFSItem> readContent() throws IOException {
+    Collection<AbstractFSItem> directories = new ArrayList<AbstractFSItem>();
     checkFile();
     Logger.logStdout("Opening " + getPath());
 
@@ -66,6 +67,8 @@ public class Directory extends AbstractFSItem {
 
     // Recursive Walk through directories
     walk(this, directories);
+    
+    firePropertyChange("children", null, getChildren());
 
     return directories;
   }

@@ -27,12 +27,6 @@ public abstract class AbstractModelObject extends Observable {
   abstract public List<AbstractModelObject> getChildren();
 
   abstract public String getName();
-  
-  abstract public void save();
-
-  public void addChild(AbstractModelObject child) {
-    getChildren().add(child);
-  }
 
   protected AbstractModelObject() {
 
@@ -77,8 +71,20 @@ public abstract class AbstractModelObject extends Observable {
     propertyChangeSupport.removePropertyChangeListener(propertyName, listener);
   }
 
-  synchronized public void firePropertyChange(String propertyName, Object oldValue, Object newValue) {
+  public synchronized void firePropertyChange(String propertyName, Object oldValue, Object newValue) {
     propertyChangeSupport.firePropertyChange(propertyName, oldValue, newValue);
+  }
+
+  public void save() {
+    if(!isDirty())
+      return;
+    for (AbstractModelObject child : getChildren()) {
+      child.save();
+    }
+  }
+
+  public void addChild(AbstractModelObject child) {
+    getChildren().add(child);
   }
 
   public int getStatus() {
@@ -131,7 +137,7 @@ public abstract class AbstractModelObject extends Observable {
     }
   }
 
-  public boolean isDirty() {
+  public synchronized boolean isDirty() {
     for (Object child : getChildren()) {
       if (child instanceof AbstractModelObject) {
         AbstractModelObject c = (AbstractModelObject) child;

@@ -231,7 +231,9 @@ public class FDEMainWindow extends ApplicationWindow {
     }
     {
       action_save = new Action("&Save") {
-
+        public void run() {
+          root.save();
+        }
       };
       action_save.setImageDescriptor(ResourceManager.getImageDescriptor(FDEMainWindow.class, "/img/actions/save_all.png"));
       action_save.setAccelerator(SWT.CTRL | 'S');
@@ -259,7 +261,7 @@ public class FDEMainWindow extends ApplicationWindow {
       menuManager.add(menu_edit);
     }
 
-    MenuManager menu_entries = new MenuManager("Browse");
+    MenuManager menu_entries = new MenuManager("&Browse");
     menuManager.add(menu_entries);
     menu_entries.add(action_previousentry);
     menu_entries.add(action_nextentry);
@@ -269,7 +271,7 @@ public class FDEMainWindow extends ApplicationWindow {
     menu_entries.add(new Separator());
     menu_entries.add(action_close);
 
-    MenuManager menu_help = new MenuManager("Help");
+    MenuManager menu_help = new MenuManager("&Help");
     menuManager.add(menu_help);
     menu_help.add(action_about);
     return menuManager;

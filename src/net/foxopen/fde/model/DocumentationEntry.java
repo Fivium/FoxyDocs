@@ -71,18 +71,22 @@ public class DocumentationEntry extends AbstractModelObject {
     firePropertyChange("status", oldStatus, getStatus());
   }
 
+  @Override
   public void save() {
+    if(!isDirty())
+      return;
     // Update or create the documentation node
-    Element documentation = node.getChild("documentation", NAMESPACE_FM);
-    if (documentation == null) {
-      documentation = getDocumentationStructure();
-      node.addContent(documentation);
+    Element documentationNode = node.getChild("documentation", NAMESPACE_FM);
+    if (documentationNode == null) {
+      documentationNode = getDocumentationStructure();
+      node.addContent(documentationNode);
     }
-    documentation.getChild("description", NAMESPACE_FM).addContent(getDocumentation());
-
+    documentationNode.getChild("description", NAMESPACE_FM).addContent(this.documentation);
+    
     // New become old
     oldDocumentation = getDocumentation();
-    setDocumentation(getDocumentation());
+    firePropertyChange("dirty", oldDocumentation, isDirty());
+    firePropertyChange("status", -1, getStatus());
   }
 
   public Element getDocumentationStructure() {
