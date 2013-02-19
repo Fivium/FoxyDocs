@@ -34,7 +34,7 @@ public class FoxModule extends AbstractFSItem {
   public FoxModule(Path path, AbstractFSItem parent) throws IOException, NotAFoxModuleException {
     super(path, parent);
     checkFile();
-    if (!f_file.toFile().isFile())
+    if (!internalPath.toFile().isFile())
       throw new IllegalArgumentException("A Fox Module must be a file");
     if (!getPath().toUpperCase().endsWith(".XML"))
       throw new NotAFoxModuleException("Invalid XML file " + getPath());
@@ -43,7 +43,7 @@ public class FoxModule extends AbstractFSItem {
   /**
    * Parse the XML content
    * 
-   * @param f_file
+   * @param internalPath
    *          the input file
    * @return the data structure with the code and the documentation entry
    * @throws ParserConfigurationException
@@ -56,7 +56,7 @@ public class FoxModule extends AbstractFSItem {
       NotAFoxModuleException {
     Logger.logStdout("Loading module " + getPath());
 
-    jdomDoc = DOM_BUILDER.build(f_file.toFile());
+    jdomDoc = DOM_BUILDER.build(internalPath.toFile());
 
     // Entries
     addEntries(documentationEntriesSet, jdomDoc, "Header", "//fm:header");
@@ -102,7 +102,7 @@ public class FoxModule extends AbstractFSItem {
   @Override
   public String getCode() {
     try {
-      FileInputStream inputStream = new FileInputStream(f_file.toFile());
+      FileInputStream inputStream = new FileInputStream(internalPath.toFile());
       String buffer = IOUtils.toString(inputStream);
       inputStream.close();
       return buffer;

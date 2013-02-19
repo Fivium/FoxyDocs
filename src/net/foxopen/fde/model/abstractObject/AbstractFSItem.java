@@ -13,17 +13,17 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 
 public abstract class AbstractFSItem extends AbstractModelObject {
-  protected Path f_file;
+  protected Path internalPath;
     
   public AbstractFSItem(String path, AbstractFSItem parent) throws IOException {
     this(parent);
-    f_file = Paths.get(path);
+    internalPath = Paths.get(path);
     checkFile();
   }
   
   public AbstractFSItem(Path path, AbstractFSItem parent) throws IOException {
     this(parent);
-    f_file = path;
+    internalPath = path;
     checkFile();
   }
 
@@ -32,14 +32,14 @@ public abstract class AbstractFSItem extends AbstractModelObject {
   }
 
   public void open(String path) {
-    f_file = Paths.get(path);
+    internalPath = Paths.get(path);
     checkFile();
     clear();
   }
 
   public String getName() {
     checkFile();
-    return f_file.getFileName() + " " + (isDirty() ? "*" : "");
+    return internalPath.getFileName() + " " + (isDirty() ? "*" : "");
   }
 
   public void save() {
@@ -49,7 +49,7 @@ public abstract class AbstractFSItem extends AbstractModelObject {
 
   public void reload() {
     try {
-      f_file = Paths.get(f_file.toFile().getCanonicalPath());
+      internalPath = Paths.get(internalPath.toFile().getCanonicalPath());
       firePropertyChange("status", null, getStatus());
     } catch (IOException e) {
       e.printStackTrace();
@@ -64,7 +64,7 @@ public abstract class AbstractFSItem extends AbstractModelObject {
    */
   public boolean isReadOnly() {
     checkFile();
-    return !f_file.toFile().canWrite();
+    return !internalPath.toFile().canWrite();
   }
 
   public Image getImage() {
@@ -76,18 +76,18 @@ public abstract class AbstractFSItem extends AbstractModelObject {
 
   public String getPath() {
     checkFile();
-    return f_file.toFile().getAbsolutePath().toString();
+    return internalPath.toFile().getAbsolutePath().toString();
   }
 
   public Path getFile() {
-    return f_file;
+    return internalPath;
   }
 
   public void checkFile() {
-    if (f_file == null)
+    if (internalPath == null)
       throw new IllegalArgumentException("The file system item must be loaded");
     // Can we read the file ?
-    if (!f_file.toFile().canRead()) {
+    if (!internalPath.toFile().canRead()) {
       throw new IllegalArgumentException("Cannot read the file");
     }
   }

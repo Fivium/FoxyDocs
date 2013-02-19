@@ -36,7 +36,7 @@ public class Directory extends AbstractFSItem {
   }
 
   public void walk(Directory entry, HashMap<String, AbstractFSItem> directories) throws IOException {
-    for (Path p : Files.newDirectoryStream(entry.f_file)) {
+    for (Path p : Files.newDirectoryStream(entry.internalPath)) {
       BasicFileAttributes attr = Files.getFileAttributeView(p, BasicFileAttributeView.class).readAttributes();
       if (attr.isDirectory()) {
         Directory d = new Directory(p, this);
