@@ -24,6 +24,14 @@ public abstract class AbstractModelObject extends Observable {
   protected AbstractModelObject parent;
   protected Image image;
 
+  abstract public List<AbstractModelObject> getChildren();
+
+  abstract public String getName();
+
+  public void addChild(AbstractModelObject child) {
+    getChildren().add(child);
+  }
+
   protected AbstractModelObject() {
 
     // Dirty property : does the file need saving ?
@@ -50,10 +58,6 @@ public abstract class AbstractModelObject extends Observable {
       }
     });
   }
-
-  abstract public List<?> getChildren();
-
-  abstract public String getName();
 
   public void addPropertyChangeListener(PropertyChangeListener listener) {
     propertyChangeSupport.addPropertyChangeListener(listener);
@@ -135,16 +139,16 @@ public abstract class AbstractModelObject extends Observable {
     }
     return false;
   }
-  
+
   public void refreshUI() {
     Display.getDefault().asyncExec(new Runnable() {
       public void run() {
-        firePropertyChange("name", null, getName());
         firePropertyChange("status", null, getStatus());
-        getParent().firePropertyChange("children", null, getParent().getChildren());
+        if (getParent() != null) {
+          getParent().firePropertyChange("children", null, getParent().getChildren());
+        }
         firePropertyChange("children", null, getChildren());
       }
     });
   }
-
 }

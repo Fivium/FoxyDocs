@@ -5,6 +5,7 @@ import static net.foxopen.utils.Constants.DOM_BUILDER;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,13 +31,13 @@ public class FoxModule extends AbstractFSItem {
   private final List<AbstractModelObject> documentationEntriesSet = new ArrayList<AbstractModelObject>();
   private Document jdomDoc;
 
-  public FoxModule(String path, AbstractFSItem parent) throws IOException {
+  public FoxModule(Path path, AbstractFSItem parent) throws IOException, NotAFoxModuleException {
     super(path, parent);
     checkFile();
     if (!f_file.toFile().isFile())
       throw new IllegalArgumentException("A Fox Module must be a file");
     if (!getPath().toUpperCase().endsWith(".XML"))
-      throw new IllegalArgumentException("Invalid XML file " + getPath());
+      throw new NotAFoxModuleException("Invalid XML file " + getPath());
   }
 
   /**

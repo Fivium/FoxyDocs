@@ -124,7 +124,7 @@ public class SyntaxHighlighter {
         event.styles = getStyle(target);
       }
     });
-   
+
   }
 
 }

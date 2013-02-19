@@ -120,7 +120,7 @@ public class FDEMainWindow extends ApplicationWindow {
               }
             }
           });
-          //Tree tree = treeViewerFileList.getTree();
+          // Tree tree = treeViewerFileList.getTree();
         }
       }
       {
@@ -351,6 +351,7 @@ public class FDEMainWindow extends ApplicationWindow {
   protected Point getInitialSize() {
     return new Point(205, 215);
   }
+
   protected DataBindingContext initDataBindings() {
     DataBindingContext bindingContext = new DataBindingContext();
     //

@@ -5,6 +5,7 @@ import static net.foxopen.utils.Logger.logStdout;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Path;
 import java.util.HashMap;
 
 import net.foxopen.fde.model.FoxModule;
@@ -54,7 +55,7 @@ public class Loader {
     public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
       monitor.beginTask("Opening " + target.getPath(), IProgressMonitor.UNKNOWN);
       logStdout(nbThreads + " Loader thread started");
-      HashMap<String, AbstractFSItem> monitorList = new HashMap<String, AbstractFSItem>();
+      final HashMap<String, AbstractFSItem> monitorList = new HashMap<String, AbstractFSItem>();
 
       synchronized (nbThreads) {
         nbThreads++;
@@ -114,12 +115,21 @@ public class Loader {
           public void deleted(AbstractFSItem entry) {
             entry.getParent().getChildren().remove(entry);
             entry.refreshUI();
+            monitorList.remove(entry);
           }
 
           @Override
-          public void created(AbstractModelObject parent, AbstractFSItem entry) {
-            entry.refreshUI();
-            parent.refreshUI();
+          public void created(AbstractFSItem parent, Path entry) {
+            try {
+              FoxModule fox = new FoxModule(entry, parent);
+              parent.getChildren().add(fox);
+              parent.refreshUI();
+            } catch (IOException e) {
+              e.printStackTrace();
+            } catch (NotAFoxModuleException e) {
+              e.printStackTrace();
+            }
+
           }
         });
         Constants.WATCHDOG.start();

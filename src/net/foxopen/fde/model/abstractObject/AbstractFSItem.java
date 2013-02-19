@@ -20,6 +20,12 @@ public abstract class AbstractFSItem extends AbstractModelObject {
     f_file = Paths.get(path);
     checkFile();
   }
+  
+  public AbstractFSItem(Path path, AbstractFSItem parent) throws IOException {
+    this(parent);
+    f_file = path;
+    checkFile();
+  }
 
   public AbstractFSItem(AbstractFSItem parent) throws IOException {
     this.parent = parent;

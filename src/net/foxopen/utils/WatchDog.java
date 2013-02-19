@@ -42,7 +42,6 @@ import java.util.*;
 
 import org.eclipse.swt.widgets.Display;
 import net.foxopen.fde.model.abstractObject.AbstractFSItem;
-import net.foxopen.fde.model.abstractObject.AbstractModelObject;
 
 public class WatchDog extends Thread {
 
@@ -153,14 +152,14 @@ public class WatchDog extends Thread {
 
         // Send signal
         AbstractFSItem entry = watchedModules.get(child.toFile().getAbsolutePath());
-        AbstractModelObject parent = (AbstractModelObject) watchedModules.get(dir.toFile().getAbsolutePath());
+        AbstractFSItem parent = watchedModules.get(dir.toFile().getAbsolutePath());
         if (entry == null) {
           Logger.logStderr(child + " not found");
         } else {
           if (kind == ENTRY_MODIFY) {
             eventHandler.modified(entry);
           } else if (kind == ENTRY_CREATE) {
-            eventHandler.created(parent, entry);
+            eventHandler.created(parent, child);
           } else if (kind == ENTRY_DELETE) {
             eventHandler.deleted(entry);
           } else {
