@@ -121,39 +121,37 @@ public class FoxModule extends AbstractFSItem {
   }
 
   @Override
-  public void save() {
-    if(!isDirty() && isReadOnly())
+  public void save() throws Exception {
+    if (!isDirty())
       return;
-    try {
-      // Prepare the save
-      super.save();
-      
-      // Write into the file
-      FileOutputStream fileOutputStream = new FileOutputStream(internalPath.toFile(), false);
-      IOUtils.write(toString(),fileOutputStream,"UTF-8");
-      
-      // Update the content
-      reload();
-      jdomDoc = DOM_BUILDER.build(internalPath.toFile());
-      Display.getDefault().asyncExec(new Runnable() {
-        public void run() {
-          firePropertyChange("code", null, getCode());
-        }
-      });
-    } catch (IOException | JDOMException e) {
-      e.printStackTrace();
+    if (isReadOnly()) {
+      throw new IOException("You cannot save this file : Access is denied");
     }
+    // Prepare the save
+    super.save();
+
+    // Write into the file
+    FileOutputStream fileOutputStream = new FileOutputStream(internalPath.toFile(), false);
+    IOUtils.write(toString(), fileOutputStream, "UTF-8");
+
+    // Update the content
+    reload();
+    jdomDoc = DOM_BUILDER.build(internalPath.toFile());
+    Display.getDefault().asyncExec(new Runnable() {
+      public void run() {
+        firePropertyChange("code", null, getCode());
+      }
+    });
   }
 
- 
-  public ArrayList<AbstractModelObject> getAllEntries(){
+  public ArrayList<AbstractModelObject> getAllEntries() {
     ArrayList<AbstractModelObject> buffer = new ArrayList<AbstractModelObject>();
-    for(AbstractModelObject child : getChildren()){
+    for (AbstractModelObject child : getChildren()) {
       buffer.addAll(child.getChildren());
     }
     return buffer;
   }
-  
+
   public static List<Element> runXpath(String xpath, org.jdom2.Document document) {
     XPathExpression<Element> actionsXPath = XPathFactory.instance().compile(xpath, Filters.element(), null, FoxyDocs.NAMESPACE_FM);
     return actionsXPath.evaluate(document);

@@ -236,7 +236,11 @@ public class FDEMainWindow extends ApplicationWindow {
     {
       action_save = new Action("&Save") {
         public void run() {
-          root.save();
+          try {
+            root.save();
+          } catch (Exception e) {
+            MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", e.getMessage());
+          }
         }
       };
       action_save.setImageDescriptor(ResourceManager.getImageDescriptor(FDEMainWindow.class, "/img/actions/save_all.png"));

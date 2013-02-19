@@ -14,6 +14,7 @@ import net.foxopen.fde.model.abstractObject.AbstractModelObject;
 import net.foxopen.fde.view.FDEMainWindow;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Display;
 
@@ -81,9 +82,8 @@ public class Loader {
         monitorList.putAll(modules);
 
       } catch (Exception e) {
+        MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", e.getMessage());
         e.printStackTrace();
-        logStderr("Failed to load " + target.getPath());
-        logStderr(e.getMessage());
       }
 
       monitor.done();

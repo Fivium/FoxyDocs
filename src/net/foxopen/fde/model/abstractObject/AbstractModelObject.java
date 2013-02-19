@@ -75,7 +75,7 @@ public abstract class AbstractModelObject extends Observable {
     propertyChangeSupport.firePropertyChange(propertyName, oldValue, newValue);
   }
 
-  public void save() {
+  public void save() throws Exception {
     if (!isDirty())
       return;
     for (AbstractModelObject child : getChildren()) {
