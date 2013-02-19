@@ -210,7 +210,11 @@ public class FDEMainWindow extends ApplicationWindow {
     }
     {
       action_previousentry = new Action("Previous Entry") {
-
+        public void run() {
+          if (tabFolder.getSelection() != null) {
+            tabFolder.getSelection().notifyListeners(FoxyDocs.EVENT_UP, new Event());
+          }
+        }
       };
       action_previousentry.setImageDescriptor(ResourceManager.getImageDescriptor(FDEMainWindow.class, "/img/actions/up.png"));
       action_previousentry.setAccelerator(SWT.ALT | 'W');

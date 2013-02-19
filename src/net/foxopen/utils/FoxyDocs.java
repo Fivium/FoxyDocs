@@ -51,6 +51,9 @@ public class FoxyDocs {
   public static final XMLOutputter XML_SERIALISER;
 
   public static final int EVENT_DOWN = 5402;
+  public static final int EVENT_UP = 5403;
+  public static final int EVENT_NEXT = 5404;
+  public static final int EVENT_PREVIOUS = 5405;
 
   static {
 

@@ -145,6 +145,15 @@ public class FoxModule extends AbstractFSItem {
     }
   }
 
+ 
+  public ArrayList<AbstractModelObject> getAllEntries(){
+    ArrayList<AbstractModelObject> buffer = new ArrayList<AbstractModelObject>();
+    for(AbstractModelObject child : getChildren()){
+      buffer.addAll(child.getChildren());
+    }
+    return buffer;
+  }
+  
   public static List<Element> runXpath(String xpath, org.jdom2.Document document) {
     XPathExpression<Element> actionsXPath = XPathFactory.instance().compile(xpath, Filters.element(), null, FoxyDocs.NAMESPACE_FM);
     return actionsXPath.evaluate(document);

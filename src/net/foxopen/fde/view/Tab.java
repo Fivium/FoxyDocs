@@ -5,6 +5,7 @@ import static net.foxopen.utils.FoxyDocs.GREY;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
 
 import net.foxopen.fde.model.DocumentationEntriesSet;
 import net.foxopen.fde.model.DocumentationEntry;
@@ -46,10 +47,12 @@ public class Tab extends CTabItem {
   private final StyledText text_documentation;
   private final StyledText text_code;
   private final FoxModule content;
+  private final ArrayList<AbstractModelObject> docEntries;
 
   private Tab(CTabFolder parent, final FoxModule content) {
     super(parent, SWT.CLOSE);
     this.content = content;
+    this.docEntries = content.getAllEntries();
     {
       setText(content.getName());
       content.addPropertyChangeListener("name", new PropertyChangeListener() {
@@ -106,7 +109,7 @@ public class Tab extends CTabItem {
             grpDocumentation.setText("Documentation");
             grpDocumentation.setLayout(new FillLayout(SWT.HORIZONTAL));
 
-            text_documentation = new StyledText(grpDocumentation, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
+            text_documentation = new StyledText(grpDocumentation, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.READ_ONLY);
             text_documentation.setFont(FONT_DEFAULT);
 
             Group grpCode = new Group(sashFormCodeDoc, SWT.NONE);
@@ -123,11 +126,27 @@ public class Tab extends CTabItem {
             this.addListener(FoxyDocs.EVENT_DOWN, new Listener() {
               @Override
               public void handleEvent(Event event) {
-                if (treeViewer.getSelection().isEmpty()) {
-                  // Set the selection to the first item
-                  treeViewer.setSelection(new StructuredSelection(treeViewer.getVisibleExpandedElements()[0]), true);
+                IStructuredSelection thisSelection = (IStructuredSelection) treeViewer.getSelection();
+                Object selectedNode = thisSelection.getFirstElement();
+                if (treeViewer.getSelection() == null) {
+                  treeViewer.setSelection(new StructuredSelection(docEntries.get(0)), true);
                 } else {
-                  // TODO
+                  int index = Math.min(docEntries.size() - 1, docEntries.indexOf(selectedNode) + 1);
+                  treeViewer.setSelection(new StructuredSelection(docEntries.get(index)), true);
+                }
+              }
+            });
+
+            this.addListener(FoxyDocs.EVENT_UP, new Listener() {
+              @Override
+              public void handleEvent(Event event) {
+                IStructuredSelection thisSelection = (IStructuredSelection) treeViewer.getSelection();
+                Object selectedNode = thisSelection.getFirstElement();
+                if (treeViewer.getSelection() == null) {
+                  treeViewer.setSelection(new StructuredSelection(docEntries.get(0)), true);
+                } else {
+                  int index = Math.max(0, docEntries.indexOf(selectedNode) - 1);
+                  treeViewer.setSelection(new StructuredSelection(docEntries.get(index)), true);
                 }
               }
             });
