@@ -2,12 +2,10 @@ package net.foxopen.utils;
 
 import java.nio.file.Path;
 
-import net.foxopen.foxydocs.model.abstractObject.AbstractFSItem;
-
 public interface WatchDogEventHandler {
-  public void modified(AbstractFSItem item);
+  public void modified(Path entryPath);
 
-  public void deleted(AbstractFSItem entry);
+  public void deleted(Path entryPath);
 
-  public void created(AbstractFSItem parent, Path entry);
+  public void created(Path parentPath, Path entryPath);
 }

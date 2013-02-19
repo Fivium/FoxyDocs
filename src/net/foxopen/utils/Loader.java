@@ -90,36 +90,41 @@ public class Loader {
 
       monitor.done();
       refreshUI();
-      if (monitor.isCanceled())
+      if (monitor.isCanceled()) {
         throw new InterruptedException("The long running operation was cancelled");
+      }
+
       try {
-        WATCHDOG = new WatchDog(target.getFile(), monitorList, new WatchDogEventHandler() {
+        WATCHDOG = new WatchDog(target.getFile(), new WatchDogEventHandler() {
 
-          @Override
-          public void modified(AbstractFSItem entry) {
-            entry.getParent().firePropertyChange("children", null, entry.getParent().getChildren());
-            entry.refreshUI();
+          private AbstractFSItem resolv(Path path) {
+            return monitorList.get(path.toFile().getAbsolutePath());
           }
 
           @Override
-          public void deleted(AbstractFSItem entry) {
-            entry.getParent().getChildren().remove(entry);
-            entry.refreshUI();
-            monitorList.remove(entry);
+          public void modified(Path entryPath) {
+            resolv(entryPath).getParent().firePropertyChange("children", null, resolv(entryPath).getParent().getChildren());
+            resolv(entryPath).refreshUI();
           }
 
           @Override
-          public void created(AbstractFSItem parent, Path entry) {
+          public void deleted(Path entryPath) {
+            resolv(entryPath).getParent().getChildren().remove(resolv(entryPath));
+            resolv(entryPath).refreshUI();
+            monitorList.remove(resolv(entryPath));
+          }
+
+          @Override
+          public void created(Path parentPath, Path entryPath) {
             try {
-              FoxModule fox = new FoxModule(entry, parent);
-              parent.getChildren().add(fox);
-              parent.refreshUI();
+              FoxModule fox = new FoxModule(entryPath, resolv(parentPath));
+              resolv(parentPath).getChildren().add(fox);
+              resolv(parentPath).refreshUI();
             } catch (IOException e) {
               e.printStackTrace();
             } catch (NotAFoxModuleException e) {
               e.printStackTrace();
             }
-
           }
         });
         WATCHDOG.start();

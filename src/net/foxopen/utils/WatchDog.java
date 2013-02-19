@@ -42,8 +42,6 @@ import java.util.*;
 
 import org.eclipse.swt.widgets.Display;
 
-import net.foxopen.foxydocs.model.abstractObject.AbstractFSItem;
-
 public class WatchDog extends Thread {
 
   public static final int MODIFIED = 600123;
@@ -52,7 +50,6 @@ public class WatchDog extends Thread {
   private final Map<WatchKey, Path> keys;
   private final boolean recursive = true;
   private boolean trace = false;
-  private final HashMap<String, AbstractFSItem> watchedModules;
   private final WatchDogEventHandler eventHandler;
 
   @SuppressWarnings("unchecked")
@@ -96,10 +93,9 @@ public class WatchDog extends Thread {
   /**
    * Creates a WatchService and registers the given directory
    */
-  public WatchDog(Path dir, HashMap<String, AbstractFSItem> watchedModules, WatchDogEventHandler watchDogEventHandler) throws IOException {
+  public WatchDog(Path dir, WatchDogEventHandler watchDogEventHandler) throws IOException {
     this.watcher = FileSystems.getDefault().newWatchService();
     this.keys = new HashMap<WatchKey, Path>();
-    this.watchedModules = watchedModules;
     this.eventHandler = watchDogEventHandler;
 
     if (recursive) {
@@ -152,21 +148,15 @@ public class WatchDog extends Thread {
         System.out.format("[%s] %s: %s\n", dir, event.kind().name(), child);
 
         // Send signal
-        AbstractFSItem entry = watchedModules.get(child.toFile().getAbsolutePath());
-        AbstractFSItem parent = watchedModules.get(dir.toFile().getAbsolutePath());
-        if (entry == null) {
-          Logger.logStderr(child + " not found");
-        } else {
-          if (kind == ENTRY_MODIFY) {
-            eventHandler.modified(entry);
-          } else if (kind == ENTRY_CREATE) {
-            eventHandler.created(parent, child);
-          } else if (kind == ENTRY_DELETE) {
-            eventHandler.deleted(entry);
-          } else {
-            Logger.logStderr(kind + " not found");
-          }
 
+        if (kind == ENTRY_MODIFY) {
+          eventHandler.modified(child);
+        } else if (kind == ENTRY_CREATE) {
+          eventHandler.created(dir, child);
+        } else if (kind == ENTRY_DELETE) {
+          eventHandler.deleted(child);
+        } else {
+          Logger.logStderr(kind + " not found");
         }
 
         // if directory is created, and watching recursively, then
