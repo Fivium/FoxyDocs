@@ -159,7 +159,7 @@ public class FDEMainWindow extends ApplicationWindow {
           if (path != null) {
             try {
               root.open(path);
-              new ProgressMonitorDialog(getShell()).run(true, true, Loader.LoadContent(root));
+              new ProgressMonitorDialog(getShell()).run(false, true, Loader.LoadContent(root));
             } catch (InvocationTargetException e) {
               e.printStackTrace();
               MessageDialog.openError(getShell(), "Error", e.getMessage());
@@ -321,11 +321,15 @@ public class FDEMainWindow extends ApplicationWindow {
           Display.getCurrent().dispose();
         } catch (Exception e) {
           e.printStackTrace();
+        } finally {
+          // Kill the watch dog thread
+          if (FoxyDocs.WATCHDOG != null)
+            FoxyDocs.WATCHDOG.interrupt();
         }
       }
     });
 
-    logStdout("FDE ended");
+    logStdout("Ended");
   }
 
   /**
@@ -346,8 +350,6 @@ public class FDEMainWindow extends ApplicationWindow {
     newShell.addShellListener(new ShellAdapter() {
       @Override
       public void shellClosed(ShellEvent e) {
-        if (FoxyDocs.WATCHDOG != null)
-          FoxyDocs.WATCHDOG.interrupt();
         logStdout("Closed");
       }
     });

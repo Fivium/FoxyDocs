@@ -76,7 +76,7 @@ public abstract class AbstractModelObject extends Observable {
   }
 
   public void save() {
-    if(!isDirty())
+    if (!isDirty())
       return;
     for (AbstractModelObject child : getChildren()) {
       child.save();
@@ -99,9 +99,13 @@ public abstract class AbstractModelObject extends Observable {
   }
 
   public void clear() {
-    if (getHasChildren())
+    if (getHasChildren()) {
+      for (AbstractModelObject child : getChildren()) {
+        child.clear();
+      }
       getChildren().clear();
-    firePropertyChange("children", null, getChildren());
+      firePropertyChange("children", null, getChildren());
+    }
   }
 
   public boolean getHasChildren() {

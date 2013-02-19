@@ -81,6 +81,7 @@ public class DocumentationEntry extends AbstractModelObject {
       documentationNode = getDocumentationStructure();
       node.addContent(documentationNode);
     }
+    documentationNode.getChild("description", NAMESPACE_FM).removeContent();
     documentationNode.getChild("description", NAMESPACE_FM).addContent(this.documentation);
     
     // New become old

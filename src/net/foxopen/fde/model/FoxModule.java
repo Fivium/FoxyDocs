@@ -4,6 +4,7 @@ import static net.foxopen.utils.FoxyDocs.DOM_BUILDER;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -19,6 +20,7 @@ import net.foxopen.utils.FoxyDocs;
 import net.foxopen.utils.Logger;
 
 import org.apache.commons.io.IOUtils;
+import org.eclipse.swt.widgets.Display;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
@@ -117,12 +119,30 @@ public class FoxModule extends AbstractFSItem {
   public String toString() {
     return FoxyDocs.XML_SERIALISER.outputString(jdomDoc);
   }
-  
+
   @Override
-  public void save(){
-    super.save();
-    reload();
-   // System.out.println(this);
+  public void save() {
+    if(!isDirty() && isReadOnly())
+      return;
+    try {
+      // Prepare the save
+      super.save();
+      
+      // Write into the file
+      FileOutputStream fileOutputStream = new FileOutputStream(internalPath.toFile(), false);
+      IOUtils.write(toString(),fileOutputStream,"UTF-8");
+      
+      // Update the content
+      reload();
+      jdomDoc = DOM_BUILDER.build(internalPath.toFile());
+      Display.getDefault().asyncExec(new Runnable() {
+        public void run() {
+          firePropertyChange("code", null, getCode());
+        }
+      });
+    } catch (IOException | JDOMException e) {
+      e.printStackTrace();
+    }
   }
 
   public static List<Element> runXpath(String xpath, org.jdom2.Document document) {

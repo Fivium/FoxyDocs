@@ -57,7 +57,8 @@ public class Tab extends CTabItem {
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
           // Update the tab name, for display the dirty star for instance
-          setText(content.getName());
+          if (!isDisposed())
+            setText(content.getName());
         }
       });
       {
@@ -129,6 +130,16 @@ public class Tab extends CTabItem {
                   // TODO
                 }
               }
+            });
+
+            // Update code
+            content.addPropertyChangeListener("code", new PropertyChangeListener() {
+              @Override
+              public void propertyChange(PropertyChangeEvent event) {
+                text_code.setText(content.getCode());
+                goToCode(content);
+              }
+
             });
 
             // Vertical Sash
