@@ -49,7 +49,7 @@ import org.eclipse.wb.rcp.databinding.TreeObservableLabelProvider;
 import org.eclipse.wb.swt.ResourceManager;
 import org.eclipse.wb.swt.SWTResourceManager;
 
-public class FDEMainWindow extends ApplicationWindow {
+public class FoxyDocsMainWindow extends ApplicationWindow {
   private Action action_exit;
 
   private static AbstractFSItem root;
@@ -75,7 +75,7 @@ public class FDEMainWindow extends ApplicationWindow {
   /**
    * Create the application window.
    */
-  public FDEMainWindow() {
+  public FoxyDocsMainWindow() {
     super(null);
     createActions();
     addToolBar(SWT.FLAT | SWT.WRAP);
@@ -94,7 +94,7 @@ public class FDEMainWindow extends ApplicationWindow {
    */
   @Override
   protected Control createContents(Composite parent) {
-    setStatus("Welcome to Fox Documentation Editor");
+    setStatus("Welcome to FoxyDocs");
     Composite container = new Composite(parent, SWT.NONE);
     container.setLayout(new FillLayout(SWT.HORIZONTAL));
     {
@@ -145,7 +145,7 @@ public class FDEMainWindow extends ApplicationWindow {
           close();
         }
       };
-      action_exit.setImageDescriptor(ResourceManager.getImageDescriptor(FDEMainWindow.class, "/img/actions/exit.png"));
+      action_exit.setImageDescriptor(ResourceManager.getImageDescriptor(FoxyDocsMainWindow.class, "/img/actions/exit.png"));
       action_exit.setAccelerator(SWT.CTRL | 'Q');
     }
     {
@@ -172,7 +172,7 @@ public class FDEMainWindow extends ApplicationWindow {
         }
       };
       action_open.setAccelerator(SWT.CTRL | 'O');
-      action_open.setImageDescriptor(ResourceManager.getImageDescriptor(FDEMainWindow.class, "/img/actions/folder_new.png"));
+      action_open.setImageDescriptor(ResourceManager.getImageDescriptor(FoxyDocsMainWindow.class, "/img/actions/folder_new.png"));
     }
     {
       action_close = new Action("&Close Tab") {
@@ -182,7 +182,7 @@ public class FDEMainWindow extends ApplicationWindow {
           }
         }
       };
-      action_close.setImageDescriptor(ResourceManager.getImageDescriptor(FDEMainWindow.class, "/img/actions/cancel.png"));
+      action_close.setImageDescriptor(ResourceManager.getImageDescriptor(FoxyDocsMainWindow.class, "/img/actions/cancel.png"));
       action_close.setAccelerator(SWT.CTRL | 'W');
     }
     {
@@ -192,7 +192,7 @@ public class FDEMainWindow extends ApplicationWindow {
         }
 
       };
-      action_about.setImageDescriptor(ResourceManager.getImageDescriptor(FDEMainWindow.class, "/img/actions/about_kde.png"));
+      action_about.setImageDescriptor(ResourceManager.getImageDescriptor(FoxyDocsMainWindow.class, "/img/actions/about_kde.png"));
     }
     {
       action_nextentry = new Action("Next Entry") {
@@ -203,7 +203,7 @@ public class FDEMainWindow extends ApplicationWindow {
         }
 
       };
-      action_nextentry.setImageDescriptor(ResourceManager.getImageDescriptor(FDEMainWindow.class, "/img/actions/adept_reinstall.png"));
+      action_nextentry.setImageDescriptor(ResourceManager.getImageDescriptor(FoxyDocsMainWindow.class, "/img/actions/adept_reinstall.png"));
       action_nextentry.setAccelerator(SWT.ALT | 'S');
     }
     {
@@ -214,21 +214,21 @@ public class FDEMainWindow extends ApplicationWindow {
           }
         }
       };
-      action_previousentry.setImageDescriptor(ResourceManager.getImageDescriptor(FDEMainWindow.class, "/img/actions/up.png"));
+      action_previousentry.setImageDescriptor(ResourceManager.getImageDescriptor(FoxyDocsMainWindow.class, "/img/actions/up.png"));
       action_previousentry.setAccelerator(SWT.ALT | 'W');
     }
     {
       action_nextfile = new Action("Next File") {
 
       };
-      action_nextfile.setImageDescriptor(ResourceManager.getImageDescriptor(FDEMainWindow.class, "/img/actions/finish.png"));
+      action_nextfile.setImageDescriptor(ResourceManager.getImageDescriptor(FoxyDocsMainWindow.class, "/img/actions/finish.png"));
       action_nextfile.setAccelerator(SWT.ALT | 'D');
     }
     {
       action_previousfile = new Action("Previous File") {
 
       };
-      action_previousfile.setImageDescriptor(ResourceManager.getImageDescriptor(FDEMainWindow.class, "/img/actions/start.png"));
+      action_previousfile.setImageDescriptor(ResourceManager.getImageDescriptor(FoxyDocsMainWindow.class, "/img/actions/start.png"));
       action_previousfile.setAccelerator(SWT.ALT | 'A');
     }
     {
@@ -241,7 +241,7 @@ public class FDEMainWindow extends ApplicationWindow {
           }
         }
       };
-      action_save.setImageDescriptor(ResourceManager.getImageDescriptor(FDEMainWindow.class, "/img/actions/save_all.png"));
+      action_save.setImageDescriptor(ResourceManager.getImageDescriptor(FoxyDocsMainWindow.class, "/img/actions/save_all.png"));
       action_save.setAccelerator(SWT.CTRL | 'S');
     }
   }
@@ -314,7 +314,7 @@ public class FDEMainWindow extends ApplicationWindow {
    */
   @Override
   protected void configureShell(final Shell newShell) {
-    newShell.setImage(SWTResourceManager.getImage(FDEMainWindow.class, "/img/actions/Burn.png"));
+    newShell.setImage(SWTResourceManager.getImage(FoxyDocsMainWindow.class, "/img/actions/Burn.png"));
 
     newShell.addDisposeListener(new DisposeListener() {
       public void widgetDisposed(DisposeEvent e) {
@@ -330,7 +330,7 @@ public class FDEMainWindow extends ApplicationWindow {
     });
 
     super.configureShell(newShell);
-    newShell.setText("Fox Documentation Editor - Dev 0.3");
+    newShell.setText("FoxyDocs - Dev 0.3");
   }
 
   /**

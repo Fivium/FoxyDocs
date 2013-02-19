@@ -1,7 +1,7 @@
 package net.foxopen;
 
 import static net.foxopen.utils.Logger.logStdout;
-import net.foxopen.foxydocs.view.FDEMainWindow;
+import net.foxopen.foxydocs.view.FoxyDocsMainWindow;
 import net.foxopen.utils.WatchDog;
 
 import org.eclipse.core.databinding.observable.Realm;
@@ -98,7 +98,7 @@ public class FoxyDocs {
     Realm.runWithDefault(SWTObservables.getRealm(display), new Runnable() {
       public void run() {
         try {
-          final FDEMainWindow window = new FDEMainWindow();
+          final FoxyDocsMainWindow window = new FoxyDocsMainWindow();
           window.setBlockOnOpen(true);
           window.open();
           Display.getCurrent().dispose();
@@ -116,7 +116,7 @@ public class FoxyDocs {
   }
 
   private static Image getImage(String file) {
-    ImageDescriptor image = ResourceManager.getImageDescriptor(FDEMainWindow.class, file);
+    ImageDescriptor image = ResourceManager.getImageDescriptor(FoxyDocsMainWindow.class, file);
     return image.createImage();
   }
 

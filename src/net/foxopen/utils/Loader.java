@@ -13,7 +13,7 @@ import net.foxopen.foxydocs.model.FoxModule;
 import net.foxopen.foxydocs.model.FoxModule.NotAFoxModuleException;
 import net.foxopen.foxydocs.model.abstractObject.AbstractFSItem;
 import net.foxopen.foxydocs.model.abstractObject.AbstractModelObject;
-import net.foxopen.foxydocs.view.FDEMainWindow;
+import net.foxopen.foxydocs.view.FoxyDocsMainWindow;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -43,7 +43,7 @@ public class Loader {
     private void refreshUI() {
       Display.getDefault().asyncExec(new Runnable() {
         public void run() {
-          for (Object o : FDEMainWindow.getRoot().getChildren()) {
+          for (Object o : FoxyDocsMainWindow.getRoot().getChildren()) {
             AbstractModelObject c = (AbstractModelObject) o;
             c.firePropertyChange("name", null, c.getName());
             c.firePropertyChange("status", null, c.getStatus());
