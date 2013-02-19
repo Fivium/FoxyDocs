@@ -1,26 +1,24 @@
 package net.foxopen.fde.view;
 
 import static net.foxopen.utils.Logger.logStdout;
+import static net.foxopen.FoxyDocs.*;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
-import net.foxopen.fde.model.Directory;
-import net.foxopen.fde.model.FoxModule;
-import net.foxopen.fde.model.abstractObject.AbstractFSItem;
-import net.foxopen.utils.FoxyDocs;
+import net.foxopen.foxydocs.model.Directory;
+import net.foxopen.foxydocs.model.FoxModule;
+import net.foxopen.foxydocs.model.abstractObject.AbstractFSItem;
 import net.foxopen.utils.Loader;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
-import org.eclipse.core.databinding.observable.Realm;
 import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.StatusLineManager;
 import org.eclipse.jface.action.ToolBarManager;
-import org.eclipse.jface.databinding.swt.SWTObservables;
 import org.eclipse.jface.databinding.viewers.ObservableListTreeContentProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -200,7 +198,7 @@ public class FDEMainWindow extends ApplicationWindow {
       action_nextentry = new Action("Next Entry") {
         public void run() {
           if (tabFolder.getSelection() != null) {
-            tabFolder.getSelection().notifyListeners(FoxyDocs.EVENT_DOWN, new Event());
+            tabFolder.getSelection().notifyListeners(EVENT_DOWN, new Event());
           }
         }
 
@@ -212,7 +210,7 @@ public class FDEMainWindow extends ApplicationWindow {
       action_previousentry = new Action("Previous Entry") {
         public void run() {
           if (tabFolder.getSelection() != null) {
-            tabFolder.getSelection().notifyListeners(FoxyDocs.EVENT_UP, new Event());
+            tabFolder.getSelection().notifyListeners(EVENT_UP, new Event());
           }
         }
       };
@@ -307,37 +305,6 @@ public class FDEMainWindow extends ApplicationWindow {
   protected StatusLineManager createStatusLineManager() {
     StatusLineManager statusLineManager = new StatusLineManager();
     return statusLineManager;
-  }
-
-  /**
-   * Launch the application.
-   * 
-   * @param args
-   */
-  public static void main(String args[]) {
-    logStdout("FDE started");
-    // Initialise statics constants
-    FoxyDocs.init();
-    // Create the interface
-    Display display = Display.getDefault();
-    Realm.runWithDefault(SWTObservables.getRealm(display), new Runnable() {
-      public void run() {
-        try {
-          final FDEMainWindow window = new FDEMainWindow();
-          window.setBlockOnOpen(true);
-          window.open();
-          Display.getCurrent().dispose();
-        } catch (Exception e) {
-          e.printStackTrace();
-        } finally {
-          // Kill the watch dog thread
-          if (FoxyDocs.WATCHDOG != null)
-            FoxyDocs.WATCHDOG.interrupt();
-        }
-      }
-    });
-
-    logStdout("Ended");
   }
 
   /**

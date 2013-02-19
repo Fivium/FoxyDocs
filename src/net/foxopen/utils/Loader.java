@@ -1,17 +1,19 @@
 package net.foxopen.utils;
 
 import static net.foxopen.utils.Logger.logStderr;
+import static net.foxopen.FoxyDocs.*;
+
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import net.foxopen.fde.model.FoxModule;
-import net.foxopen.fde.model.FoxModule.NotAFoxModuleException;
-import net.foxopen.fde.model.abstractObject.AbstractFSItem;
-import net.foxopen.fde.model.abstractObject.AbstractModelObject;
 import net.foxopen.fde.view.FDEMainWindow;
+import net.foxopen.foxydocs.model.FoxModule;
+import net.foxopen.foxydocs.model.FoxModule.NotAFoxModuleException;
+import net.foxopen.foxydocs.model.abstractObject.AbstractFSItem;
+import net.foxopen.foxydocs.model.abstractObject.AbstractModelObject;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -91,7 +93,7 @@ public class Loader {
       if (monitor.isCanceled())
         throw new InterruptedException("The long running operation was cancelled");
       try {
-        FoxyDocs.WATCHDOG = new WatchDog(target.getFile(), monitorList, new WatchDogEventHandler() {
+        WATCHDOG = new WatchDog(target.getFile(), monitorList, new WatchDogEventHandler() {
 
           @Override
           public void modified(AbstractFSItem entry) {
@@ -120,7 +122,7 @@ public class Loader {
 
           }
         });
-        FoxyDocs.WATCHDOG.start();
+        WATCHDOG.start();
       } catch (IOException e) {
         e.printStackTrace();
       }

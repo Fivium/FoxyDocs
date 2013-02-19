@@ -1,17 +1,15 @@
 package net.foxopen.fde.view;
 
-import static net.foxopen.utils.FoxyDocs.FONT_DEFAULT;
-import static net.foxopen.utils.FoxyDocs.GREY;
+import static net.foxopen.FoxyDocs.*;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 
-import net.foxopen.fde.model.DocumentationEntriesSet;
-import net.foxopen.fde.model.DocumentationEntry;
-import net.foxopen.fde.model.FoxModule;
-import net.foxopen.fde.model.abstractObject.AbstractModelObject;
-import net.foxopen.utils.FoxyDocs;
+import net.foxopen.foxydocs.model.DocumentationEntriesSet;
+import net.foxopen.foxydocs.model.DocumentationEntry;
+import net.foxopen.foxydocs.model.FoxModule;
+import net.foxopen.foxydocs.model.abstractObject.AbstractModelObject;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
@@ -123,7 +121,7 @@ public class Tab extends CTabItem {
             SyntaxHighlighter.addSyntaxHighligherListener(text_code);
 
             // Browse Listener
-            this.addListener(FoxyDocs.EVENT_DOWN, new Listener() {
+            this.addListener(EVENT_DOWN, new Listener() {
               @Override
               public void handleEvent(Event event) {
                 IStructuredSelection thisSelection = (IStructuredSelection) treeViewer.getSelection();
@@ -137,7 +135,7 @@ public class Tab extends CTabItem {
               }
             });
 
-            this.addListener(FoxyDocs.EVENT_UP, new Listener() {
+            this.addListener(EVENT_UP, new Listener() {
               @Override
               public void handleEvent(Event event) {
                 IStructuredSelection thisSelection = (IStructuredSelection) treeViewer.getSelection();

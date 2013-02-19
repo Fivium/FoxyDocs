@@ -1,7 +1,11 @@
-package net.foxopen.utils;
+package net.foxopen;
 
+import static net.foxopen.utils.Logger.logStdout;
 import net.foxopen.fde.view.FDEMainWindow;
+import net.foxopen.utils.WatchDog;
 
+import org.eclipse.core.databinding.observable.Realm;
+import org.eclipse.jface.databinding.swt.SWTObservables;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
@@ -20,7 +24,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
 public class FoxyDocs {
-  
+
   public static WatchDog WATCHDOG;
 
   public final static int STATUS_UNKNOWN = 0x0;
@@ -47,15 +51,21 @@ public class FoxyDocs {
 
   public static final Namespace NAMESPACE_FM = Namespace.getNamespace("fm", "http://www.og.dti.gov/fox_module");
 
-  public static final SAXBuilder DOM_BUILDER;
-  public static final XMLOutputter XML_SERIALISER;
+  public static SAXBuilder DOM_BUILDER;
+  public static XMLOutputter XML_SERIALISER;
 
   public static final int EVENT_DOWN = 5402;
   public static final int EVENT_UP = 5403;
   public static final int EVENT_NEXT = 5404;
   public static final int EVENT_PREVIOUS = 5405;
 
-  static {
+  /**
+   * Launch the application.
+   * 
+   * @param args
+   */
+  public static void main(String args[]) {
+    logStdout("FDE started");
 
     DOM_BUILDER = new SAXBuilder(new XMLReaderSAX2Factory(false, "net.sf.saxon.aelfred.SAXDriver"));
     DOM_BUILDER.setJDOMFactory(new LocatedJDOMFactory());
@@ -71,23 +81,38 @@ public class FoxyDocs {
       @Override
       public void fatalError(SAXParseException exception) throws SAXException {
         // Empty
+        // TODO
       }
 
       @Override
       public void error(SAXParseException exception) throws SAXException {
         // Empty
+        // TODO
       }
     });
 
     XML_SERIALISER = new XMLOutputter();
-  }
 
-  private FoxyDocs() {
-    // Empty
-  }
+    // Create the interface
+    Display display = Display.getDefault();
+    Realm.runWithDefault(SWTObservables.getRealm(display), new Runnable() {
+      public void run() {
+        try {
+          final FDEMainWindow window = new FDEMainWindow();
+          window.setBlockOnOpen(true);
+          window.open();
+          Display.getCurrent().dispose();
+        } catch (Exception e) {
+          e.printStackTrace();
+        } finally {
+          // Kill the watch dog thread
+          if (FoxyDocs.WATCHDOG != null)
+            FoxyDocs.WATCHDOG.interrupt();
+        }
+      }
+    });
 
-  public static void init() {
-    Logger.logStdout("Init constants");
+    logStdout("Ended");
   }
 
   private static Image getImage(String file) {

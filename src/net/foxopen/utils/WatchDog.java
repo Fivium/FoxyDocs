@@ -41,7 +41,8 @@ import java.io.*;
 import java.util.*;
 
 import org.eclipse.swt.widgets.Display;
-import net.foxopen.fde.model.abstractObject.AbstractFSItem;
+
+import net.foxopen.foxydocs.model.abstractObject.AbstractFSItem;
 
 public class WatchDog extends Thread {
 

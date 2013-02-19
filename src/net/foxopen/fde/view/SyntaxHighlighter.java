@@ -1,11 +1,6 @@
 package net.foxopen.fde.view;
 
-import static net.foxopen.utils.FoxyDocs.BLUE;
-import static net.foxopen.utils.FoxyDocs.DARK_RED;
-import static net.foxopen.utils.FoxyDocs.GREEN;
-import static net.foxopen.utils.FoxyDocs.PURPLE;
-import static net.foxopen.utils.FoxyDocs.RED;
-import static net.foxopen.utils.FoxyDocs.GREY;
+import static net.foxopen.FoxyDocs.*;
 
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
