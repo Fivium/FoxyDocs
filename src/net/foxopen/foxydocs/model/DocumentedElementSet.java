@@ -1,5 +1,6 @@
 package net.foxopen.foxydocs.model;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,7 +57,7 @@ public class DocumentedElementSet extends AbstractModelObject {
   }
 
   @Override
-  public String getCode() {
+  public String getCode() throws IOException {
     return getParent().getCode();
   }
 }

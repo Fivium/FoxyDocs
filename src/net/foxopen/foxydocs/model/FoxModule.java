@@ -2,8 +2,6 @@ package net.foxopen.foxydocs.model;
 
 import static net.foxopen.foxydocs.FoxyDocs.*;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -17,8 +15,9 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import net.foxopen.foxydocs.model.abstractObject.AbstractFSItem;
 import net.foxopen.foxydocs.model.abstractObject.AbstractModelObject;
+import net.foxopen.utils.Logger;
+import net.foxopen.utils.NIOFileReader;
 
-import org.apache.commons.io.IOUtils;
 import org.eclipse.swt.widgets.Display;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -37,7 +36,7 @@ public class FoxModule extends AbstractFSItem {
   public FoxModule(Path path, AbstractFSItem parent) throws NotAFoxModuleException, IOException {
     super(path, parent);
     checkFile();
-   
+
     // Check type
     String type = Files.probeContentType(path);
     if (type == null || !type.endsWith("xml"))
@@ -108,18 +107,8 @@ public class FoxModule extends AbstractFSItem {
   }
 
   @Override
-  public String getCode() {
-    try {
-      FileInputStream inputStream = new FileInputStream(getFile());
-      String buffer = IOUtils.toString(inputStream);
-      inputStream.close();
-      return buffer;
-    } catch (FileNotFoundException e) {
-      e.printStackTrace();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-    return toString();
+  public String getCode() throws IOException {
+    return NIOFileReader.readFile(getFile());
   }
 
   @Override
@@ -148,7 +137,11 @@ public class FoxModule extends AbstractFSItem {
     Display.getDefault().asyncExec(new Runnable() {
       @Override
       public void run() {
-        firePropertyChange("code", null, getCode());
+        try {
+          firePropertyChange("code", null, getCode());
+        } catch (IOException e) {
+          Logger.logStderr(e.getMessage());
+        }
       }
     });
   }

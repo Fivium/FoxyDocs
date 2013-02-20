@@ -5,6 +5,7 @@ import static net.foxopen.foxydocs.FoxyDocs.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.io.IOException;
 import java.util.List;
 import java.util.Observable;
 
@@ -111,7 +112,7 @@ public abstract class AbstractModelObject extends Observable {
     throw new IllegalArgumentException("You cannot call this method directly. Please override it.");
   }
 
-  public String getCode() {
+  public String getCode() throws IOException {
     throw new IllegalArgumentException("You cannot call this method directly. Please override it.");
   }
 

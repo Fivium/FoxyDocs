@@ -3,6 +3,7 @@ package net.foxopen.foxydocs.view;
 import static net.foxopen.foxydocs.FoxyDocs.*;
 import static net.foxopen.utils.Logger.logStdout;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
 import net.foxopen.foxydocs.model.Directory;
@@ -109,7 +110,11 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
               IStructuredSelection thisSelection = (IStructuredSelection) event.getSelection();
               Object selectedNode = thisSelection.getFirstElement();
               if (selectedNode instanceof FoxModule) {
-                Tab.open(tabFolder, (FoxModule) selectedNode);
+                try {
+                  Tab.open(tabFolder, (FoxModule) selectedNode);
+                } catch (IOException e) {
+                  MessageDialog.openError(getShell(), "Error", e.getMessage());
+    }
               } else {
                 treeViewerFileList.setExpandedState(selectedNode, !treeViewerFileList.getExpandedState(selectedNode));
               }

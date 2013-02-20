@@ -1,5 +1,6 @@
 package net.foxopen.foxydocs.model;
 
+import java.io.IOException;
 import java.util.List;
 
 import static net.foxopen.foxydocs.FoxyDocs.*;
@@ -57,7 +58,7 @@ public class DocumentedElement extends AbstractModelObject {
   }
 
   @Override
-  public String getCode() {
+  public String getCode() throws IOException {
     return getParent().getCode();
   }
 

@@ -7,6 +7,7 @@ import static net.foxopen.foxydocs.FoxyDocs.GREY;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import net.foxopen.foxydocs.model.DocEntry;
@@ -22,6 +23,7 @@ import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.databinding.viewers.ObservableListTreeContentProvider;
 import org.eclipse.jface.databinding.viewers.ViewerProperties;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -37,6 +39,7 @@ import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Listener;
@@ -165,8 +168,12 @@ public class Tab extends CTabItem {
             content.addPropertyChangeListener("code", new PropertyChangeListener() {
               @Override
               public void propertyChange(PropertyChangeEvent event) {
-                codeText.setText(content.getCode());
-                goToCode(content);
+                try {
+                  codeText.setText(content.getCode());
+                  goToCode(content);
+                } catch (IOException e) {
+                  MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", e.getMessage());
+                }
               }
 
             });
@@ -228,8 +235,9 @@ public class Tab extends CTabItem {
    *          The parent Tab Folder
    * @param content
    *          The FoxModule to open in a tab
+   * @throws IOException
    */
-  public static void open(CTabFolder parent, FoxModule content) {
+  public static void open(CTabFolder parent, FoxModule content) throws IOException {
     // Check if the tab is already open. If so, set selection to it. If not,
     // open a new one.
     Tab tab = getOpenedTab(parent, content);
