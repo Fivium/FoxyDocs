@@ -1,4 +1,4 @@
-package net.foxopen;
+package net.foxopen.foxydocs;
 
 import static net.foxopen.utils.Logger.logStdout;
 import net.foxopen.foxydocs.view.FoxyDocsMainWindow;

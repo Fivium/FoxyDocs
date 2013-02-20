@@ -1,6 +1,6 @@
 package net.foxopen.foxydocs.view;
 
-import static net.foxopen.FoxyDocs.*;
+import static net.foxopen.foxydocs.FoxyDocs.*;
 
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;

@@ -1,6 +1,6 @@
 package net.foxopen.foxydocs.model;
 
-import static net.foxopen.FoxyDocs.*;
+import static net.foxopen.foxydocs.FoxyDocs.*;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;

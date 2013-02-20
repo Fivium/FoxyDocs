@@ -2,7 +2,7 @@ package net.foxopen.foxydocs.model;
 
 import java.util.List;
 
-import static net.foxopen.FoxyDocs.*;
+import static net.foxopen.foxydocs.FoxyDocs.*;
 
 import net.foxopen.foxydocs.model.abstractObject.AbstractModelObject;
 

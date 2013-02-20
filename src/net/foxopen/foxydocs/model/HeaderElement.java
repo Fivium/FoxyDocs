@@ -3,7 +3,7 @@ package net.foxopen.foxydocs.model;
 import java.util.HashMap;
 
 import net.foxopen.foxydocs.model.abstractObject.AbstractModelObject;
-import static net.foxopen.FoxyDocs.NAMESPACE_FM;
+import static net.foxopen.foxydocs.FoxyDocs.NAMESPACE_FM;
 
 import org.jdom2.Element;
 

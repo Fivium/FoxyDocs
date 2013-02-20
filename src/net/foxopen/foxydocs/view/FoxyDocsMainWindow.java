@@ -1,7 +1,7 @@
 package net.foxopen.foxydocs.view;
 
+import static net.foxopen.foxydocs.FoxyDocs.*;
 import static net.foxopen.utils.Logger.logStdout;
-import static net.foxopen.FoxyDocs.*;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;

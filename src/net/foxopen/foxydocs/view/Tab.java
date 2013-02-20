@@ -1,9 +1,9 @@
 package net.foxopen.foxydocs.view;
 
-import static net.foxopen.FoxyDocs.EVENT_DOWN;
-import static net.foxopen.FoxyDocs.EVENT_UP;
-import static net.foxopen.FoxyDocs.FONT_DEFAULT;
-import static net.foxopen.FoxyDocs.GREY;
+import static net.foxopen.foxydocs.FoxyDocs.EVENT_DOWN;
+import static net.foxopen.foxydocs.FoxyDocs.EVENT_UP;
+import static net.foxopen.foxydocs.FoxyDocs.FONT_DEFAULT;
+import static net.foxopen.foxydocs.FoxyDocs.GREY;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;

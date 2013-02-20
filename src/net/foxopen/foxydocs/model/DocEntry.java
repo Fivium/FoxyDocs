@@ -1,6 +1,6 @@
 package net.foxopen.foxydocs.model;
 
-import static net.foxopen.FoxyDocs.NAMESPACE_FM;
+import static net.foxopen.foxydocs.FoxyDocs.NAMESPACE_FM;
 
 import org.jdom2.Element;
 

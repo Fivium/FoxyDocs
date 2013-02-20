@@ -1,6 +1,6 @@
 package net.foxopen.foxydocs.model.abstractObject;
 
-import static net.foxopen.FoxyDocs.*;
+import static net.foxopen.foxydocs.FoxyDocs.*;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;

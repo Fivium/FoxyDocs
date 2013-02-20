@@ -1,7 +1,7 @@
 package net.foxopen.utils;
 
+import static net.foxopen.foxydocs.FoxyDocs.*;
 import static net.foxopen.utils.Logger.logStderr;
-import static net.foxopen.FoxyDocs.*;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -9,7 +9,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import net.foxopen.FoxyDocs;
+import net.foxopen.foxydocs.FoxyDocs;
 import net.foxopen.foxydocs.model.FoxModule;
 import net.foxopen.foxydocs.model.FoxModule.NotAFoxModuleException;
 import net.foxopen.foxydocs.model.abstractObject.AbstractFSItem;
