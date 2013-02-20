@@ -41,7 +41,7 @@ public class FoxModule extends AbstractFSItem {
     // Check type
     String type = Files.probeContentType(path);
     if (type == null || !type.endsWith("xml"))
-      throw new NotAFoxModuleException("Invalid XML file " + getPath());
+      throw new NotAFoxModuleException("Invalid XML file " + getAbsolutePath());
   }
 
   /**
@@ -58,7 +58,7 @@ public class FoxModule extends AbstractFSItem {
    */
   @Override
   public synchronized Collection<AbstractFSItem> readContent() throws ParserConfigurationException, SAXException, IOException, JDOMException, NotAFoxModuleException {
-    jdomDoc = DOM_BUILDER.build(internalPath.toFile());
+    jdomDoc = DOM_BUILDER.build(getFile());
 
     // Header
     List<Element> header = runXpath("/xs:schema/xs:annotation/xs:appinfo/fm:module/fm:header", jdomDoc);
@@ -103,14 +103,14 @@ public class FoxModule extends AbstractFSItem {
   @Override
   public HashMap<String, FoxModule> getFoxModules() {
     HashMap<String, FoxModule> buffer = new HashMap<String, FoxModule>();
-    buffer.put(getPath(), this);
+    buffer.put(getAbsolutePath(), this);
     return buffer;
   }
 
   @Override
   public String getCode() {
     try {
-      FileInputStream inputStream = new FileInputStream(internalPath.toFile());
+      FileInputStream inputStream = new FileInputStream(getFile());
       String buffer = IOUtils.toString(inputStream);
       inputStream.close();
       return buffer;
@@ -138,13 +138,13 @@ public class FoxModule extends AbstractFSItem {
     super.save();
 
     // Write into the file
-    FileOutputStream out = new FileOutputStream(internalPath.toFile(), false);
+    FileOutputStream out = new FileOutputStream(getFile(), false);
     XML_SERIALISER.output(jdomDoc, out);
     out.close();
 
     // Update the content
     reload();
-    jdomDoc = DOM_BUILDER.build(internalPath.toFile());
+    jdomDoc = DOM_BUILDER.build(getFile());
     Display.getDefault().asyncExec(new Runnable() {
       @Override
       public void run() {

@@ -37,10 +37,10 @@ public class Loader {
 
     public ThreadPopulateStructure(AbstractFSItem target) {
       this.target = target;
-      if (!doneList.containsKey(target.getPath())) {
-        doneList.put(target.getPath(), true);
+      if (!doneList.containsKey(target.getAbsolutePath())) {
+        doneList.put(target.getAbsolutePath(), true);
       } else {
-        logStderr(target.getPath() + " has already been scanned");
+        logStderr(target.getAbsolutePath() + " has already been scanned");
       }
     }
 
@@ -59,7 +59,7 @@ public class Loader {
 
     @Override
     public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-      monitor.beginTask("Opening " + target.getPath(), IProgressMonitor.UNKNOWN);
+      monitor.beginTask("Opening " + target.getAbsolutePath(), IProgressMonitor.UNKNOWN);
       final HashMap<String, AbstractFSItem> monitorList = new HashMap<String, AbstractFSItem>();
 
       try {
@@ -100,7 +100,7 @@ public class Loader {
       }
 
       try {
-        WATCHDOG = new WatchDog(target.getFile(), new WatchDogEventHandler() {
+        WATCHDOG = new WatchDog(target.getPath(), new WatchDogEventHandler() {
 
           private AbstractFSItem resolv(Path path) {
             return monitorList.get(path.toFile().getAbsolutePath());

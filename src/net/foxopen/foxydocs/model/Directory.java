@@ -37,7 +37,7 @@ public class Directory extends AbstractFSItem {
   }
 
   public void walk(Directory entry, Collection<AbstractFSItem> directories) throws IOException {
-    for (Path path : Files.newDirectoryStream(entry.internalPath)) {
+    for (Path path : Files.newDirectoryStream(entry.getPath())) {
       BasicFileAttributes attr = Files.getFileAttributeView(path, BasicFileAttributeView.class).readAttributes();
       // Don't like links...
       if (attr.isSymbolicLink())
@@ -59,13 +59,12 @@ public class Directory extends AbstractFSItem {
         String type = Files.probeContentType(path);
         if (type == null || !type.endsWith("xml"))
           continue;
-         
+
         try {
           FoxModule fox = new FoxModule(path, this);
           entry.addChild(fox);
         } catch (NotAFoxModuleException e) {
           // Nothing
-
         }
       }
     }
