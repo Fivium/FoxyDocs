@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import net.foxopen.FoxyDocs;
 import net.foxopen.foxydocs.model.FoxModule;
 import net.foxopen.foxydocs.model.FoxModule.NotAFoxModuleException;
 import net.foxopen.foxydocs.model.abstractObject.AbstractFSItem;
@@ -24,6 +25,9 @@ public class Loader {
 
   public static IRunnableWithProgress LoadContent(AbstractFSItem target) {
     target.checkFile();
+    // Kill running WatchDog Thread
+    if (FoxyDocs.WATCHDOG != null)
+      FoxyDocs.WATCHDOG.interrupt();
     return new ThreadPopulateStructure(target);
   }
 

@@ -21,7 +21,9 @@ public abstract class AbstractModelObject extends Observable {
 
   abstract public String getName();
 
-  protected AbstractModelObject() {
+  protected AbstractModelObject(AbstractModelObject parent) {
+    
+    this.parent = parent;
 
     // Dirty property : does the file need saving ?
     addPropertyChangeListener("dirty", new PropertyChangeListener() {

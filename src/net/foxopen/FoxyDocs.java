@@ -18,6 +18,7 @@ import org.jdom2.Namespace;
 import org.jdom2.input.SAXBuilder;
 import org.jdom2.input.sax.XMLReaderSAX2Factory;
 import org.jdom2.located.LocatedJDOMFactory;
+import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
@@ -50,6 +51,7 @@ public class FoxyDocs {
   public static final Font FONT_DEFAULT = new Font(Display.getCurrent(), "Courier New", 10, SWT.NORMAL);
 
   public static final Namespace NAMESPACE_FM = Namespace.getNamespace("fm", "http://www.og.dti.gov/fox_module");
+  public static final Namespace NAMESPACE_XS = Namespace.getNamespace("xs", "http://www.w3.org/2001/XMLSchema");
 
   public static SAXBuilder DOM_BUILDER;
   public static XMLOutputter XML_SERIALISER;
@@ -92,6 +94,9 @@ public class FoxyDocs {
     });
 
     XML_SERIALISER = new XMLOutputter();
+    Format prettyPrint = Format.getPrettyFormat();
+    prettyPrint.setIndent("  ");
+    XML_SERIALISER.setFormat(prettyPrint);
 
     // Create the interface
     Display display = Display.getDefault();

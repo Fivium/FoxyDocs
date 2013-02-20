@@ -1,13 +1,17 @@
 package net.foxopen.foxydocs.view;
 
-import static net.foxopen.FoxyDocs.*;
+import static net.foxopen.FoxyDocs.EVENT_DOWN;
+import static net.foxopen.FoxyDocs.EVENT_UP;
+import static net.foxopen.FoxyDocs.FONT_DEFAULT;
+import static net.foxopen.FoxyDocs.GREY;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 
-import net.foxopen.foxydocs.model.DocumentationEntriesSet;
-import net.foxopen.foxydocs.model.DocumentationEntry;
+import net.foxopen.foxydocs.model.DocEntry;
+import net.foxopen.foxydocs.model.DocumentedElement;
+import net.foxopen.foxydocs.model.DocumentedElementSet;
 import net.foxopen.foxydocs.model.FoxModule;
 import net.foxopen.foxydocs.model.abstractObject.AbstractModelObject;
 
@@ -42,13 +46,16 @@ import org.eclipse.wb.rcp.databinding.TreeObservableLabelProvider;
 public class Tab extends CTabItem {
 
   private final TreeViewer treeViewer;
-  private final StyledText text_documentation;
-  private final StyledText text_code;
+  private final StyledText documentationText;
+  private final StyledText codeText;
   private final FoxModule content;
   private final ArrayList<AbstractModelObject> docEntries;
 
   private Tab(CTabFolder parent, final FoxModule content) {
     super(parent, SWT.CLOSE);
+    if (content == null) {
+      throw new IllegalArgumentException("The tab content must not be null");
+    }
     this.content = content;
     this.docEntries = content.getAllEntries();
     {
@@ -76,11 +83,12 @@ public class Tab extends CTabItem {
             public void doubleClick(DoubleClickEvent event) {
               IStructuredSelection thisSelection = (IStructuredSelection) event.getSelection();
               Object selectedNode = thisSelection.getFirstElement();
-              if (selectedNode instanceof DocumentationEntriesSet) {
+              if (selectedNode instanceof DocumentedElementSet) {
                 treeViewer.setExpandedState(selectedNode, !treeViewer.getExpandedState(selectedNode));
               }
             }
           });
+          // An entry is selected
           treeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
             @Override
             public void selectionChanged(SelectionChangedEvent event) {
@@ -89,14 +97,17 @@ public class Tab extends CTabItem {
               goToCode(selectedNode);
 
               // Set focus and editable
-              if (selectedNode instanceof DocumentationEntry) {
-                text_documentation.setEditable(true);
-                text_documentation.setEnabled(true);
-                text_documentation.setFocus();
-              } else if (selectedNode instanceof DocumentationEntriesSet) {
-                text_documentation.setEditable(false);
-                text_documentation.setEnabled(true);
+              if (selectedNode instanceof DocumentedElement) {
+                documentationText.setEditable(true);
+                documentationText.setEnabled(true);
+                documentationText.setFocus();
+              } else if (selectedNode instanceof DocumentedElementSet) {
+                documentationText.setEditable(false);
+                documentationText.setEnabled(true);
               }
+
+              // Special case header
+              // TODO
             }
           });
           {
@@ -107,18 +118,18 @@ public class Tab extends CTabItem {
             grpDocumentation.setText("Documentation");
             grpDocumentation.setLayout(new FillLayout(SWT.HORIZONTAL));
 
-            text_documentation = new StyledText(grpDocumentation, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.READ_ONLY);
-            text_documentation.setFont(FONT_DEFAULT);
+            documentationText = new StyledText(grpDocumentation, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.READ_ONLY);
+            documentationText.setFont(FONT_DEFAULT);
 
             Group grpCode = new Group(sashFormCodeDoc, SWT.NONE);
             grpCode.setText("Code");
             grpCode.setLayout(new FillLayout(SWT.HORIZONTAL));
 
-            text_code = new StyledText(grpCode, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.READ_ONLY);
-            text_code.setFont(FONT_DEFAULT);
+            codeText = new StyledText(grpCode, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.READ_ONLY);
+            codeText.setFont(FONT_DEFAULT);
 
             // Add the syntax colouring handler
-            SyntaxHighlighter.addSyntaxHighligherListener(text_code);
+            SyntaxHighlighter.addSyntaxHighligherListener(codeText);
 
             // Browse Listener
             this.addListener(EVENT_DOWN, new Listener() {
@@ -153,16 +164,18 @@ public class Tab extends CTabItem {
             content.addPropertyChangeListener("code", new PropertyChangeListener() {
               @Override
               public void propertyChange(PropertyChangeEvent event) {
-                text_code.setText(content.getCode());
+                codeText.setText(content.getCode());
                 goToCode(content);
               }
 
             });
 
             // Vertical Sash
+            sashFormCodeDoc.setSashWidth(4);
             sashFormCodeDoc.setWeights(new int[] { 1, 3 });
           }
           // Horizontal Sash
+          sashFormTabContent.setSashWidth(4);
           sashFormTabContent.setWeights(new int[] { 1, 5 });
         }
       }
@@ -178,9 +191,9 @@ public class Tab extends CTabItem {
     IObservableList childrenRootObserveList = BeanProperties.list("children").observe(content);
     treeViewer.setInput(childrenRootObserveList);
     //
-    IObservableValue observeTextText_documentationObserveWidget = WidgetProperties.text(new int[] { SWT.Modify, SWT.FocusOut, SWT.DefaultSelection }).observe(text_documentation);
+    IObservableValue observeTextText_documentationObserveWidget = WidgetProperties.text(new int[] { SWT.Modify, SWT.FocusOut, SWT.DefaultSelection }).observe(documentationText);
     IObservableValue observeSingleSelectionTreeViewer = ViewerProperties.singleSelection().observe(treeViewer);
-    IObservableValue treeViewerDocumentationObserveDetailValue = BeanProperties.value(AbstractModelObject.class, "documentation", String.class).observeDetail(observeSingleSelectionTreeViewer);
+    IObservableValue treeViewerDocumentationObserveDetailValue = BeanProperties.value(AbstractModelObject.class, "documentation", DocEntry.class).observeDetail(observeSingleSelectionTreeViewer);
     bindingContext.bindValue(observeTextText_documentationObserveWidget, treeViewerDocumentationObserveDetailValue, null, null);
   }
 
@@ -196,14 +209,14 @@ public class Tab extends CTabItem {
   }
 
   private void goToCode(Object selectedNode) {
-    if (selectedNode instanceof DocumentationEntry) {
-      DocumentationEntry entry = (DocumentationEntry) selectedNode;
+    if (selectedNode instanceof DocumentedElement) {
+      DocumentedElement entry = (DocumentedElement) selectedNode;
       // Reset background
-      text_code.setLineBackground(0, text_code.getLineCount(), text_code.getBackground());
+      codeText.setLineBackground(0, codeText.getLineCount(), codeText.getBackground());
       // Set background
-      text_code.setLineBackground(entry.getLineNumber() - 1, 1, GREY);
+      codeText.setLineBackground(entry.getLineNumber() - 1, 1, GREY);
       // Scroll to
-      text_code.setTopIndex(entry.getLineNumber() - 7);
+      codeText.setTopIndex(entry.getLineNumber() - 7);
     }
   }
 
@@ -227,8 +240,8 @@ public class Tab extends CTabItem {
     parent.setSelection(tab);
 
     // Open code
-    tab.text_code.setText(content.getCode());
-    
+    tab.codeText.setText(content.getCode());
+
     // Open the first entry
     tab.treeViewer.setSelection(new StructuredSelection(tab.docEntries.get(0)), true);
   }

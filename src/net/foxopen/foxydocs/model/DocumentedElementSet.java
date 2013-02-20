@@ -5,22 +5,22 @@ import java.util.List;
 
 import net.foxopen.foxydocs.model.abstractObject.AbstractModelObject;
 
-public class DocumentationEntriesSet extends AbstractModelObject {
+public class DocumentedElementSet extends AbstractModelObject {
 
   private String type;
-  private final ArrayList<AbstractModelObject> documentationEntries = new ArrayList<AbstractModelObject>();
+  private final ArrayList<AbstractModelObject> documentedElements = new ArrayList<AbstractModelObject>();
 
-  public DocumentationEntriesSet(String type, AbstractModelObject parent) {
+  public DocumentedElementSet(String type, AbstractModelObject parent) {
+    super(parent);
     setType(type);
-    this.parent = parent;
   }
 
   public List<AbstractModelObject> getDocumentationEntries() {
-    return documentationEntries;
+    return documentedElements;
   }
 
-  public void add(DocumentationEntry e) {
-    documentationEntries.add(e);
+  public void add(DocumentedElement e) {
+    documentedElements.add(e);
   }
 
   public void setType(String type) {
@@ -32,7 +32,7 @@ public class DocumentationEntriesSet extends AbstractModelObject {
   }
 
   public int size() {
-    return documentationEntries.size();
+    return documentedElements.size();
   }
 
   @Override

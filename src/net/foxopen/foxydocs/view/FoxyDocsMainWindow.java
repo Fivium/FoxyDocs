@@ -33,6 +33,8 @@ import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.ShellAdapter;
 import org.eclipse.swt.events.ShellEvent;
 import org.eclipse.swt.graphics.Point;
@@ -43,6 +45,7 @@ import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Tree;
 import org.eclipse.wb.rcp.databinding.BeansListObservableFactory;
 import org.eclipse.wb.rcp.databinding.TreeBeanAdvisor;
 import org.eclipse.wb.rcp.databinding.TreeObservableLabelProvider;
@@ -119,7 +122,26 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
               }
             }
           });
-          // Tree tree = treeViewerFileList.getTree();
+          Tree tree = treeViewerFileList.getTree();
+          tree.addMouseListener(new MouseListener() {
+
+            @Override
+            public void mouseUp(MouseEvent e) {
+              // Empty
+            }
+
+            @Override
+            public void mouseDown(MouseEvent e) {
+              // If root is empty, you can open a folder by clicking on the tree
+              if (!root.getHasChildren())
+                action_open.run();
+            }
+
+            @Override
+            public void mouseDoubleClick(MouseEvent e) {
+              // Empty
+            }
+          });
         }
       }
       {
@@ -190,7 +212,6 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
         public void run() {
           MessageDialog.openInformation(getShell(), "About", "A Fox Documentation Editor\n\npierredominique.putallaz@fivium.co.uk\n\nhttps://github.com/Akkenar/FoxyDocs");
         }
-
       };
       action_about.setImageDescriptor(ResourceManager.getImageDescriptor(FoxyDocsMainWindow.class, "/img/actions/about_kde.png"));
     }
@@ -201,7 +222,6 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
             tabFolder.getSelection().notifyListeners(EVENT_DOWN, new Event());
           }
         }
-
       };
       action_nextentry.setImageDescriptor(ResourceManager.getImageDescriptor(FoxyDocsMainWindow.class, "/img/actions/adept_reinstall.png"));
       action_nextentry.setAccelerator(SWT.ALT | 'S');
@@ -219,14 +239,18 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
     }
     {
       action_nextfile = new Action("Next File") {
-
+        public void run() {
+          MessageDialog.openInformation(getShell(), "Not Yet Implemented", "This functionality is not implemented yet.");
+        }
       };
       action_nextfile.setImageDescriptor(ResourceManager.getImageDescriptor(FoxyDocsMainWindow.class, "/img/actions/finish.png"));
       action_nextfile.setAccelerator(SWT.ALT | 'D');
     }
     {
       action_previousfile = new Action("Previous File") {
-
+        public void run() {
+          MessageDialog.openInformation(getShell(), "Not Yet Implemented", "This functionality is not implemented yet.");
+        }
       };
       action_previousfile.setImageDescriptor(ResourceManager.getImageDescriptor(FoxyDocsMainWindow.class, "/img/actions/start.png"));
       action_previousfile.setAccelerator(SWT.ALT | 'A');
@@ -290,9 +314,15 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
    */
   @Override
   protected ToolBarManager createToolBarManager(int style) {
-    ToolBarManager toolBarManager = new ToolBarManager(SWT.WRAP);
+    ToolBarManager toolBarManager = new ToolBarManager(SWT.NONE);
     toolBarManager.add(action_open);
     toolBarManager.add(action_save);
+    toolBarManager.add(new Separator());
+    toolBarManager.add(action_nextentry);
+    toolBarManager.add(action_previousentry);
+    toolBarManager.add(new Separator());
+    toolBarManager.add(action_previousfile);
+    toolBarManager.add(action_nextfile);
     return toolBarManager;
   }
 
@@ -338,7 +368,7 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
    */
   @Override
   protected Point getInitialSize() {
-    return new Point(205, 215);
+    return new Point(405, 415);
   }
 
   protected DataBindingContext initDataBindings() {

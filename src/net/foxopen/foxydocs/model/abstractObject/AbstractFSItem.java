@@ -33,7 +33,7 @@ public abstract class AbstractFSItem extends AbstractModelObject {
   }
 
   public AbstractFSItem(AbstractFSItem parent) throws IOException {
-    this.parent = parent;
+    super(parent);
   }
 
   public void open(String path) {

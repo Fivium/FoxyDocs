@@ -16,7 +16,6 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import net.foxopen.foxydocs.model.abstractObject.AbstractFSItem;
 import net.foxopen.foxydocs.model.abstractObject.AbstractModelObject;
-import net.foxopen.utils.Logger;
 
 import org.apache.commons.io.IOUtils;
 import org.eclipse.swt.widgets.Display;
@@ -32,6 +31,7 @@ public class FoxModule extends AbstractFSItem {
 
   private final List<AbstractModelObject> documentationEntriesSet = new ArrayList<AbstractModelObject>();
   private Document jdomDoc;
+  private HeaderElement headerElement ;
 
   public FoxModule(Path path, AbstractFSItem parent) throws IOException, NotAFoxModuleException {
     super(path, parent);
@@ -55,15 +55,20 @@ public class FoxModule extends AbstractFSItem {
    * @throws NotAFoxModuleException
    */
   public synchronized Collection<AbstractFSItem> readContent() throws ParserConfigurationException, SAXException, IOException, JDOMException, NotAFoxModuleException {
-    Logger.logStdout("Loading module " + getPath());
-
     jdomDoc = DOM_BUILDER.build(internalPath.toFile());
 
-    // Entries
-    addEntries(documentationEntriesSet, jdomDoc, "Header", "//fm:header");
-    addEntries(documentationEntriesSet, jdomDoc, "Entry Themes", "//fm:entry-theme");
-    addEntries(documentationEntriesSet, jdomDoc, "Actions", "//fm:action");
-    addEntries(documentationEntriesSet, jdomDoc, "Orphans", "//*[./fm:documentation and name()!='fm:header' and name()!='fm:entry-theme' and name()!='fm:action']");
+    // Header
+    List<Element> header = runXpath("/xs:schema/xs:annotation/xs:appinfo/fm:module/fm:header", jdomDoc);
+    if (header.size() != 1) {
+      throw new NotAFoxModuleException(getName());
+    }
+    headerElement = new HeaderElement(header.get(0), this);
+    documentationEntriesSet.add(headerElement);
+
+    // Regular entries
+    addEntries(documentationEntriesSet, jdomDoc, "Entry Themes", "/xs:schema/xs:annotation/xs:appinfo/fm:module//fm:entry-theme");
+    addEntries(documentationEntriesSet, jdomDoc, "Actions", "/xs:schema/xs:annotation/xs:appinfo/fm:module//fm:action");
+    addEntries(documentationEntriesSet, jdomDoc, "Orphans", "/xs:schema/xs:annotation/xs:appinfo/fm:module//*[./fm:documentation and name()!='fm:header' and name()!='fm:entry-theme' and name()!='fm:action']");
 
     if (documentationEntriesSet.size() == 0) {
       throw new NotAFoxModuleException(getName());
@@ -73,9 +78,9 @@ public class FoxModule extends AbstractFSItem {
   }
 
   private void addEntries(List<AbstractModelObject> data, org.jdom2.Document document, String key, String xpath) {
-    DocumentationEntriesSet set = new DocumentationEntriesSet(key, this);
+    DocumentedElementSet set = new DocumentedElementSet(key, this);
     for (Element e : runXpath(xpath, document)) {
-      set.add(new DocumentationEntry(e, set));
+      set.add(new DocumentedElement(e, set));
     }
     if (set.size() > 0) {
       data.add(set);
@@ -124,14 +129,14 @@ public class FoxModule extends AbstractFSItem {
     if (!isDirty())
       return;
     if (isReadOnly()) {
-      throw new IOException("You cannot save this file : Access is denied");
+      throw new IOException("You cannot save this file : This file is locked or you don't have access to it.");
     }
     // Prepare the save
     super.save();
 
     // Write into the file
     FileOutputStream fileOutputStream = new FileOutputStream(internalPath.toFile(), false);
-    IOUtils.write(toString(), fileOutputStream, "UTF-8");
+    XML_SERIALISER.output(jdomDoc, fileOutputStream);
 
     // Update the content
     reload();
@@ -146,13 +151,16 @@ public class FoxModule extends AbstractFSItem {
   public ArrayList<AbstractModelObject> getAllEntries() {
     ArrayList<AbstractModelObject> buffer = new ArrayList<AbstractModelObject>();
     for (AbstractModelObject child : getChildren()) {
-      buffer.addAll(child.getChildren());
+      if (child.getHasChildren())
+        buffer.addAll(child.getChildren());
+      else
+        buffer.add(child);
     }
     return buffer;
   }
 
   public static List<Element> runXpath(String xpath, org.jdom2.Document document) {
-    XPathExpression<Element> actionsXPath = XPathFactory.instance().compile(xpath, Filters.element(), null, NAMESPACE_FM);
+    XPathExpression<Element> actionsXPath = XPathFactory.instance().compile(xpath, Filters.element(), null, NAMESPACE_FM, NAMESPACE_XS);
     return actionsXPath.evaluate(document);
   }
 

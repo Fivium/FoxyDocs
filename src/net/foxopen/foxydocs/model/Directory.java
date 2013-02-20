@@ -13,7 +13,6 @@ import java.util.List;
 import net.foxopen.foxydocs.model.FoxModule.NotAFoxModuleException;
 import net.foxopen.foxydocs.model.abstractObject.AbstractFSItem;
 import net.foxopen.foxydocs.model.abstractObject.AbstractModelObject;
-import net.foxopen.utils.Logger;
 
 public class Directory extends AbstractFSItem {
 
@@ -59,8 +58,7 @@ public class Directory extends AbstractFSItem {
   public synchronized Collection<AbstractFSItem> readContent() throws IOException {
     Collection<AbstractFSItem> directories = new ArrayList<AbstractFSItem>();
     checkFile();
-    Logger.logStdout("Opening " + getPath());
-
+   
     // Reset or init the content list
     contentList.clear();
     firePropertyChange("children", null, getChildren());
