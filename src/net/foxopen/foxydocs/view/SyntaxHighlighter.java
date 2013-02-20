@@ -37,8 +37,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import net.xmlparser.XmlRegion;
-import net.xmlparser.XmlRegionAnalyzer;
+import net.vzurczak.main.*;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.Bullet;
