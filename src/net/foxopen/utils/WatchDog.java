@@ -185,6 +185,7 @@ public class WatchDog extends Thread {
     }
   }
 
+  @Override
   public void run() {
     Logger.logStdout("Running watch dog...");
     Display.getDefault().wake();

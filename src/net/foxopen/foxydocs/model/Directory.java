@@ -18,14 +18,15 @@ public class Directory extends AbstractFSItem {
 
   private final List<AbstractModelObject> contentList = new ArrayList<AbstractModelObject>();
 
-  public Directory(Directory parent) throws IOException {
+  public Directory(Directory parent) {
     super(parent);
   }
 
-  public Directory(Path path, Directory parent) throws IOException {
+  public Directory(Path path, Directory parent) {
     super(path, parent);
   }
 
+  @Override
   public List<AbstractModelObject> getChildren() {
     return contentList;
   }

@@ -33,7 +33,7 @@ public class FoxModule extends AbstractFSItem {
   private Document jdomDoc;
   private HeaderElement headerElement ;
 
-  public FoxModule(Path path, AbstractFSItem parent) throws IOException, NotAFoxModuleException {
+  public FoxModule(Path path, AbstractFSItem parent) throws NotAFoxModuleException {
     super(path, parent);
     checkFile();
     if (!internalPath.toFile().isFile())
@@ -54,6 +54,7 @@ public class FoxModule extends AbstractFSItem {
    * @throws JDOMException
    * @throws NotAFoxModuleException
    */
+  @Override
   public synchronized Collection<AbstractFSItem> readContent() throws ParserConfigurationException, SAXException, IOException, JDOMException, NotAFoxModuleException {
     jdomDoc = DOM_BUILDER.build(internalPath.toFile());
 
@@ -135,13 +136,15 @@ public class FoxModule extends AbstractFSItem {
     super.save();
 
     // Write into the file
-    FileOutputStream fileOutputStream = new FileOutputStream(internalPath.toFile(), false);
-    XML_SERIALISER.output(jdomDoc, fileOutputStream);
+    FileOutputStream out = new FileOutputStream(internalPath.toFile(), false);
+    XML_SERIALISER.output(jdomDoc, out);
+    out.close();
 
     // Update the content
     reload();
     jdomDoc = DOM_BUILDER.build(internalPath.toFile());
     Display.getDefault().asyncExec(new Runnable() {
+      @Override
       public void run() {
         firePropertyChange("code", null, getCode());
       }

@@ -99,7 +99,7 @@ public class SyntaxHighlighter {
         break;
       }
     }
-    StyleRange[] styles = (StyleRange[]) ranges.toArray(new StyleRange[0]);
+    StyleRange[] styles = ranges.toArray(new StyleRange[0]);
     cache.put(hash, styles);
     return styles;
   }

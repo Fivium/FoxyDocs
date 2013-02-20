@@ -3,7 +3,6 @@ package net.foxopen.foxydocs.view;
 import static net.foxopen.foxydocs.FoxyDocs.*;
 import static net.foxopen.utils.Logger.logStdout;
 
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
 import net.foxopen.foxydocs.model.Directory;
@@ -55,9 +54,11 @@ import org.eclipse.wb.swt.SWTResourceManager;
 public class FoxyDocsMainWindow extends ApplicationWindow {
   private Action action_exit;
 
-  private static AbstractFSItem root;
+  private static AbstractFSItem root = new Directory(null);
+
   private TreeViewer treeViewerFileList;
   private CTabFolder tabFolder;
+
   private Action action_open;
   private Action action_close;
   private Action action_about;
@@ -66,14 +67,6 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
   private Action action_nextfile;
   private Action action_previousfile;
   private Action action_save;
-
-  static {
-    try {
-      root = new Directory(null);
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-  }
 
   /**
    * Create the application window.
@@ -163,6 +156,7 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
   private void createActions() {
     {
       action_exit = new Action("&Exit") {
+        @Override
         public void run() {
           close();
         }
@@ -172,6 +166,7 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
     }
     {
       action_open = new Action("&Open...") {
+        @Override
         public void run() {
           // User has selected to save a file
           DirectoryDialog dlg = new DirectoryDialog(getShell(), SWT.OPEN);
@@ -198,6 +193,7 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
     }
     {
       action_close = new Action("&Close Tab") {
+        @Override
         public void run() {
           if (tabFolder.getSelection() != null) {
             tabFolder.getSelection().dispose();
@@ -209,6 +205,7 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
     }
     {
       action_about = new Action("&About...") {
+        @Override
         public void run() {
           MessageDialog.openInformation(getShell(), "About", "A Fox Documentation Editor\n\npierredominique.putallaz@fivium.co.uk\n\nhttps://github.com/Akkenar/FoxyDocs");
         }
@@ -217,6 +214,7 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
     }
     {
       action_nextentry = new Action("Next Entry") {
+        @Override
         public void run() {
           if (tabFolder.getSelection() != null) {
             tabFolder.getSelection().notifyListeners(EVENT_DOWN, new Event());
@@ -228,6 +226,7 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
     }
     {
       action_previousentry = new Action("Previous Entry") {
+        @Override
         public void run() {
           if (tabFolder.getSelection() != null) {
             tabFolder.getSelection().notifyListeners(EVENT_UP, new Event());
@@ -239,6 +238,7 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
     }
     {
       action_nextfile = new Action("Next File") {
+        @Override
         public void run() {
           MessageDialog.openInformation(getShell(), "Not Yet Implemented", "This functionality is not implemented yet.");
         }
@@ -248,6 +248,7 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
     }
     {
       action_previousfile = new Action("Previous File") {
+        @Override
         public void run() {
           MessageDialog.openInformation(getShell(), "Not Yet Implemented", "This functionality is not implemented yet.");
         }
@@ -257,6 +258,7 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
     }
     {
       action_save = new Action("&Save") {
+        @Override
         public void run() {
           try {
             root.save();
@@ -347,6 +349,7 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
     newShell.setImage(SWTResourceManager.getImage(FoxyDocsMainWindow.class, "/img/actions/Burn.png"));
 
     newShell.addDisposeListener(new DisposeListener() {
+      @Override
       public void widgetDisposed(DisposeEvent e) {
         logStdout("Disposed");
       }

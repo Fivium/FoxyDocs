@@ -20,19 +20,19 @@ public abstract class AbstractFSItem extends AbstractModelObject {
 
   abstract public HashMap<String, FoxModule> getFoxModules();
 
-  public AbstractFSItem(String path, AbstractFSItem parent) throws IOException {
+  public AbstractFSItem(String path, AbstractFSItem parent) {
     this(parent);
     internalPath = Paths.get(path);
     checkFile();
   }
 
-  public AbstractFSItem(Path path, AbstractFSItem parent) throws IOException {
+  public AbstractFSItem(Path path, AbstractFSItem parent) {
     this(parent);
     internalPath = path;
     checkFile();
   }
 
-  public AbstractFSItem(AbstractFSItem parent) throws IOException {
+  public AbstractFSItem(AbstractFSItem parent) {
     super(parent);
   }
 
@@ -42,6 +42,7 @@ public abstract class AbstractFSItem extends AbstractModelObject {
     clear();
   }
 
+  @Override
   public String getName() {
     checkFile();
     return internalPath.getFileName() + " " + (isDirty() ? "*" : "");
@@ -68,11 +69,12 @@ public abstract class AbstractFSItem extends AbstractModelObject {
     return !internalPath.toFile().canWrite();
   }
 
+  @Override
   public Image getImage() {
-    if (isReadOnly())
+    if (isReadOnly()) {
       return new Image(Display.getCurrent(), super.getImage(), SWT.IMAGE_DISABLE);
-    else
-      return super.getImage();
+    }
+    return super.getImage();
   }
 
   public String getPath() {

@@ -46,6 +46,7 @@ public class Loader {
 
     private void refreshUI() {
       Display.getDefault().asyncExec(new Runnable() {
+        @Override
         public void run() {
           for (Object o : FoxyDocsMainWindow.getRoot().getChildren()) {
             AbstractModelObject c = (AbstractModelObject) o;
@@ -124,8 +125,6 @@ public class Loader {
               FoxModule fox = new FoxModule(entryPath, resolv(parentPath));
               resolv(parentPath).getChildren().add(fox);
               resolv(parentPath).refreshUI();
-            } catch (IOException e) {
-              e.printStackTrace();
             } catch (NotAFoxModuleException e) {
               e.printStackTrace();
             }

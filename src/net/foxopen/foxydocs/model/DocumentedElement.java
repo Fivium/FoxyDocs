@@ -39,11 +39,11 @@ public class DocumentedElement extends AbstractModelObject {
     documentation = newDoc;
     previousDocumentationContent = newDoc.toString();
 
-    String name = node.getAttributeValue("name");
-    if (name == null) {
+    String nodeName = node.getAttributeValue("name");
+    if (nodeName == null) {
       setName(node.getName());
     } else {
-      setName(name);
+      setName(nodeName);
     }
   }
 
@@ -51,19 +51,23 @@ public class DocumentedElement extends AbstractModelObject {
     return lineNumber;
   }
 
+  @Override
   public int getStatus() {
     return documentation.isEmpty() ? STATUS_MISSING : STATUS_OK;
   }
 
+  @Override
   public String getCode() {
     return getParent().getCode();
   }
 
+  @Override
   public String getName() {
     return name + " " + (isDirty() ? "*" : "");
   }
 
-  public boolean isDirty() {
+  @Override
+  public synchronized boolean isDirty() {
     return !documentation.toString().equals(previousDocumentationContent);
   }
 

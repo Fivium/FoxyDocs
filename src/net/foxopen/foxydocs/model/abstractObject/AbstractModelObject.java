@@ -149,6 +149,7 @@ public abstract class AbstractModelObject extends Observable {
 
   public void refreshUI() {
     Display.getDefault().asyncExec(new Runnable() {
+      @Override
       public void run() {
         firePropertyChange("status", null, getStatus());
         if (getParent() != null) {

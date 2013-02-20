@@ -101,6 +101,7 @@ public class FoxyDocs {
     // Create the interface
     Display display = Display.getDefault();
     Realm.runWithDefault(SWTObservables.getRealm(display), new Runnable() {
+      @Override
       public void run() {
         try {
           final FoxyDocsMainWindow window = new FoxyDocsMainWindow();

@@ -22,6 +22,7 @@ import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.databinding.viewers.ObservableListTreeContentProvider;
 import org.eclipse.jface.databinding.viewers.ViewerProperties;
+import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -77,7 +78,7 @@ public class Tab extends CTabItem {
           SashForm sashFormTabContent = new SashForm(composite, SWT.NONE);
 
           treeViewer = new TreeViewer(sashFormTabContent, SWT.BORDER);
-          treeViewer.setAutoExpandLevel(TreeViewer.ALL_LEVELS);
+          treeViewer.setAutoExpandLevel(AbstractTreeViewer.ALL_LEVELS);
           treeViewer.addDoubleClickListener(new IDoubleClickListener() {
             @Override
             public void doubleClick(DoubleClickEvent event) {
