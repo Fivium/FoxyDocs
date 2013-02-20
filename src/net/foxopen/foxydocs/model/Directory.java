@@ -37,19 +37,35 @@ public class Directory extends AbstractFSItem {
   }
 
   public void walk(Directory entry, Collection<AbstractFSItem> directories) throws IOException {
-    for (Path p : Files.newDirectoryStream(entry.internalPath)) {
-      BasicFileAttributes attr = Files.getFileAttributeView(p, BasicFileAttributeView.class).readAttributes();
+    for (Path path : Files.newDirectoryStream(entry.internalPath)) {
+      BasicFileAttributes attr = Files.getFileAttributeView(path, BasicFileAttributeView.class).readAttributes();
+      // Don't like links...
+      if (attr.isSymbolicLink())
+        continue;
+
+      // Don't like hidden files...
+      if (path.toFile().isHidden())
+        continue;
+
+      // Directory
       if (attr.isDirectory()) {
-        Directory d = new Directory(p, this);
+        Directory d = new Directory(path, this);
         entry.addChild(d);
         directories.add(d);
-        //entry.walk(d, directories);
-      } else if (attr.isRegularFile()) {
+      }
+      // File
+      else if (attr.isRegularFile()) {
+        // Parse only XML's
+        String type = Files.probeContentType(path);
+        if (type == null || !type.endsWith("xml"))
+          continue;
+         
         try {
-          FoxModule fox = new FoxModule(p, this);
+          FoxModule fox = new FoxModule(path, this);
           entry.addChild(fox);
         } catch (NotAFoxModuleException e) {
           // Nothing
+
         }
       }
     }
@@ -59,14 +75,14 @@ public class Directory extends AbstractFSItem {
   public synchronized Collection<AbstractFSItem> readContent() throws IOException {
     Collection<AbstractFSItem> directories = new ArrayList<AbstractFSItem>();
     checkFile();
-   
+
     // Reset or init the content list
     contentList.clear();
     firePropertyChange("children", null, getChildren());
 
     // Recursive Walk through directories
     walk(this, directories);
-    
+
     firePropertyChange("children", null, getChildren());
 
     return directories;

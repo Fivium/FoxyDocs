@@ -14,6 +14,8 @@ public class HeaderElement extends DocumentedElement {
 
   public HeaderElement(Element node, AbstractModelObject parent) {
     super(node, parent);
+
+    // Some extra fields
     for (String attr : attributeList) {
       Element attributeElement = node.getChild(attr, NAMESPACE_FM);
       if (attributeElement == null) {

@@ -125,7 +125,7 @@ public class Loader {
               FoxModule fox = new FoxModule(entryPath, resolv(parentPath));
               resolv(parentPath).getChildren().add(fox);
               resolv(parentPath).refreshUI();
-            } catch (NotAFoxModuleException e) {
+            } catch (NotAFoxModuleException | IOException e) {
               e.printStackTrace();
             }
           }

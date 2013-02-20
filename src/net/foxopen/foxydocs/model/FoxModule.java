@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,14 +32,15 @@ public class FoxModule extends AbstractFSItem {
 
   private final List<AbstractModelObject> documentationEntriesSet = new ArrayList<AbstractModelObject>();
   private Document jdomDoc;
-  private HeaderElement headerElement ;
+  private HeaderElement headerElement;
 
-  public FoxModule(Path path, AbstractFSItem parent) throws NotAFoxModuleException {
+  public FoxModule(Path path, AbstractFSItem parent) throws NotAFoxModuleException, IOException {
     super(path, parent);
     checkFile();
-    if (!internalPath.toFile().isFile())
-      throw new IllegalArgumentException("A Fox Module must be a file");
-    if (!getPath().toUpperCase().endsWith(".XML"))
+   
+    // Check type
+    String type = Files.probeContentType(path);
+    if (type == null || !type.endsWith("xml"))
       throw new NotAFoxModuleException("Invalid XML file " + getPath());
   }
 
