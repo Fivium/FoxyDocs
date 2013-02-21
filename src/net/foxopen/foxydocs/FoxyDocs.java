@@ -42,6 +42,10 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.wb.swt.ResourceManager;
+import org.jconfig.Configuration;
+import org.jconfig.ConfigurationManager;
+import org.jconfig.ConfigurationManagerException;
+import org.jconfig.handler.XMLFileHandler;
 import org.jdom2.Namespace;
 import org.jdom2.input.SAXBuilder;
 import org.jdom2.input.sax.XMLReaderSAX2Factory;
@@ -89,14 +93,30 @@ public class FoxyDocs {
   public static final int EVENT_NEXT = 5404;
   public static final int EVENT_PREVIOUS = 5405;
 
+  public static final String APP_NAME = "FoyxDocs";
+  public static Configuration appConfig;
+  private static final XMLFileHandler xmlConfigHandler = new XMLFileHandler("config.xml");
+
   /**
    * Launch the application.
    * 
    * @param args
+   * @throws ConfigurationManagerException
    */
   public static void main(String args[]) {
     logStdout("FDE started");
 
+    // Loading configuration
+    try {
+      ConfigurationManager.getInstance().load(xmlConfigHandler, APP_NAME);
+    } catch (ConfigurationManagerException e1) {
+     // Nothing
+    }
+    appConfig = ConfigurationManager.getConfiguration(APP_NAME);
+    appConfig.setLongProperty("lastRun", System.currentTimeMillis());
+    saveConfiguration();
+
+    // Creating dom builder
     DOM_BUILDER = new SAXBuilder(new XMLReaderSAX2Factory(false, "net.sf.saxon.aelfred.SAXDriver"));
     DOM_BUILDER.setJDOMFactory(new LocatedJDOMFactory());
     // Bullet proof-ish parser as a FoxModule is not a valid XML due to
@@ -121,6 +141,7 @@ public class FoxyDocs {
       }
     });
 
+    // Create and configure the XML Serialiser
     XML_SERIALISER = new XMLOutputter();
     Format prettyPrint = Format.getPrettyFormat();
     prettyPrint.setIndent("  ");
@@ -152,6 +173,14 @@ public class FoxyDocs {
   private static Image getImage(String file) {
     ImageDescriptor image = ResourceManager.getImageDescriptor(FoxyDocsMainWindow.class, file);
     return image.createImage();
+  }
+
+  public static void saveConfiguration(){
+    try {
+      ConfigurationManager.getInstance().save(xmlConfigHandler, appConfig);
+    } catch (ConfigurationManagerException e) {
+      e.printStackTrace();
+    }
   }
 
 }

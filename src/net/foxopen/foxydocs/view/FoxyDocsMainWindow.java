@@ -97,6 +97,8 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
   private Action action_previousfile;
   private Action action_save;
 
+  private String lastUsedPath;
+
   /**
    * Create the application window.
    */
@@ -142,7 +144,7 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
                   Tab.open(tabFolder, (FoxModule) selectedNode);
                 } catch (IOException e) {
                   MessageDialog.openError(getShell(), "Error", e.getMessage());
-    }
+                }
               } else {
                 treeViewerFileList.setExpandedState(selectedNode, !treeViewerFileList.getExpandedState(selectedNode));
               }
@@ -201,12 +203,22 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
       action_open = new Action("&Open...") {
         @Override
         public void run() {
+          // Get Last Path
+          lastUsedPath = appConfig.getProperty("lastUsedPath");
           // User has selected to save a file
           DirectoryDialog dlg = new DirectoryDialog(getShell(), SWT.OPEN);
-          String path = dlg.open();
-          if (path != null) {
+          if (lastUsedPath != null) {
+            dlg.setFilterPath(lastUsedPath);
+          }
+          lastUsedPath = dlg.open();
+          if (lastUsedPath != null) {
+            appConfig.setProperty("lastUsedPath", lastUsedPath);
+            saveConfiguration();
+          }
+
+          if (lastUsedPath != null) {
             try {
-              root.open(path);
+              root.open(lastUsedPath);
               new ProgressMonitorDialog(getShell()).run(false, true, Loader.LoadContent(root));
             } catch (InvocationTargetException e) {
               e.printStackTrace();
