@@ -309,6 +309,7 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
             root.save();
           } catch (Exception e) {
             MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", e.getMessage());
+            e.printStackTrace();
           }
         }
       };

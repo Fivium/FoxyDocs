@@ -39,20 +39,10 @@ import org.jdom2.located.Located;
 public class DocumentedElement extends DocEntry {
   private String previousDocumentationContent;
   private String name;
-  private int lineNumber = -1;
-
+  
   public DocumentedElement(Element node, AbstractModelObject parent) {
     super(node, parent);
-   
-    // Extract the line number. Must use SAX and a located element
-    if (node instanceof Located) {
-      Located locatedNode = (Located) node;
-      lineNumber = locatedNode.getLine();
-    }
-
-   
-    // Create documentation
-    // DocEntry newDoc = new DocEntry(docNode, get);
+      
     previousDocumentationContent = this.toString();
 
     String nodeName = node.getAttributeValue("name");
@@ -64,7 +54,12 @@ public class DocumentedElement extends DocEntry {
   }
 
   public int getLineNumber() {
-    return lineNumber;
+    // Extract the line number. Must use SAX and a located element
+    if (node instanceof Located) {
+      Located locatedNode = (Located) node;
+      return locatedNode.getLine();
+    }
+    return 0;
   }
 
   @Override
@@ -90,7 +85,6 @@ public class DocumentedElement extends DocEntry {
     // New become old
     previousDocumentationContent = toString();
     firePropertyChange("dirty", true, isDirty());
-    firePropertyChange("status", -1, getStatus());
   }
 
   public void setName(String name) {

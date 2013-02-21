@@ -136,7 +136,7 @@ public class FoxModule extends AbstractFSItem {
 
   @Override
   public String getCode() throws IOException {
-    return NIOFileReader.readFile(getFile());
+    return NIOFileReader.readFile(getPath());
   }
 
   @Override
@@ -153,7 +153,7 @@ public class FoxModule extends AbstractFSItem {
     }
     // Prepare the save
     super.save();
-
+    
     // Write into the file
     FileOutputStream out = new FileOutputStream(getFile(), false);
     XML_SERIALISER.output(jdomDoc, out);

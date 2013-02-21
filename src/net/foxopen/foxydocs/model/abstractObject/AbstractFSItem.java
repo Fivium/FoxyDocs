@@ -78,13 +78,9 @@ public abstract class AbstractFSItem extends AbstractModelObject {
   }
 
   public void reload() {
-    try {
-      internalPath = Paths.get(internalPath.toFile().getCanonicalPath());
-      checkFile();
-      firePropertyChange("status", null, getStatus());
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
+    internalPath = Paths.get(getAbsolutePath());
+    checkFile();
+    firePropertyChange("status", null, getStatus());
   }
 
   /**
@@ -97,7 +93,7 @@ public abstract class AbstractFSItem extends AbstractModelObject {
     checkFile();
     return !getFile().canWrite();
   }
-  
+
   @Override
   public Image getImage() {
     if (isReadOnly()) {
@@ -110,15 +106,15 @@ public abstract class AbstractFSItem extends AbstractModelObject {
     checkFile();
     return getFile().getAbsolutePath().toString();
   }
-  
-  public Path getPath(){
+
+  public Path getPath() {
     return internalPath;
   }
 
   public File getFile() {
     return internalPath.toFile();
   }
-  
+
   public void checkFile() {
     if (internalPath == null)
       throw new IllegalArgumentException("The file system item must be loaded");
@@ -131,10 +127,6 @@ public abstract class AbstractFSItem extends AbstractModelObject {
   @Override
   public boolean getHasChildren() {
     return super.getHasChildren() && getChildren().get(0) instanceof AbstractFSItem;
-  }
-
-  public void sendSignal(WatchEvent<?> event) {
-    reload();
   }
 
 }

@@ -43,9 +43,13 @@ public class DocEntry extends AbstractModelObject {
   private Element comments;
   private Element description;
   private Element precondition;
+  
+  protected final Element node;
 
   public DocEntry(Element node, AbstractModelObject parent) {
     super(parent);
+    
+    this.node = node;
 
     // Get an existing documentation node. If it does not exist, create it
     Element docNode = node.getChild("documentation", NAMESPACE_FM);
@@ -122,13 +126,11 @@ public class DocEntry extends AbstractModelObject {
 
   @Override
   public List<AbstractModelObject> getChildren() {
-    // TODO Auto-generated method stub
     return null;
   }
 
   @Override
   public String getName() {
-    // TODO Auto-generated method stub
     return null;
   }
 

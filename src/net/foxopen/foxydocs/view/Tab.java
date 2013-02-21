@@ -42,7 +42,6 @@ import net.foxopen.foxydocs.model.DocEntry;
 import net.foxopen.foxydocs.model.DocumentedElement;
 import net.foxopen.foxydocs.model.DocumentedElementSet;
 import net.foxopen.foxydocs.model.FoxModule;
-import net.foxopen.foxydocs.model.HeaderElement;
 import net.foxopen.foxydocs.model.abstractObject.AbstractModelObject;
 
 import org.eclipse.core.databinding.DataBindingContext;
@@ -65,10 +64,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.SashForm;
-import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
@@ -90,10 +87,8 @@ public class Tab extends CTabItem {
   private final FoxModule content;
   private final ArrayList<AbstractModelObject> docEntries;
 
-  private final StackLayout docStackLayout;
-  private final Composite stackComposite;
-  private final Composite regularDocComposite;
-  private final Composite headerDocComposite;
+  private final CTabItem regularDocTab;
+  private final CTabItem headerDocTab;
 
   private Tab(CTabFolder parent, final FoxModule content) {
     super(parent, SWT.CLOSE);
@@ -150,31 +145,21 @@ public class Tab extends CTabItem {
                 docDescriptionText.setEnabled(true);
               }
 
-              // Special case header
-              if (selectedNode instanceof HeaderElement) {
-                docStackLayout.topControl = headerDocComposite;
-              } else {
-                docStackLayout.topControl = regularDocComposite;
-              }
-              stackComposite.layout();
             }
           });
           {
             SashForm sashFormCodeDoc = new SashForm(sashFormTabContent, SWT.VERTICAL);
             sashFormCodeDoc.setLayout(new FillLayout(SWT.VERTICAL));
 
-            Group grpDocumentation = new Group(sashFormCodeDoc, SWT.NONE);
-            grpDocumentation.setText("Documentation");
-            grpDocumentation.setLayout(new FillLayout(SWT.HORIZONTAL));
+            CTabFolder tabFolderDoc = new CTabFolder(sashFormCodeDoc, SWT.BORDER | SWT.NONE);
+            tabFolderDoc.setSelectionBackground(Display.getCurrent().getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));
 
-            // Stack composite for displaying a child composite or an other
-            stackComposite = new Composite(grpDocumentation, SWT.NONE);
-            stackComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
-            docStackLayout = new StackLayout();
-            stackComposite.setLayout(docStackLayout);
+            regularDocTab = new CTabItem(tabFolderDoc, SWT.NONE);
+            regularDocTab.setText("Documentation");
+            tabFolderDoc.setSelection(regularDocTab); // Default tab
 
             // Regular documentation composite
-            regularDocComposite = new Composite(stackComposite, SWT.NONE);
+            Composite regularDocComposite = new Composite(tabFolderDoc, SWT.NONE);
             regularDocComposite.setLayout(new FillLayout(SWT.VERTICAL));
             // Fields
             docDescriptionText = new StyledText(regularDocComposite, SWT.BORDER | SWT.V_SCROLL | SWT.WRAP);
@@ -185,14 +170,17 @@ public class Tab extends CTabItem {
 
             docPreConditionText = new StyledText(regularDocComposite, SWT.BORDER | SWT.V_SCROLL | SWT.WRAP);
             docPreConditionText.setFont(FONT_DEFAULT);
+            regularDocTab.setControl(regularDocComposite);
 
-            // Header documentation composite
-            headerDocComposite = new Composite(stackComposite, SWT.NONE);
+            headerDocTab = new CTabItem(tabFolderDoc, SWT.NONE);
+            headerDocTab.setText("Module Informations");
+
+            // Header documentation composite/
+            Composite headerDocComposite = new Composite(tabFolderDoc, SWT.NONE);
             headerDocComposite.setLayout(new FillLayout(SWT.VERTICAL));
             // TODO
-            
 
-            docStackLayout.topControl = headerDocComposite;
+            headerDocTab.setControl(headerDocComposite);
 
             Group grpCode = new Group(sashFormCodeDoc, SWT.NONE);
             grpCode.setText("Code");
@@ -332,7 +320,8 @@ public class Tab extends CTabItem {
     tab.codeText.setText(content.getCode());
 
     // Open the first entry
-    tab.treeViewer.setSelection(new StructuredSelection(tab.docEntries.get(0)), true);
+    if (tab.docEntries.size() > 1)
+      tab.treeViewer.setSelection(new StructuredSelection(tab.docEntries.get(0)), true);
   }
 
   /**
