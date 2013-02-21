@@ -29,26 +29,39 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package net.foxopen.foxydocs.model;
 
 import static net.foxopen.foxydocs.FoxyDocs.NAMESPACE_FM;
+import static net.foxopen.foxydocs.FoxyDocs.STATUS_MISSING;
+import static net.foxopen.foxydocs.FoxyDocs.STATUS_OK;
+
+import java.util.List;
+
+import net.foxopen.foxydocs.model.abstractObject.AbstractModelObject;
 
 import org.jdom2.Element;
 
-public class DocEntry {
-
-  private final Element node;
+public class DocEntry extends AbstractModelObject {
 
   private Element comments;
   private Element description;
   private Element precondition;
 
-  public DocEntry(Element node) {
-    this.node = node;
-    comments = node.getChild("comments", NAMESPACE_FM);
-    description = node.getChild("description", NAMESPACE_FM);
-    precondition = node.getChild("pre-condition", NAMESPACE_FM);
+  public DocEntry(Element node, AbstractModelObject parent) {
+    super(parent);
+
+    // Get an existing documentation node. If it does not exist, create it
+    Element docNode = node.getChild("documentation", NAMESPACE_FM);
+    if (docNode == null) {
+      // Add a new empty node
+      docNode = DocEntry.getDocumentationStructure();
+      node.addContent(docNode);
+    }
+
+    comments = docNode.getChild("comments", NAMESPACE_FM);
+    description = docNode.getChild("description", NAMESPACE_FM);
+    precondition = docNode.getChild("pre-condition", NAMESPACE_FM);
   }
 
   public boolean isEmpty() {
-    return description.getTextTrim().length() == 0;
+    return description == null || description.getTextTrim().length() == 0;
   }
 
   public static Element getDocumentationStructure() {
@@ -64,18 +77,68 @@ public class DocEntry {
     return documentation;
   }
 
-  public DocEntry setDocumentation(String content) {
-    description.removeContent();
-    description.addContent(content);
-    return this;
+  public String getDescription() {
+    if (description == null)
+      return "";
+    return description.getTextNormalize();
+  }
+
+  public void setDescription(String content) {
+    updateNode(description, content);
+  }
+
+  public String getComments() {
+    if (comments == null)
+      return "";
+    return comments.getTextNormalize();
+  }
+
+  public void setComments(String content) {
+    updateNode(comments, content);
+  }
+
+  public String getPrecondition() {
+    if (precondition == null)
+      return "";
+    return precondition.getTextNormalize();
+  }
+
+  public void setPrecondition(String content) {
+    updateNode(precondition, content);
+  }
+
+  private void updateNode(Element node, String content) {
+    node.removeContent();
+    if (content != null && content.trim().length() > 0)
+      node.addContent(content);
+    firePropertyChange("status", -1, getStatus());
+    firePropertyChange("dirty", null, isDirty());
   }
 
   @Override
   public String toString() {
-    if (description == null) {
-      return "";
-    }
-    return description.getTextNormalize();
+    return getDescription() + getComments() + getPrecondition();
   }
 
+  @Override
+  public List<AbstractModelObject> getChildren() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public String getName() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  public int getStatus(Element node) {
+    return node.getContentSize() == 0 ? STATUS_MISSING : STATUS_OK;
+  }
+
+  @Override
+  public int getStatus() {
+    // Precondition is not mandatory
+    return getStatus(comments) | getStatus(description);
+  }
 }

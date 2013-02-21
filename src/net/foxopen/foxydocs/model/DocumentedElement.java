@@ -31,42 +31,29 @@ package net.foxopen.foxydocs.model;
 import java.io.IOException;
 import java.util.List;
 
-import static net.foxopen.foxydocs.FoxyDocs.*;
-
 import net.foxopen.foxydocs.model.abstractObject.AbstractModelObject;
 
 import org.jdom2.Element;
 import org.jdom2.located.Located;
 
-public class DocumentedElement extends AbstractModelObject {
-  private DocEntry documentation;
+public class DocumentedElement extends DocEntry {
   private String previousDocumentationContent;
   private String name;
   private int lineNumber = -1;
 
   public DocumentedElement(Element node, AbstractModelObject parent) {
-    super(parent);
-    if (node == null)
-      throw new IllegalArgumentException("The node cannot be null");
-
+    super(node, parent);
+   
     // Extract the line number. Must use SAX and a located element
     if (node instanceof Located) {
       Located locatedNode = (Located) node;
       lineNumber = locatedNode.getLine();
     }
 
-    // Get an existing documentation node. If it does not exist, create it
-    Element docNode = node.getChild("documentation", NAMESPACE_FM);
-    if (docNode == null) {
-      // Add a new empty node
-      docNode = DocEntry.getDocumentationStructure();
-      node.addContent(docNode);
-    }
-
+   
     // Create documentation
-    DocEntry newDoc = new DocEntry(docNode);
-    documentation = newDoc;
-    previousDocumentationContent = newDoc.toString();
+    // DocEntry newDoc = new DocEntry(docNode, get);
+    previousDocumentationContent = this.toString();
 
     String nodeName = node.getAttributeValue("name");
     if (nodeName == null) {
@@ -81,11 +68,6 @@ public class DocumentedElement extends AbstractModelObject {
   }
 
   @Override
-  public int getStatus() {
-    return documentation.isEmpty() ? STATUS_MISSING : STATUS_OK;
-  }
-
-  @Override
   public String getCode() throws IOException {
     return getParent().getCode();
   }
@@ -97,25 +79,16 @@ public class DocumentedElement extends AbstractModelObject {
 
   @Override
   public synchronized boolean isDirty() {
-    return !documentation.toString().equals(previousDocumentationContent);
-  }
-
-  @Override
-  public void setDocumentation(String content) {
-    int oldStatus = getStatus();
-    boolean wasDirty = isDirty();
-    firePropertyChange("documentation", documentation, documentation.setDocumentation(content));
-    firePropertyChange("dirty", wasDirty, isDirty());
-    firePropertyChange("status", oldStatus, getStatus());
+    return !toString().equals(previousDocumentationContent);
   }
 
   @Override
   public void save() throws Exception {
     if (!isDirty())
       return;
-  
+
     // New become old
-    previousDocumentationContent = documentation.toString();
+    previousDocumentationContent = toString();
     firePropertyChange("dirty", true, isDirty());
     firePropertyChange("status", -1, getStatus());
   }
@@ -128,9 +101,9 @@ public class DocumentedElement extends AbstractModelObject {
 
   @Override
   public String getDocumentation() {
-    return documentation.toString();
+    return getDescription()+getComments()+getPrecondition();
   }
-
+  
   @Override
   public List<AbstractModelObject> getChildren() {
     // No children at this point

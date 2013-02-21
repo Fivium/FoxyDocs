@@ -93,7 +93,7 @@ public class FoxModule extends AbstractFSItem {
       throw new NotAFoxModuleException(getName());
     }
     headerElement = new HeaderElement(header.get(0), this);
-    documentationEntriesSet.add(headerElement);
+    documentationEntriesSet.add(headerElement); 
 
     // Regular entries
     addEntries(documentationEntriesSet, jdomDoc, "Entry Themes", "/xs:schema/xs:annotation/xs:appinfo/fm:module//fm:entry-theme");

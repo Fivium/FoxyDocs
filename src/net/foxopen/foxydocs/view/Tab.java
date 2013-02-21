@@ -42,6 +42,7 @@ import net.foxopen.foxydocs.model.DocEntry;
 import net.foxopen.foxydocs.model.DocumentedElement;
 import net.foxopen.foxydocs.model.DocumentedElementSet;
 import net.foxopen.foxydocs.model.FoxModule;
+import net.foxopen.foxydocs.model.HeaderElement;
 import net.foxopen.foxydocs.model.abstractObject.AbstractModelObject;
 
 import org.eclipse.core.databinding.DataBindingContext;
@@ -64,8 +65,10 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
@@ -78,10 +81,19 @@ import org.eclipse.wb.rcp.databinding.TreeObservableLabelProvider;
 public class Tab extends CTabItem {
 
   private final TreeViewer treeViewer;
-  private final StyledText documentationText;
+
+  private final StyledText docDescriptionText;
+  private final StyledText docCommentsText;
+  private final StyledText docPreConditionText;
   private final StyledText codeText;
+
   private final FoxModule content;
   private final ArrayList<AbstractModelObject> docEntries;
+
+  private final StackLayout docStackLayout;
+  private final Composite stackComposite;
+  private final Composite regularDocComposite;
+  private final Composite headerDocComposite;
 
   private Tab(CTabFolder parent, final FoxModule content) {
     super(parent, SWT.CLOSE);
@@ -130,16 +142,21 @@ public class Tab extends CTabItem {
 
               // Set focus and editable
               if (selectedNode instanceof DocumentedElement) {
-                documentationText.setEditable(true);
-                documentationText.setEnabled(true);
-                documentationText.setFocus();
+                docDescriptionText.setEditable(true);
+                docDescriptionText.setEnabled(true);
+                docDescriptionText.setFocus();
               } else if (selectedNode instanceof DocumentedElementSet) {
-                documentationText.setEditable(false);
-                documentationText.setEnabled(true);
+                docDescriptionText.setEditable(false);
+                docDescriptionText.setEnabled(true);
               }
 
               // Special case header
-              // TODO
+              if (selectedNode instanceof HeaderElement) {
+                docStackLayout.topControl = headerDocComposite;
+              } else {
+                docStackLayout.topControl = regularDocComposite;
+              }
+              stackComposite.layout();
             }
           });
           {
@@ -150,8 +167,32 @@ public class Tab extends CTabItem {
             grpDocumentation.setText("Documentation");
             grpDocumentation.setLayout(new FillLayout(SWT.HORIZONTAL));
 
-            documentationText = new StyledText(grpDocumentation, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.READ_ONLY);
-            documentationText.setFont(FONT_DEFAULT);
+            // Stack composite for displaying a child composite or an other
+            stackComposite = new Composite(grpDocumentation, SWT.NONE);
+            stackComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
+            docStackLayout = new StackLayout();
+            stackComposite.setLayout(docStackLayout);
+
+            // Regular documentation composite
+            regularDocComposite = new Composite(stackComposite, SWT.NONE);
+            regularDocComposite.setLayout(new FillLayout(SWT.VERTICAL));
+            // Fields
+            docDescriptionText = new StyledText(regularDocComposite, SWT.BORDER | SWT.V_SCROLL | SWT.WRAP);
+            docDescriptionText.setFont(FONT_DEFAULT);
+
+            docCommentsText = new StyledText(regularDocComposite, SWT.BORDER | SWT.V_SCROLL | SWT.WRAP);
+            docCommentsText.setFont(FONT_DEFAULT);
+
+            docPreConditionText = new StyledText(regularDocComposite, SWT.BORDER | SWT.V_SCROLL | SWT.WRAP);
+            docPreConditionText.setFont(FONT_DEFAULT);
+
+            // Header documentation composite
+            headerDocComposite = new Composite(stackComposite, SWT.NONE);
+            headerDocComposite.setLayout(new FillLayout(SWT.VERTICAL));
+            // TODO
+            
+
+            docStackLayout.topControl = headerDocComposite;
 
             Group grpCode = new Group(sashFormCodeDoc, SWT.NONE);
             grpCode.setText("Code");
@@ -208,7 +249,7 @@ public class Tab extends CTabItem {
 
             // Vertical Sash
             sashFormCodeDoc.setSashWidth(4);
-            sashFormCodeDoc.setWeights(new int[] { 1, 3 });
+            sashFormCodeDoc.setWeights(new int[] { 1, 2 });
           }
           // Horizontal Sash
           sashFormTabContent.setSashWidth(4);
@@ -227,10 +268,21 @@ public class Tab extends CTabItem {
     IObservableList childrenRootObserveList = BeanProperties.list("children").observe(content);
     treeViewer.setInput(childrenRootObserveList);
     //
-    IObservableValue observeTextText_documentationObserveWidget = WidgetProperties.text(new int[] { SWT.Modify, SWT.FocusOut, SWT.DefaultSelection }).observe(documentationText);
+    IObservableValue observeTextText_documentationObserveWidget = WidgetProperties.text(new int[] { SWT.Modify, SWT.FocusOut, SWT.DefaultSelection }).observe(docDescriptionText);
     IObservableValue observeSingleSelectionTreeViewer = ViewerProperties.singleSelection().observe(treeViewer);
-    IObservableValue treeViewerDocumentationObserveDetailValue = BeanProperties.value(AbstractModelObject.class, "documentation", DocEntry.class).observeDetail(observeSingleSelectionTreeViewer);
+    IObservableValue treeViewerDocumentationObserveDetailValue = BeanProperties.value(DocEntry.class, "description", String.class).observeDetail(observeSingleSelectionTreeViewer);
     bindingContext.bindValue(observeTextText_documentationObserveWidget, treeViewerDocumentationObserveDetailValue, null, null);
+    //
+    IObservableValue observeTextText_documentationObserveWidget2 = WidgetProperties.text(new int[] { SWT.Modify, SWT.FocusOut, SWT.DefaultSelection }).observe(docCommentsText);
+    IObservableValue observeSingleSelectionTreeViewer2 = ViewerProperties.singleSelection().observe(treeViewer);
+    IObservableValue treeViewerDocumentationObserveDetailValue2 = BeanProperties.value(DocEntry.class, "comments", String.class).observeDetail(observeSingleSelectionTreeViewer2);
+    bindingContext.bindValue(observeTextText_documentationObserveWidget2, treeViewerDocumentationObserveDetailValue2, null, null);
+    //
+    IObservableValue observeTextText_documentationObserveWidget3 = WidgetProperties.text(new int[] { SWT.Modify, SWT.FocusOut, SWT.DefaultSelection }).observe(docPreConditionText);
+    IObservableValue observeSingleSelectionTreeViewer3 = ViewerProperties.singleSelection().observe(treeViewer);
+    IObservableValue treeViewerDocumentationObserveDetailValue3 = BeanProperties.value(DocEntry.class, "precondition", String.class).observeDetail(observeSingleSelectionTreeViewer3);
+    bindingContext.bindValue(observeTextText_documentationObserveWidget3, treeViewerDocumentationObserveDetailValue3, null, null);
+
   }
 
   /**
