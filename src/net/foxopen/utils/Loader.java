@@ -103,6 +103,7 @@ public class Loader {
         // Parse modules
         monitor.beginTask("Parsing FoxModules", modules.size());
         monitor.subTask("Parsing " + modules.size() + " FoxModules");
+        
         for (FoxModule f : modules.values()) {
           if (monitor.isCanceled())
             break;

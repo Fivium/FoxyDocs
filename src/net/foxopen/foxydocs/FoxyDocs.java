@@ -59,6 +59,8 @@ import org.xml.sax.SAXParseException;
 public class FoxyDocs {
 
   public static WatchDog WATCHDOG;
+  
+  public final static String FOX_MODULE_XPATH = "/xs:schema/xs:annotation/xs:appinfo/fm:module/";
 
   public final static int STATUS_UNKNOWN = 0x0;
   public final static int STATUS_MISSING = 0x01;
@@ -145,6 +147,7 @@ public class FoxyDocs {
     XML_SERIALISER = new XMLOutputter();
     Format prettyPrint = Format.getPrettyFormat();
     prettyPrint.setIndent("  ");
+    prettyPrint.setEncoding("UTF-8");
     XML_SERIALISER.setFormat(prettyPrint);
 
     // Create the interface

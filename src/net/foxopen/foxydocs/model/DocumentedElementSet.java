@@ -28,8 +28,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 package net.foxopen.foxydocs.model;
 
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import net.foxopen.foxydocs.model.abstractObject.AbstractModelObject;
@@ -37,7 +37,7 @@ import net.foxopen.foxydocs.model.abstractObject.AbstractModelObject;
 public class DocumentedElementSet extends AbstractModelObject {
 
   private String type;
-  private final ArrayList<AbstractModelObject> documentedElements = new ArrayList<AbstractModelObject>();
+  private final List<AbstractModelObject> documentedElements = Collections.synchronizedList(new ArrayList<AbstractModelObject>());
 
   public DocumentedElementSet(String type, AbstractModelObject parent) {
     super(parent);
@@ -85,7 +85,7 @@ public class DocumentedElementSet extends AbstractModelObject {
   }
 
   @Override
-  public String getCode() throws IOException {
+  public String getCode(){
     return getParent().getCode();
   }
 }

@@ -32,7 +32,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.WatchEvent;
 import java.util.Collection;
 import java.util.HashMap;
 
@@ -72,7 +71,7 @@ public abstract class AbstractFSItem extends AbstractModelObject {
   }
 
   @Override
-  public String getName() {
+  public synchronized String getName() {
     checkFile();
     return internalPath.getFileName() + " " + (isDirty() ? "*" : "");
   }

@@ -5,12 +5,12 @@ All rights reserved.
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
-    * Redistributions of source code must retain the above copyright notice, 
+ * Redistributions of source code must retain the above copyright notice, 
       this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above copyright notice, 
+ * Redistributions in binary form must reproduce the above copyright notice, 
       this list of conditions and the following disclaimer in the documentation 
       and/or other materials provided with the distribution.
-    * Neither the name of the DEPARTMENT OF ENERGY AND CLIMATE CHANGE nor the
+ * Neither the name of the DEPARTMENT OF ENERGY AND CLIMATE CHANGE nor the
       names of its contributors may be used to endorse or promote products
       derived from this software without specific prior written permission.
 
@@ -25,13 +25,15 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-*/
+ */
 package net.foxopen.foxydocs.model;
 
 import static net.foxopen.foxydocs.FoxyDocs.NAMESPACE_FM;
 import static net.foxopen.foxydocs.FoxyDocs.STATUS_MISSING;
 import static net.foxopen.foxydocs.FoxyDocs.STATUS_OK;
+import static net.foxopen.foxydocs.FoxyDocs.STATUS_UNKNOWN;
 
+import java.util.HashMap;
 import java.util.List;
 
 import net.foxopen.foxydocs.model.abstractObject.AbstractModelObject;
@@ -40,82 +42,54 @@ import org.jdom2.Element;
 
 public class DocEntry extends AbstractModelObject {
 
-  private Element comments;
-  private Element description;
-  private Element precondition;
-  
   protected final Element node;
+  protected Element docNode;
+
+  private final HashMap<String, Element> attributes = new HashMap<String, Element>();
+  private final static String[] attributeList = new String[] { "comments", "description", "pre-condition" };
 
   public DocEntry(Element node, AbstractModelObject parent) {
     super(parent);
-    
+
     this.node = node;
 
     // Get an existing documentation node. If it does not exist, create it
-    Element docNode = node.getChild("documentation", NAMESPACE_FM);
+    docNode = node.getChild("documentation", NAMESPACE_FM);
     if (docNode == null) {
       // Add a new empty node
-      docNode = DocEntry.getDocumentationStructure();
+      docNode = new Element("documentation", NAMESPACE_FM);
       node.addContent(docNode);
     }
 
-    comments = docNode.getChild("comments", NAMESPACE_FM);
-    description = docNode.getChild("description", NAMESPACE_FM);
-    precondition = docNode.getChild("pre-condition", NAMESPACE_FM);
+    for (String attr : attributeList) {
+      attributes.put(attr, docNode.getChild(attr, NAMESPACE_FM));
+    }
   }
 
-  public boolean isEmpty() {
-    return description == null || description.getTextTrim().length() == 0;
+  private Element getAttributeNode(String key) {
+    return attributes.get(key);
   }
 
-  public static Element getDocumentationStructure() {
-    // Root
-    Element documentation = new Element("documentation", NAMESPACE_FM);
-    // Children
-    Element comments = new Element("comments", NAMESPACE_FM);
-    documentation.addContent(comments);
-    Element description = new Element("description", NAMESPACE_FM);
-    documentation.addContent(description);
-    Element precondition = new Element("pre-condition", NAMESPACE_FM);
-    documentation.addContent(precondition);
-    return documentation;
-  }
-
-  public String getDescription() {
-    if (description == null)
+  private String getAttributeText(String key) {
+    Element tNode = getAttributeNode(key);
+    if (tNode == null) {
       return "";
-    return description.getTextNormalize();
+    }
+    return tNode.getTextNormalize();
   }
 
-  public void setDescription(String content) {
-    updateNode(description, content);
-  }
-
-  public String getComments() {
-    if (comments == null)
-      return "";
-    return comments.getTextNormalize();
-  }
-
-  public void setComments(String content) {
-    updateNode(comments, content);
-  }
-
-  public String getPrecondition() {
-    if (precondition == null)
-      return "";
-    return precondition.getTextNormalize();
-  }
-
-  public void setPrecondition(String content) {
-    updateNode(precondition, content);
-  }
-
-  private void updateNode(Element node, String content) {
-    node.removeContent();
+  private void setAttributeText(String key, String content) {
+    Element tNode = getAttributeNode(key);
+    // If there is no node...
+    if (tNode == null) {
+      tNode = new Element(key, NAMESPACE_FM);
+      docNode.addContent(tNode);
+    } else {
+      tNode.removeContent();
+    }
     if (content != null && content.trim().length() > 0)
-      node.addContent(content);
-    firePropertyChange("status", -1, getStatus());
+      tNode.addContent(content);
+    firePropertyChange("status", STATUS_UNKNOWN, getStatus());
     firePropertyChange("dirty", null, isDirty());
   }
 
@@ -134,13 +108,46 @@ public class DocEntry extends AbstractModelObject {
     return null;
   }
 
-  public int getStatus(Element node) {
-    return node.getContentSize() == 0 ? STATUS_MISSING : STATUS_OK;
+  public int getStatus(String key) {
+    Element tNode = getAttributeNode(key);
+    if(tNode == null){
+      return STATUS_MISSING;
+    }
+    return tNode.getContentSize() == 0 ? STATUS_MISSING : STATUS_OK;
   }
 
   @Override
-  public int getStatus() {
+  public synchronized int getStatus() {
     // Precondition is not mandatory
-    return getStatus(comments) | getStatus(description);
+    return getStatus("comments") | getStatus("description");
+  }
+  
+  public String[] getAttributeKeys(){
+    return attributeList;
+  }
+  
+  
+  public String getDescription() {
+    return getAttributeText("description");
+  }
+
+  public void setDescription(String content) {
+    setAttributeText("description", content);
+  }
+
+  public String getComments() {
+    return getAttributeText("comments");
+  }
+
+  public void setComments(String content) {
+    setAttributeText("comments", content);
+  }
+
+  public String getPrecondition() {
+    return getAttributeText("pre-condition");
+  }
+
+  public void setPrecondition(String content) {
+    setAttributeText("pre-condition", content);
   }
 }

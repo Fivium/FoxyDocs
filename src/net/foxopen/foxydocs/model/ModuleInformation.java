@@ -5,12 +5,12 @@ All rights reserved.
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
-    * Redistributions of source code must retain the above copyright notice, 
+ * Redistributions of source code must retain the above copyright notice, 
       this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above copyright notice, 
+ * Redistributions in binary form must reproduce the above copyright notice, 
       this list of conditions and the following disclaimer in the documentation 
       and/or other materials provided with the distribution.
-    * Neither the name of the DEPARTMENT OF ENERGY AND CLIMATE CHANGE nor the
+ * Neither the name of the DEPARTMENT OF ENERGY AND CLIMATE CHANGE nor the
       names of its contributors may be used to endorse or promote products
       derived from this software without specific prior written permission.
 
@@ -25,24 +25,29 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-*/
+ */
 package net.foxopen.foxydocs.model;
 
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import net.foxopen.foxydocs.model.abstractObject.AbstractModelObject;
 import static net.foxopen.foxydocs.FoxyDocs.NAMESPACE_FM;
 
 import org.jdom2.Element;
 
-public class HeaderElement extends DocumentedElement {
+public class ModuleInformation extends AbstractModelObject{
+
+  private final static String[] attributeList = new String[] { "name", "title", "application-title", "version-desc", "description", "build-notes", "help-text", };
 
   private final HashMap<String, Element> attributes = new HashMap<String, Element>();
-  private final static String[] attributeList = new String[] { "name", "title", "application-title", "version-no", "version-desc", "history", "description", "build-notes", "help-text", };
 
-  public HeaderElement(Element node, AbstractModelObject parent) {
-    super(node, parent);
+  private String oldContent;
 
+  public ModuleInformation(Element node, AbstractModelObject parent) {
+    super(parent);
     // Some extra fields
     for (String attr : attributeList) {
       Element attributeElement = node.getChild(attr, NAMESPACE_FM);
@@ -52,6 +57,48 @@ public class HeaderElement extends DocumentedElement {
       }
       attributes.put(attr, attributeElement);
     }
+
+    save();
   }
-  
+
+  public Set<Entry<String, Element>> getContent() {
+    return attributes.entrySet();
+  }
+
+  @Override
+  public String toString() {
+    StringBuffer buffer = new StringBuffer();
+    for (Element e : attributes.values()) {
+      buffer.append(e.getTextNormalize());
+    }
+    return buffer.toString();
+  }
+
+  @Override
+  public synchronized boolean isDirty() {
+    return !oldContent.equals(this.toString());
+  }
+
+  @Override
+  public void save() {
+    oldContent = this.toString();
+  }
+
+  public void change(String key, String text) {
+    attributes.get(key).removeContent();
+    attributes.get(key).addContent(text);
+    parent.firePropertyChange("dirty", false, isDirty());
+  }
+
+  @Override
+  public List<AbstractModelObject> getChildren() {
+    // No children
+    return null;
+  }
+
+  @Override
+  public String getName() {
+   return getParent().getName();
+  }
+
 }

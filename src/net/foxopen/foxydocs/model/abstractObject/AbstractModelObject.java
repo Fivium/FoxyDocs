@@ -33,7 +33,6 @@ import static net.foxopen.foxydocs.FoxyDocs.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import java.io.IOException;
 import java.util.List;
 import java.util.Observable;
 
@@ -79,19 +78,19 @@ public abstract class AbstractModelObject extends Observable {
     });
   }
 
-  public void addPropertyChangeListener(PropertyChangeListener listener) {
+  public synchronized void addPropertyChangeListener(PropertyChangeListener listener) {
     propertyChangeSupport.addPropertyChangeListener(listener);
   }
 
-  public void addPropertyChangeListener(String propertyName, PropertyChangeListener listener) {
+  public synchronized void addPropertyChangeListener(String propertyName, PropertyChangeListener listener) {
     propertyChangeSupport.addPropertyChangeListener(propertyName, listener);
   }
 
-  public void removePropertyChangeListener(PropertyChangeListener listener) {
+  public synchronized void removePropertyChangeListener(PropertyChangeListener listener) {
     propertyChangeSupport.removePropertyChangeListener(listener);
   }
 
-  public void removePropertyChangeListener(String propertyName, PropertyChangeListener listener) {
+  public synchronized void removePropertyChangeListener(String propertyName, PropertyChangeListener listener) {
     propertyChangeSupport.removePropertyChangeListener(propertyName, listener);
   }
 
@@ -107,11 +106,11 @@ public abstract class AbstractModelObject extends Observable {
     }
   }
 
-  public void addChild(AbstractModelObject child) {
+  public synchronized void addChild(AbstractModelObject child) {
     getChildren().add(child);
   }
 
-  public int getStatus() {
+  public synchronized int getStatus() {
     int status = STATUS_UNKNOWN;
     for (Object child : getChildren()) {
       if (child instanceof AbstractModelObject) {
@@ -140,7 +139,7 @@ public abstract class AbstractModelObject extends Observable {
     throw new IllegalArgumentException("You cannot call this method directly. Please override it.");
   }
 
-  public String getCode() throws IOException {
+  public String getCode() {
     throw new IllegalArgumentException("You cannot call this method directly. Please override it.");
   }
 
@@ -176,7 +175,7 @@ public abstract class AbstractModelObject extends Observable {
     return false;
   }
 
-  public void refreshUI() {
+  public synchronized void refreshUI() {
     Display.getDefault().asyncExec(new Runnable() {
       @Override
       public void run() {

@@ -35,6 +35,7 @@ import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -44,7 +45,7 @@ import net.foxopen.foxydocs.model.abstractObject.AbstractModelObject;
 
 public class Directory extends AbstractFSItem {
 
-  private final List<AbstractModelObject> contentList = new ArrayList<AbstractModelObject>();
+  private final List<AbstractModelObject> contentList = Collections.synchronizedList(new ArrayList<AbstractModelObject>());
 
   public Directory(Directory parent) {
     super(parent);
@@ -61,7 +62,6 @@ public class Directory extends AbstractFSItem {
 
   public void addChild(AbstractFSItem e) {
     contentList.add(e);
-    refreshUI();
   }
 
   public void walk(Directory entry, Collection<AbstractFSItem> directories) throws IOException {

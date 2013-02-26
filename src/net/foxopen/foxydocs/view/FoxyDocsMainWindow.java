@@ -32,7 +32,6 @@ import static net.foxopen.foxydocs.FoxyDocs.*;
 import static net.foxopen.utils.Logger.logStdout;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 
 import net.foxopen.foxydocs.model.Directory;
 import net.foxopen.foxydocs.model.FoxModule;
@@ -219,10 +218,7 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
           if (lastUsedPath != null) {
             try {
               root.open(lastUsedPath);
-              new ProgressMonitorDialog(getShell()).run(false, true, Loader.LoadContent(root));
-            } catch (InvocationTargetException e) {
-              e.printStackTrace();
-              MessageDialog.openError(getShell(), "Error", e.getMessage());
+              new ProgressMonitorDialog(getShell()).run(true, true, Loader.LoadContent(root));
             } catch (InterruptedException e) {
               e.printStackTrace();
               MessageDialog.openInformation(getShell(), "Cancelled", e.getMessage());

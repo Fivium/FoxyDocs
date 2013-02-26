@@ -5,12 +5,12 @@ All rights reserved.
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
-    * Redistributions of source code must retain the above copyright notice, 
+ * Redistributions of source code must retain the above copyright notice, 
       this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above copyright notice, 
+ * Redistributions in binary form must reproduce the above copyright notice, 
       this list of conditions and the following disclaimer in the documentation 
       and/or other materials provided with the distribution.
-    * Neither the name of the DEPARTMENT OF ENERGY AND CLIMATE CHANGE nor the
+ * Neither the name of the DEPARTMENT OF ENERGY AND CLIMATE CHANGE nor the
       names of its contributors may be used to endorse or promote products
       derived from this software without specific prior written permission.
 
@@ -25,10 +25,9 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-*/
+ */
 package net.foxopen.foxydocs.model;
 
-import java.io.IOException;
 import java.util.List;
 
 import net.foxopen.foxydocs.model.abstractObject.AbstractModelObject;
@@ -36,14 +35,18 @@ import net.foxopen.foxydocs.model.abstractObject.AbstractModelObject;
 import org.jdom2.Element;
 import org.jdom2.located.Located;
 
-public class DocumentedElement extends DocEntry {
+public class DocumentedElement extends AbstractModelObject {
   private String previousDocumentationContent;
   private String name;
+  private final DocEntry documentationEntry;
+  private final Element node;
   
   public DocumentedElement(Element node, AbstractModelObject parent) {
-    super(node, parent);
-      
-    previousDocumentationContent = this.toString();
+    super(parent);
+    this.node = node;
+
+    documentationEntry = new DocEntry(node, this);
+    previousDocumentationContent = documentationEntry.toString();
 
     String nodeName = node.getAttributeValue("name");
     if (nodeName == null) {
@@ -63,7 +66,7 @@ public class DocumentedElement extends DocEntry {
   }
 
   @Override
-  public String getCode() throws IOException {
+  public String getCode() {
     return getParent().getCode();
   }
 
@@ -74,7 +77,7 @@ public class DocumentedElement extends DocEntry {
 
   @Override
   public synchronized boolean isDirty() {
-    return !toString().equals(previousDocumentationContent);
+    return !documentationEntry.toString().equals(previousDocumentationContent);
   }
 
   @Override
@@ -83,7 +86,7 @@ public class DocumentedElement extends DocEntry {
       return;
 
     // New become old
-    previousDocumentationContent = toString();
+    previousDocumentationContent = documentationEntry.toString();
     firePropertyChange("dirty", true, isDirty());
   }
 
@@ -95,9 +98,9 @@ public class DocumentedElement extends DocEntry {
 
   @Override
   public String getDocumentation() {
-    return getDescription()+getComments()+getPrecondition();
+    return documentationEntry.getDescription() + documentationEntry.getComments() + documentationEntry.getPrecondition();
   }
-  
+
   @Override
   public List<AbstractModelObject> getChildren() {
     // No children at this point
@@ -105,7 +108,37 @@ public class DocumentedElement extends DocEntry {
   }
 
   @Override
-  public boolean getHasChildren() {
+  public synchronized boolean  getHasChildren() {
     return false;
   }
+
+  @Override
+  public synchronized int getStatus() {
+    return documentationEntry.getStatus();
+  }
+
+  public String getDescription() {
+    return documentationEntry.getDescription();
+  }
+
+  public String getComments() {
+    return documentationEntry.getComments();
+  }
+
+  public String getPrecondition() {
+    return documentationEntry.getPrecondition();
+  }
+  
+  public void setDescription(String content) {
+    documentationEntry.setDescription(content);
+  }
+  
+  public void setComments(String content) {
+    documentationEntry.setComments(content);
+  }
+  
+  public void setPrecondition(String content) {
+    documentationEntry.setPrecondition(content);
+  }
+
 }
