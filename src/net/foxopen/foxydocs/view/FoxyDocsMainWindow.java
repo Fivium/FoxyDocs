@@ -454,7 +454,7 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
     });
 
     super.configureShell(newShell);
-    newShell.setText("FoxyDocs - Dev 0.3");
+    newShell.setText("FoxyDocs - Dev 0.4");
   }
 
   /**
