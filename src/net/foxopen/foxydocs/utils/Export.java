@@ -10,8 +10,11 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Collections;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -136,13 +139,13 @@ public class Export {
 
   private static class MultiExportThread implements IRunnableWithProgress {
 
-    private final Collection<FoxModule> modules;
+    private final List<FoxModule> modules;
     private final File targetDirectory;
     private final File indexFile;
     private final Document moduleListXML = new Document();
 
     public MultiExportThread(Collection<FoxModule> modules, File targetDiretory) {
-      this.modules = modules;
+      this.modules = new ArrayList<FoxModule>(modules);
       this.targetDirectory = targetDiretory;
       this.indexFile = new File(targetDirectory.getAbsolutePath() + "/index.html");
 
@@ -165,6 +168,13 @@ public class Export {
         FileUtils.copyFile(new File("assets/xsl/summary.html"), new File(targetDirectory.getAbsolutePath() + "/summary.html"));
         monitor.worked(1);
 
+        // Sort the collection
+        Collections.sort(modules, new Comparator<FoxModule>() {
+          @Override
+          public int compare(FoxModule o1, FoxModule o2) {
+            return o1.getName().compareTo(o2.getName());
+          }
+        });
         // Generate HTML for each module
         for (FoxModule module : modules) {
           if (monitor.isCanceled())
