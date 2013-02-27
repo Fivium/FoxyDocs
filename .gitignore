@@ -5,3 +5,5 @@
 *Thumbs.db
 /bin/
 config.xml
+/*.pdf
+/*.html

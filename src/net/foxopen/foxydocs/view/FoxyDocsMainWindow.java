@@ -5,12 +5,12 @@ All rights reserved.
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
-    * Redistributions of source code must retain the above copyright notice, 
+ * Redistributions of source code must retain the above copyright notice, 
       this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above copyright notice, 
+ * Redistributions in binary form must reproduce the above copyright notice, 
       this list of conditions and the following disclaimer in the documentation 
       and/or other materials provided with the distribution.
-    * Neither the name of the DEPARTMENT OF ENERGY AND CLIMATE CHANGE nor the
+ * Neither the name of the DEPARTMENT OF ENERGY AND CLIMATE CHANGE nor the
       names of its contributors may be used to endorse or promote products
       derived from this software without specific prior written permission.
 
@@ -25,17 +25,22 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-*/
+ */
 package net.foxopen.foxydocs.view;
 
-import static net.foxopen.foxydocs.FoxyDocs.*;
+import static net.foxopen.foxydocs.FoxyDocs.EVENT_DOWN;
+import static net.foxopen.foxydocs.FoxyDocs.EVENT_UP;
+import static net.foxopen.foxydocs.FoxyDocs.appConfig;
+import static net.foxopen.foxydocs.FoxyDocs.saveConfiguration;
 import static net.foxopen.utils.Logger.logStdout;
 
+import java.io.File;
 import java.io.IOException;
 
 import net.foxopen.foxydocs.model.Directory;
 import net.foxopen.foxydocs.model.FoxModule;
 import net.foxopen.foxydocs.model.abstractObject.AbstractFSItem;
+import net.foxopen.utils.Export;
 import net.foxopen.utils.Loader;
 
 import org.eclipse.core.databinding.DataBindingContext;
@@ -97,6 +102,8 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
   private Action action_save;
 
   private String lastUsedPath;
+  private Action action_export_pdf;
+  private Action action_load_last;
 
   /**
    * Create the application window.
@@ -251,7 +258,7 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
           MessageDialog.openInformation(getShell(), "About", "A Fox Documentation Editor\n\npierredominique.putallaz@fivium.co.uk\n\nhttps://github.com/Akkenar/FoxyDocs");
         }
       };
-      action_about.setImageDescriptor(ResourceManager.getImageDescriptor(FoxyDocsMainWindow.class, "/img/actions/about_kde.png"));
+      action_about.setImageDescriptor(ResourceManager.getImageDescriptor(FoxyDocsMainWindow.class, "/img/actions/messagebox_info.png"));
     }
     {
       action_nextentry = new Action("Next Entry") {
@@ -309,8 +316,46 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
           }
         }
       };
-      action_save.setImageDescriptor(ResourceManager.getImageDescriptor(FoxyDocsMainWindow.class, "/img/actions/save_all.png"));
+      action_save.setImageDescriptor(ResourceManager.getImageDescriptor(FoxyDocsMainWindow.class, "/img/actions/filesave.png"));
       action_save.setAccelerator(SWT.CTRL | 'S');
+    }
+    {
+      action_export_pdf = new Action("to &PDF...") {
+        @Override
+        public void run() {
+          try {
+            Tab tab = (Tab) tabFolder.getSelection();
+            Export.toPDF(tab.getContent().getFile(), new File("out.pdf"));
+          } catch (Exception e) {
+            MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", e.getMessage());
+            e.printStackTrace();
+          }
+        }
+      };
+      action_export_pdf.setImageDescriptor(ResourceManager.getImageDescriptor(FoxyDocsMainWindow.class, "/img/actions/idea.png"));
+      action_export_pdf.setAccelerator(SWT.CTRL | 'P');
+    }
+    {
+      action_load_last = new Action("Load the last location") {
+        @Override
+        public void run() {
+          lastUsedPath = appConfig.getProperty("lastUsedPath");
+          if (lastUsedPath != null) {
+            try {
+              root.open(lastUsedPath);
+              new ProgressMonitorDialog(getShell()).run(true, true, Loader.LoadContent(root));
+            } catch (InterruptedException e) {
+              MessageDialog.openInformation(getShell(), "Cancelled", e.getMessage());
+            } catch (Exception e) {
+              e.printStackTrace();
+              MessageDialog.openInformation(getShell(), "Error", e.getMessage());
+            }
+          } else {
+            MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "No last location");
+          }
+        }
+      };
+      action_load_last.setAccelerator(SWT.CTRL | 'R');
     }
   }
 
@@ -328,6 +373,8 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
       menu_file.add(action_open);
       menu_file.add(action_save);
       menu_file.add(new Separator());
+      menu_file.add(action_load_last);
+      menu_file.add(new Separator());
       menu_file.add(action_exit);
     }
     {
@@ -344,6 +391,11 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
     menu_entries.add(action_nextfile);
     menu_entries.add(new Separator());
     menu_entries.add(action_close);
+    {
+      MenuManager menu_export = new MenuManager("E&xport");
+      menuManager.add(menu_export);
+      menu_export.add(action_export_pdf);
+    }
 
     MenuManager menu_help = new MenuManager("&Help");
     menuManager.add(menu_help);
@@ -367,6 +419,8 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
     toolBarManager.add(new Separator());
     toolBarManager.add(action_previousfile);
     toolBarManager.add(action_nextfile);
+    toolBarManager.add(new Separator());
+    toolBarManager.add(action_export_pdf);
     return toolBarManager;
   }
 

@@ -433,4 +433,8 @@ public class Tab extends CTabItem {
     return null;
   }
 
+  public FoxModule getContent() {
+    return content;
+  }
+
 }

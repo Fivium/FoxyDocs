@@ -1,0 +1,109 @@
+@CHARSET "ISO-8859-1";
+
+body {
+  font-family: sans-serif;
+  color: #666;
+  background: #F9F9F9 url(bg.png) 0 0 repeat-x;
+  background-image: url(bg.png);
+  background-repeat-x: repeat;
+  background-repeat-y: no-repeat;
+  background-attachment: initial;
+  background-position-x: 0px;
+  background-position-y: 0px;
+  background-origin: initial;
+  background-clip: initial;
+  background-color: #F9F9F9;
+}
+
+a img {
+  border: 0
+}
+
+.header {
+  height: 98px;
+  width: 100%;
+}
+
+.header .nav {
+  display: inline;
+  margin: 0px;
+  padding: 0px;
+  width: 80%;
+}
+
+.header .foxOpenLogo {
+  float: right;
+  display: inline;
+  margin: 0px;
+  padding: 0px;
+}
+
+.header .nav h1 {
+  font-size: 1.5em;
+}
+
+
+.header .nav .summaryContainer, .header .nav .detailContainer {
+  font-size: 0.7em;
+  margin: 0px;
+  padding: 0px;
+}
+
+.header .nav .summaryContainer .summaryQuickLinks, .header .nav .detailContainer .detailQuickLinks {
+  display: inline;
+}
+
+.header .nav .summaryContainer .summaryQuickLinks li, .header .nav .detailContainer .detailQuickLinks li {
+  display: inline;
+  border-right: solid 1px black;
+    margin: 0px;
+  padding-left: 1px;
+    padding-right: 5px;
+}
+
+.fmHeader {
+  line-height: 1.5em;
+}
+
+.fmHeader ul li {
+  list-style: none;
+}
+
+.fmHeader .label {
+  font-weight: bold;
+  margin-right: 5px;
+}
+
+h1 {
+  color: #F88216;
+  font-size: 20pt;
+  font-weight: bold;
+  line-height: 38px;
+}
+
+h2 {
+  color: #707070;
+  font-size: 18pt;
+  font-weight: bold;
+  line-height: 38px;
+}
+
+h3 {
+  color: #707070;
+  font-size: 14pt;
+  font-weight: bold;
+  line-height: 38px;
+}
+
+a:link {
+    color: #0071BC;
+}
+a:link:hover {
+    color: #0F89D9;
+}
+a:link:active {
+    color: #0F89D9;
+}
+a:visited {
+    color: #A400BC;
+}
