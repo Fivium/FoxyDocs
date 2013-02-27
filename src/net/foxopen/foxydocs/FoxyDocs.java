@@ -29,6 +29,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package net.foxopen.foxydocs;
 
 import static net.foxopen.foxydocs.utils.Logger.logStdout;
+import static net.foxopen.foxydocs.view.FoxyDocsMainWindow.getImage;
 import net.foxopen.foxydocs.utils.WatchDog;
 import net.foxopen.foxydocs.view.FoxyDocsMainWindow;
 
@@ -171,11 +172,6 @@ public class FoxyDocs {
     });
 
     logStdout("Ended");
-  }
-
-  private static Image getImage(String file) {
-    ImageDescriptor image = ResourceManager.getImageDescriptor(FoxyDocsMainWindow.class, file);
-    return image.createImage();
   }
 
   public static void saveConfiguration(){

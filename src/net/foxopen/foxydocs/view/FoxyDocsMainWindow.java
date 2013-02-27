@@ -55,6 +55,7 @@ import org.eclipse.jface.databinding.viewers.ObservableListTreeContentProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.layout.TreeColumnLayout;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -69,6 +70,8 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.ShellAdapter;
 import org.eclipse.swt.events.ShellEvent;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -201,7 +204,7 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
           close();
         }
       };
-      action_exit.setImageDescriptor(ResourceManager.getImageDescriptor(FoxyDocsMainWindow.class, "/img/actions/exit.png"));
+      action_exit.setImageDescriptor(getIcon("/img/metro/Other/Power - Shut Down.png"));
       action_exit.setAccelerator(SWT.CTRL | 'Q');
     }
     {
@@ -236,7 +239,7 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
         }
       };
       action_open.setAccelerator(SWT.CTRL | 'O');
-      action_open.setImageDescriptor(ResourceManager.getImageDescriptor(FoxyDocsMainWindow.class, "/img/actions/folder_new.png"));
+      action_open.setImageDescriptor(getIcon("/img/metro/FoldersOS/Explorer.png"));
     }
     {
       action_close = new Action("&Close Tab") {
@@ -247,7 +250,6 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
           }
         }
       };
-      action_close.setImageDescriptor(ResourceManager.getImageDescriptor(FoxyDocsMainWindow.class, "/img/actions/cancel.png"));
       action_close.setAccelerator(SWT.CTRL | 'W');
     }
     {
@@ -257,7 +259,7 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
           MessageDialog.openInformation(getShell(), "About", "A Fox Documentation Editor\n\nDeveloper : pierredominique.putallaz@fivium.co.uk\nWith the help of mike.leonard@fivium.co.uk\nXSL : william.friesen@fivium.co.uk\n\nhttps://github.com/Akkenar/FoxyDocs");
         }
       };
-      action_about.setImageDescriptor(ResourceManager.getImageDescriptor(FoxyDocsMainWindow.class, "/img/actions/messagebox_info.png"));
+      action_about.setImageDescriptor(getIcon("/img/metro/Other/Default.png"));
     }
     {
       action_nextentry = new Action("Next Entry") {
@@ -268,7 +270,6 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
           }
         }
       };
-      action_nextentry.setImageDescriptor(ResourceManager.getImageDescriptor(FoxyDocsMainWindow.class, "/img/actions/adept_reinstall.png"));
       action_nextentry.setAccelerator(SWT.ALT | 'S');
     }
     {
@@ -280,7 +281,6 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
           }
         }
       };
-      action_previousentry.setImageDescriptor(ResourceManager.getImageDescriptor(FoxyDocsMainWindow.class, "/img/actions/up.png"));
       action_previousentry.setAccelerator(SWT.ALT | 'W');
     }
     {
@@ -295,7 +295,7 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
           }
         }
       };
-      action_save.setImageDescriptor(ResourceManager.getImageDescriptor(FoxyDocsMainWindow.class, "/img/actions/filesave.png"));
+      action_save.setImageDescriptor(getIcon("/img/metro/Other/Save.png"));
       action_save.setAccelerator(SWT.CTRL | 'S');
     }
     {
@@ -316,7 +316,7 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
           }
         }
       };
-      action_export_pdf.setImageDescriptor(ResourceManager.getImageDescriptor(FoxyDocsMainWindow.class, "/img/actions/idea.png"));
+      action_export_pdf.setImageDescriptor(getIcon("/img/metro/Adobe Acrobat Reader.png"));
       action_export_pdf.setAccelerator(SWT.CTRL | 'P');
     }
     {
@@ -339,6 +339,7 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
           }
         }
       };
+      action_load_last.setImageDescriptor(getIcon("/img/metro/Other/Power - Restart.png"));
       action_load_last.setAccelerator(SWT.CTRL | 'R');
     }
     {
@@ -357,6 +358,7 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
         }
       };
       action_export_html.setAccelerator(SWT.CTRL | 'H');
+      action_export_html.setImageDescriptor(getIcon("/img/metro/Google Chrome.png"));
     }
   }
 
@@ -414,11 +416,6 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
     ToolBarManager toolBarManager = new ToolBarManager(SWT.NONE);
     toolBarManager.add(action_open);
     toolBarManager.add(action_save);
-    toolBarManager.add(new Separator());
-    toolBarManager.add(action_nextentry);
-    toolBarManager.add(action_previousentry);
-    toolBarManager.add(new Separator());
-    toolBarManager.add(action_export_pdf);
     return toolBarManager;
   }
 
@@ -481,5 +478,28 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
     treeViewerFileList.setInput(childrenRootObserveList);
     //
     return bindingContext;
+  }
+
+  private static Image resize(Image image, int width, int height) {
+    Image scaled = new Image(Display.getDefault(), width, height);
+    GC gc = new GC(scaled);
+    gc.setAntialias(SWT.ON);
+    gc.setInterpolation(SWT.HIGH);
+    gc.drawImage(image, 0, 0, image.getBounds().width, image.getBounds().height, 0, 0, width, height);
+    gc.dispose();
+    image.dispose(); // don't forget about me!
+    return scaled;
+  }
+
+  public static ImageDescriptor getIcon(String url) {
+    return ImageDescriptor.createFromImage(getImage(url));
+  }
+
+  public static Image getImage(String url) {
+    ImageDescriptor icon = ResourceManager.getImageDescriptor(FoxyDocsMainWindow.class, url);
+    Image image = icon.createImage();
+    if (image.getBounds().width > 25)
+      return resize(image, 25, 25);
+    return image;
   }
 }

@@ -171,7 +171,7 @@ public class Tab extends CTabItem {
                   headerDocTab.setText("Module Informations");
                   headerDocTab.setControl(moduleInfoWrapper);
                 } else if (headerDocTab != null) {
-                    headerDocTab.dispose();
+                  headerDocTab.dispose();
                 }
               }
             }
@@ -365,7 +365,6 @@ public class Tab extends CTabItem {
    *          the name of the variable in the model to bind to
    */
   private void bind(StyledText pStyledText, String pKey) {
-    // Add listener
     IObservableValue observeTextText_documentationObserveWidget = WidgetProperties.text(new int[] { SWT.Modify, SWT.FocusOut, SWT.DefaultSelection }).observe(pStyledText);
     IObservableValue observeSingleSelectionTreeViewer = ViewerProperties.singleSelection().observe(treeViewer);
     IObservableValue treeViewerDocumentationObserveDetailValue = BeanProperties.value(DocumentedElement.class, pKey, String.class).observeDetail(observeSingleSelectionTreeViewer);
