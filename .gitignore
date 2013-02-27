@@ -7,3 +7,5 @@
 config.xml
 /*.pdf
 /*.html
+/export
+/report

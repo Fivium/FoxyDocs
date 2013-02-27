@@ -99,7 +99,9 @@ public class FoxModule extends AbstractFSItem {
     if (header.size() != 1) {
       throw new NotAFoxModuleException(getName());
     }
-    DocumentedElement headerElement = new DocumentedElement(header.get(0), this);
+    DocumentedElement headerElement = new DocumentedElement(header.get(0), this, true);
+    documentationEntriesSet.add(headerElement);
+    docElements.add(headerElement);
    
     // Module informations (header content)
     moduleInfo = new ModuleInformation(header.get(0), headerElement);

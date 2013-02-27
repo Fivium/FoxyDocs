@@ -72,7 +72,7 @@ public class DocEntry extends AbstractModelObject {
 
   private String getAttributeText(String key) {
     Element tNode = getAttributeNode(key);
-    if (tNode == null) {
+    if (tNode == null || tNode.getContent() == null) {
       return "";
     }
     return tNode.getTextNormalize();
@@ -110,7 +110,7 @@ public class DocEntry extends AbstractModelObject {
 
   public int getStatus(String key) {
     Element tNode = getAttributeNode(key);
-    if(tNode == null){
+    if (tNode == null) {
       return STATUS_MISSING;
     }
     return tNode.getContentSize() == 0 ? STATUS_MISSING : STATUS_OK;
@@ -121,12 +121,11 @@ public class DocEntry extends AbstractModelObject {
     // Precondition is not mandatory
     return getStatus("comments") | getStatus("description");
   }
-  
-  public String[] getAttributeKeys(){
+
+  public String[] getAttributeKeys() {
     return attributeList;
   }
-  
-  
+
   public String getDescription() {
     return getAttributeText("description");
   }

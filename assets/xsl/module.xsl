@@ -10,13 +10,13 @@
 				<xsl:value-of select="fm:header/fm:name" />
 				- Module Specification
 			</title>
-			<link type="text/css" rel="stylesheet" href="assets/xsl/style.css" />
+			<link type="text/css" rel="stylesheet" href="style.css" />
 		</head>
 		<body>
 			<div class="header">
 				<div class="foxOpenLogo">
 					<a href="summary.html">
-						<img src="assets/xsl/logo.png" alt="FOXOpen" border="0" />
+						<img src="logo.png" alt="FOXOpen" border="0" />
 					</a>
 				</div>
 				<div class="nav">

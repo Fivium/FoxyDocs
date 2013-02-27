@@ -40,10 +40,12 @@ public class DocumentedElement extends AbstractModelObject {
   private String name;
   private final DocEntry documentationEntry;
   private final Element node;
+  private final boolean isHeader;
   
-  public DocumentedElement(Element node, AbstractModelObject parent) {
+  public  DocumentedElement(Element node, AbstractModelObject parent, boolean isHeader){
     super(parent);
     this.node = node;
+    this.isHeader = isHeader;
 
     documentationEntry = new DocEntry(node, this);
     previousDocumentationContent = documentationEntry.toString();
@@ -54,6 +56,13 @@ public class DocumentedElement extends AbstractModelObject {
     } else {
       setName(nodeName);
     }
+  }
+  public DocumentedElement(Element node, AbstractModelObject parent) {
+    this(node, parent, false);
+  }
+  
+  public boolean isHeader(){
+    return isHeader;
   }
 
   public int getLineNumber() {

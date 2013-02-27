@@ -91,8 +91,13 @@ public class Tab extends CTabItem {
   private final StyledText codeText;
   private final FoxModule content;
   private final ArrayList<DocumentedElement> docEntries;
-  private final CTabItem regularDocTab;
-  private final CTabItem headerDocTab;
+  private final CTabFolder tabFolderDoc;
+
+  private CTabItem regularDocTab;
+  private CTabItem headerDocTab;
+  private final Composite regularDocComposite;
+  private final ScrolledComposite moduleInfoWrapper;
+
   private final Composite moduleInfoDocComposite;
   private final DataBindingContext bindingContext = new DataBindingContext();
 
@@ -156,13 +161,26 @@ public class Tab extends CTabItem {
               } else {
                 // TODO Do something if a DocumentElementSet is selected
               }
+
+              // Header or standard
+              if (selectedNode instanceof DocumentedElement) {
+                DocumentedElement doc = (DocumentedElement) selectedNode;
+                if (doc.isHeader()) {
+                  System.out.println("header");
+                  headerDocTab = new CTabItem(tabFolderDoc, SWT.NONE);
+                  headerDocTab.setText("Module Informations");
+                  headerDocTab.setControl(moduleInfoWrapper);
+                } else if (headerDocTab != null) {
+                    headerDocTab.dispose();
+                }
+              }
             }
           });
           {
             SashForm sashFormCodeDoc = new SashForm(sashFormTabContent, SWT.VERTICAL);
             sashFormCodeDoc.setLayout(new FillLayout(SWT.VERTICAL));
 
-            CTabFolder tabFolderDoc = new CTabFolder(sashFormCodeDoc, SWT.BORDER | SWT.NONE);
+            tabFolderDoc = new CTabFolder(sashFormCodeDoc, SWT.BORDER | SWT.NONE);
             tabFolderDoc.setSelectionBackground(Display.getCurrent().getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));
 
             regularDocTab = new CTabItem(tabFolderDoc, SWT.NONE);
@@ -170,7 +188,7 @@ public class Tab extends CTabItem {
             tabFolderDoc.setSelection(regularDocTab); // Default tab
 
             // Regular documentation composite
-            Composite regularDocComposite = new Composite(tabFolderDoc, SWT.NONE);
+            regularDocComposite = new Composite(tabFolderDoc, SWT.NONE);
             regularDocComposite.setLayout(new GridLayout(2, false));
 
             // Fields
@@ -180,11 +198,8 @@ public class Tab extends CTabItem {
 
             regularDocTab.setControl(regularDocComposite);
 
-            headerDocTab = new CTabItem(tabFolderDoc, SWT.NONE);
-            headerDocTab.setText("Module Informations");
-
             // Module Info Composite
-            ScrolledComposite moduleInfoWrapper = new ScrolledComposite(tabFolderDoc, SWT.BORDER | SWT.V_SCROLL);
+            moduleInfoWrapper = new ScrolledComposite(tabFolderDoc, SWT.BORDER | SWT.V_SCROLL);
             moduleInfoWrapper.setExpandHorizontal(true);
             moduleInfoWrapper.setExpandVertical(false);
 
@@ -197,8 +212,6 @@ public class Tab extends CTabItem {
             moduleInfoDocComposite.pack(true);
             moduleInfoWrapper.setContent(moduleInfoDocComposite);
             moduleInfoWrapper.setMinSize(moduleInfoDocComposite.computeSize(SWT.NONE, SWT.DEFAULT));
-
-            headerDocTab.setControl(moduleInfoWrapper);
 
             Group grpCode = new Group(sashFormCodeDoc, SWT.NONE);
             grpCode.setText("Code");
@@ -255,7 +268,7 @@ public class Tab extends CTabItem {
             sashFormCodeDoc.setWeights(new int[] { 1, 2 });
           }
           // Horizontal Sash
-          sashFormTabContent.setSashWidth(4);
+          sashFormTabContent.setSashWidth(10);
           sashFormTabContent.setWeights(new int[] { 1, 5 });
         }
       }
@@ -338,8 +351,8 @@ public class Tab extends CTabItem {
     tText.addModifyListener(new ModifyListener() {
       @Override
       public void modifyText(ModifyEvent e) {
-        content.getModuleInfo().change(entry.getKey(),tText.getText());
-     }
+        content.getModuleInfo().change(entry.getKey(), tText.getText());
+      }
     });
   }
 

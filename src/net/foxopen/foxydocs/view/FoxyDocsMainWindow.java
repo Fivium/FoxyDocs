@@ -97,8 +97,6 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
   private Action action_about;
   private Action action_nextentry;
   private Action action_previousentry;
-  private Action action_nextfile;
-  private Action action_previousfile;
   private Action action_save;
 
   private String lastUsedPath;
@@ -286,26 +284,6 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
       action_previousentry.setAccelerator(SWT.ALT | 'W');
     }
     {
-      action_nextfile = new Action("Next File") {
-        @Override
-        public void run() {
-          MessageDialog.openInformation(getShell(), "Not Yet Implemented", "This functionality is not implemented yet.");
-        }
-      };
-      action_nextfile.setImageDescriptor(ResourceManager.getImageDescriptor(FoxyDocsMainWindow.class, "/img/actions/finish.png"));
-      action_nextfile.setAccelerator(SWT.ALT | 'D');
-    }
-    {
-      action_previousfile = new Action("Previous File") {
-        @Override
-        public void run() {
-          MessageDialog.openInformation(getShell(), "Not Yet Implemented", "This functionality is not implemented yet.");
-        }
-      };
-      action_previousfile.setImageDescriptor(ResourceManager.getImageDescriptor(FoxyDocsMainWindow.class, "/img/actions/start.png"));
-      action_previousfile.setAccelerator(SWT.ALT | 'A');
-    }
-    {
       action_save = new Action("&Save") {
         @Override
         public void run() {
@@ -325,8 +303,10 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
         @Override
         public void run() {
           try {
+            if(tabFolder.getSelection() == null)
+              throw new RuntimeException("You must open a module before generating documentation");
             Tab tab = (Tab) tabFolder.getSelection();
-            new ProgressMonitorDialog(getShell()).run(true, true, Export.toPDF(tab.getContent().getFile(), new File("out.pdf")));
+            new ProgressMonitorDialog(getShell()).run(true, true, Export.toPDF(tab.getContent().getFile(), new File("export")));
           } catch (Exception e) {
             MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", e.getMessage());
             e.printStackTrace();
@@ -363,13 +343,14 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
         @Override
         public void run() {
           try {
-            Export.toHTML(root);
+            new ProgressMonitorDialog(getShell()).run(true, true, Export.toHTML(root));
           } catch (Exception e) {
             MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", e.getMessage());
             e.printStackTrace();
           }
         }
       };
+      action_export_html.setAccelerator(SWT.CTRL | 'H');
     }
   }
 
@@ -389,6 +370,13 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
       menu_file.add(new Separator());
       menu_file.add(action_load_last);
       menu_file.add(new Separator());
+      {
+        MenuManager menu_export = new MenuManager("E&xport");
+        menu_file.add(menu_export);
+        menu_export.add(action_export_pdf);
+        menu_export.add(action_export_html);
+      }
+      menu_file.add(new Separator());
       menu_file.add(action_exit);
     }
     {
@@ -401,16 +389,8 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
     menu_entries.add(action_previousentry);
     menu_entries.add(action_nextentry);
     menu_entries.add(new Separator());
-    menu_entries.add(action_previousfile);
-    menu_entries.add(action_nextfile);
     menu_entries.add(new Separator());
     menu_entries.add(action_close);
-    {
-      MenuManager menu_export = new MenuManager("E&xport");
-      menuManager.add(menu_export);
-      menu_export.add(action_export_pdf);
-      menu_export.add(action_export_html);
-    }
 
     MenuManager menu_help = new MenuManager("&Help");
     menuManager.add(menu_help);
@@ -431,9 +411,6 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
     toolBarManager.add(new Separator());
     toolBarManager.add(action_nextentry);
     toolBarManager.add(action_previousentry);
-    toolBarManager.add(new Separator());
-    toolBarManager.add(action_previousfile);
-    toolBarManager.add(action_nextfile);
     toolBarManager.add(new Separator());
     toolBarManager.add(action_export_pdf);
     return toolBarManager;
