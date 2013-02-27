@@ -72,8 +72,8 @@ public class DocEntry extends AbstractModelObject {
 
   private String getAttributeText(String key) {
     Element tNode = getAttributeNode(key);
-    if (tNode == null || tNode.getContent() == null) {
-      return "";
+    if (tNode == null || tNode.getContent() == null || tNode.getTextTrim().length() == 0) {
+      return new String("");
     }
     return tNode.getTextNormalize();
   }
@@ -84,11 +84,14 @@ public class DocEntry extends AbstractModelObject {
     if (tNode == null) {
       tNode = new Element(key, NAMESPACE_FM);
       docNode.addContent(tNode);
+      attributes.put(key, tNode);
     } else {
       tNode.removeContent();
     }
+    
     if (content != null && content.trim().length() > 0)
       tNode.addContent(content);
+    
     firePropertyChange("status", STATUS_UNKNOWN, getStatus());
     firePropertyChange("dirty", null, isDirty());
   }
