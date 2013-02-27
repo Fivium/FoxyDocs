@@ -34,6 +34,7 @@ import static net.foxopen.foxydocs.FoxyDocs.appConfig;
 import static net.foxopen.foxydocs.FoxyDocs.saveConfiguration;
 import static net.foxopen.utils.Logger.logStdout;
 
+import java.io.File;
 import java.io.IOException;
 
 import net.foxopen.foxydocs.model.Directory;
@@ -102,6 +103,7 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
 
   private String lastUsedPath;
   private Action action_export_pdf;
+  private Action action_load_last;
 
   /**
    * Create the application window.
@@ -323,7 +325,7 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
         public void run() {
           try {
             Tab tab = (Tab) tabFolder.getSelection();
-            Export.toPDF(tab.getContent().getCode());
+            Export.toPDF(tab.getContent().getFile(), new File("out.pdf"));
           } catch (Exception e) {
             MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", e.getMessage());
             e.printStackTrace();
@@ -332,6 +334,28 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
       };
       action_export_pdf.setImageDescriptor(ResourceManager.getImageDescriptor(FoxyDocsMainWindow.class, "/img/actions/idea.png"));
       action_export_pdf.setAccelerator(SWT.CTRL | 'P');
+    }
+    {
+      action_load_last = new Action("Load the last location") {
+        @Override
+        public void run() {
+          lastUsedPath = appConfig.getProperty("lastUsedPath");
+          if (lastUsedPath != null) {
+            try {
+              root.open(lastUsedPath);
+              new ProgressMonitorDialog(getShell()).run(true, true, Loader.LoadContent(root));
+            } catch (InterruptedException e) {
+              MessageDialog.openInformation(getShell(), "Cancelled", e.getMessage());
+            } catch (Exception e) {
+              e.printStackTrace();
+              MessageDialog.openInformation(getShell(), "Error", e.getMessage());
+            }
+          } else {
+            MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "No last location");
+          }
+        }
+      };
+      action_load_last.setAccelerator(SWT.CTRL | 'R');
     }
   }
 
@@ -348,6 +372,8 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
       menuManager.add(menu_file);
       menu_file.add(action_open);
       menu_file.add(action_save);
+      menu_file.add(new Separator());
+      menu_file.add(action_load_last);
       menu_file.add(new Separator());
       menu_file.add(action_exit);
     }
@@ -393,6 +419,7 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
     toolBarManager.add(new Separator());
     toolBarManager.add(action_previousfile);
     toolBarManager.add(action_nextfile);
+    toolBarManager.add(new Separator());
     toolBarManager.add(action_export_pdf);
     return toolBarManager;
   }
