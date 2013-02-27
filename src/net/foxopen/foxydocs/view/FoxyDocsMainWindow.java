@@ -254,7 +254,7 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
       action_about = new Action("&About...") {
         @Override
         public void run() {
-          MessageDialog.openInformation(getShell(), "About", "A Fox Documentation Editor\n\npierredominique.putallaz@fivium.co.uk\n\nhttps://github.com/Akkenar/FoxyDocs");
+          MessageDialog.openInformation(getShell(), "About", "A Fox Documentation Editor\n\nDeveloper : pierredominique.putallaz@fivium.co.uk\nWith the help of mike.leonard@fivium.co.uk\nXSL : william.friesen@fivium.co.uk\n\nhttps://github.com/Akkenar/FoxyDocs");
         }
       };
       action_about.setImageDescriptor(ResourceManager.getImageDescriptor(FoxyDocsMainWindow.class, "/img/actions/messagebox_info.png"));
@@ -303,10 +303,13 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
         @Override
         public void run() {
           try {
-            if(tabFolder.getSelection() == null)
+            if (tabFolder.getSelection() == null)
               throw new RuntimeException("You must open a module before generating documentation");
             Tab tab = (Tab) tabFolder.getSelection();
-            new ProgressMonitorDialog(getShell()).run(true, true, Export.toPDF(tab.getContent().getFile(), new File("export")));
+            DirectoryDialog dlg = new DirectoryDialog(getShell(), SWT.OPEN);
+            String targetDir = dlg.open();
+            if (targetDir != null)
+              new ProgressMonitorDialog(getShell()).run(true, true, Export.toPDF(tab.getContent().getFile(), new File(targetDir)));
           } catch (Exception e) {
             MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", e.getMessage());
             e.printStackTrace();
@@ -343,7 +346,10 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
         @Override
         public void run() {
           try {
-            new ProgressMonitorDialog(getShell()).run(true, true, Export.toHTML(root));
+            DirectoryDialog dlg = new DirectoryDialog(getShell(), SWT.OPEN);
+            String targetDir = dlg.open();
+            if (targetDir != null)
+              new ProgressMonitorDialog(getShell()).run(true, true, Export.toHTML(root, new File(targetDir)));
           } catch (Exception e) {
             MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", e.getMessage());
             e.printStackTrace();

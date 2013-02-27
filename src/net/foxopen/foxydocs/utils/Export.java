@@ -130,10 +130,9 @@ public class Export {
     openWebpage(out.toURI());
   }
 
-  public static IRunnableWithProgress toHTML(AbstractFSItem root) {
+  public static IRunnableWithProgress toHTML(AbstractFSItem root, File targetDirectory) {
     Collection<FoxModule> modules = root.getFoxModules().values();
     Logger.logStdout(modules.size() + " modules selected");
-    File targetDirectory = new File("report");
     return new MultiExportThread(modules, targetDirectory);
   }
 
