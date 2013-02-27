@@ -26,26 +26,14 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
-package net.foxopen.utils;
+package net.foxopen.foxydocs.utils;
 
-import java.io.*;
+import java.nio.file.Path;
 
-/**
- * @author Pierre-Dominique Putallaz
- */
-public final class Logger {
+public interface WatchDogEventHandler {
+  public void modified(Path entryPath);
 
-  public static void logStdout(String message) {
-    write(message, System.out);
-  }
+  public void deleted(Path entryPath);
 
-  public synchronized static void logStderr(String message) {
-    write(message, System.err);
-  }
-
-  private synchronized static void write(String message, PrintStream out) {
-    int callerPos = 3;
-    StackTraceElement caller = Thread.currentThread().getStackTrace()[callerPos];
-    out.println("[" + caller.getFileName() + ":" + caller.getLineNumber() + "] " + message);
-  }
+  public void created(Path parentPath, Path entryPath);
 }

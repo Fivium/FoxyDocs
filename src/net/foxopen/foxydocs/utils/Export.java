@@ -1,13 +1,16 @@
-package net.foxopen.utils;
+package net.foxopen.foxydocs.utils;
 
 import static net.foxopen.foxydocs.FoxyDocs.XML_SERIALISER;
 
+import java.awt.Desktop;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.StringReader;
+import java.lang.reflect.InvocationTargetException;
+import java.net.URI;
 import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -21,9 +24,15 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.sax.SAXResult;
 import javax.xml.transform.stream.StreamSource;
 
+import net.foxopen.foxydocs.model.abstractObject.AbstractFSItem;
+
 import org.apache.fop.apps.Fop;
 import org.apache.fop.apps.FopFactory;
 import org.apache.fop.apps.MimeConstants;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.swt.widgets.Display;
 import org.jdom2.Content;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -67,9 +76,19 @@ public class Export {
     return resDoc;
   }
 
-  public static void toPDF(File foxModule, File out) throws ParserConfigurationException, JDOMException, SAXException, IOException, TransformerException {
+  public static SingleExportThread toPDF(final File foxModule, final File out) {
+    return new SingleExportThread(new SingleExport() {
+      @Override
+      public void run() throws Exception {
+        toPDFinternal(foxModule, out);
+      }
+    });
+  }
+
+  private static void toPDFinternal(File foxModule, File out) throws ParserConfigurationException, JDOMException, SAXException, IOException, TransformerException {
+
     Document html = foxToHtml(foxModule);
-    
+
     // Save html dump
     FileOutputStream outhml = new FileOutputStream(new File("out.html"), false);
     XML_SERIALISER.output(html, outhml);
@@ -92,6 +111,54 @@ public class Export {
     } finally {
       // Clean-up
       pdfout.close();
+    }
+
+    openWebpage(out.toURI());
+  }
+
+  public static void toHTML(AbstractFSItem root) {
+    // TODO
+  }
+
+  public static void openWebpage(URI uri) {
+    Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
+    if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
+      try {
+        desktop.browse(uri);
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }
+  }
+
+  private static interface SingleExport {
+    public void run() throws Exception;
+  }
+
+  private static class SingleExportThread implements IRunnableWithProgress {
+
+    private final SingleExport task;
+
+    public SingleExportThread(SingleExport task) {
+      this.task = task;
+    }
+
+    @Override
+    public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+      monitor.beginTask("Generating Documentation", IProgressMonitor.UNKNOWN);
+
+      try {
+        task.run();
+        monitor.worked(1);
+      } catch (Exception e) {
+        MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", e.getMessage());
+        e.printStackTrace();
+      }
+
+      monitor.done();
+      if (monitor.isCanceled()) {
+        throw new InterruptedException("The long running operation was cancelled");
+      }
     }
   }
 }

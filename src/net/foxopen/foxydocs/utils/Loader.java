@@ -26,10 +26,10 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
-package net.foxopen.utils;
+package net.foxopen.foxydocs.utils;
 
 import static net.foxopen.foxydocs.FoxyDocs.*;
-import static net.foxopen.utils.Logger.logStderr;
+import static net.foxopen.foxydocs.utils.Logger.logStderr;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;

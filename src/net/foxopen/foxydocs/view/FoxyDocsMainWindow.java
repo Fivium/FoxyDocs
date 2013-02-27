@@ -32,7 +32,7 @@ import static net.foxopen.foxydocs.FoxyDocs.EVENT_DOWN;
 import static net.foxopen.foxydocs.FoxyDocs.EVENT_UP;
 import static net.foxopen.foxydocs.FoxyDocs.appConfig;
 import static net.foxopen.foxydocs.FoxyDocs.saveConfiguration;
-import static net.foxopen.utils.Logger.logStdout;
+import static net.foxopen.foxydocs.utils.Logger.logStdout;
 
 import java.io.File;
 import java.io.IOException;
@@ -40,8 +40,8 @@ import java.io.IOException;
 import net.foxopen.foxydocs.model.Directory;
 import net.foxopen.foxydocs.model.FoxModule;
 import net.foxopen.foxydocs.model.abstractObject.AbstractFSItem;
-import net.foxopen.utils.Export;
-import net.foxopen.utils.Loader;
+import net.foxopen.foxydocs.utils.Export;
+import net.foxopen.foxydocs.utils.Loader;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
@@ -104,6 +104,7 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
   private String lastUsedPath;
   private Action action_export_pdf;
   private Action action_load_last;
+  private Action action_export_html;
 
   /**
    * Create the application window.
@@ -325,7 +326,7 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
         public void run() {
           try {
             Tab tab = (Tab) tabFolder.getSelection();
-            Export.toPDF(tab.getContent().getFile(), new File("out.pdf"));
+            new ProgressMonitorDialog(getShell()).run(true, true, Export.toPDF(tab.getContent().getFile(), new File("out.pdf")));
           } catch (Exception e) {
             MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", e.getMessage());
             e.printStackTrace();
@@ -356,6 +357,19 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
         }
       };
       action_load_last.setAccelerator(SWT.CTRL | 'R');
+    }
+    {
+      action_export_html = new Action("to HTML report...") {
+        @Override
+        public void run() {
+          try {
+            Export.toHTML(root);
+          } catch (Exception e) {
+            MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", e.getMessage());
+            e.printStackTrace();
+          }
+        }
+      };
     }
   }
 
@@ -395,6 +409,7 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
       MenuManager menu_export = new MenuManager("E&xport");
       menuManager.add(menu_export);
       menu_export.add(action_export_pdf);
+      menu_export.add(action_export_html);
     }
 
     MenuManager menu_help = new MenuManager("&Help");

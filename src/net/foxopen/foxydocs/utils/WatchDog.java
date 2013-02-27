@@ -27,7 +27,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-package net.foxopen.utils;
+package net.foxopen.foxydocs.utils;
 
 import java.nio.file.*;
 import java.nio.file.WatchEvent.Kind;

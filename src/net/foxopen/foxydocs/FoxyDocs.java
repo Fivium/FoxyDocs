@@ -28,9 +28,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 package net.foxopen.foxydocs;
 
-import static net.foxopen.utils.Logger.logStdout;
+import static net.foxopen.foxydocs.utils.Logger.logStdout;
+import net.foxopen.foxydocs.utils.WatchDog;
 import net.foxopen.foxydocs.view.FoxyDocsMainWindow;
-import net.foxopen.utils.WatchDog;
 
 import org.eclipse.core.databinding.observable.Realm;
 import org.eclipse.jface.databinding.swt.SWTObservables;
