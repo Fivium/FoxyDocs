@@ -156,8 +156,10 @@ public class Tab extends CTabItem {
               Object selectedNode = thisSelection.getFirstElement();
               goToCode(selectedNode);
 
-              // Set focus and editable
+              if (headerDocTab != null)
+                headerDocTab.dispose();
               if (selectedNode instanceof DocumentedElement) {
+
                 DocumentedElement doc = (DocumentedElement) selectedNode;
                 regularDocComposite.setVisible(true);
                 regularDocTab.getParent().setSelection(regularDocTab);
@@ -166,13 +168,9 @@ public class Tab extends CTabItem {
                   headerDocTab = new CTabItem(tabFolderDoc, SWT.NONE);
                   headerDocTab.setText("Module Informations");
                   headerDocTab.setControl(moduleInfoWrapper);
-                } else if (headerDocTab != null) {
-                  headerDocTab.dispose();
                 }
               } else {
-                headerDocTab.dispose();
                 regularDocComposite.setVisible(false);
-                // TODO Do something if a DocumentElementSet is selected
               }
             }
           });

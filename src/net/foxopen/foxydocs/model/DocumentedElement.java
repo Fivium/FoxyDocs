@@ -154,14 +154,17 @@ public class DocumentedElement extends AbstractModelObject implements AbstractDo
     return documentationEntry.getPrecondition();
   }
   
+  @Override
   public void setDescription(String content) {
     documentationEntry.setDescription(content);
   }
   
+  @Override
   public void setComments(String content) {
     documentationEntry.setComments(content);
   }
   
+  @Override
   public void setPrecondition(String content) {
     documentationEntry.setPrecondition(content);
   }

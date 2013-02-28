@@ -104,4 +104,19 @@ public class DocumentedElementSet extends AbstractModelObject implements Abstrac
   public String getPrecondition() {
     return "";
   }
+
+  @Override
+  public void setDescription(String c) {
+    // Nothing
+  }
+
+  @Override
+  public void setComments(String c) {
+    // Nothing
+  }
+
+  @Override
+  public void setPrecondition(String c) {
+    // Nothing
+  }
 }
