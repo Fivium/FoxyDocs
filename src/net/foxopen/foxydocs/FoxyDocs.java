@@ -5,12 +5,12 @@ All rights reserved.
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
-    * Redistributions of source code must retain the above copyright notice, 
+ * Redistributions of source code must retain the above copyright notice, 
       this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above copyright notice, 
+ * Redistributions in binary form must reproduce the above copyright notice, 
       this list of conditions and the following disclaimer in the documentation 
       and/or other materials provided with the distribution.
-    * Neither the name of the DEPARTMENT OF ENERGY AND CLIMATE CHANGE nor the
+ * Neither the name of the DEPARTMENT OF ENERGY AND CLIMATE CHANGE nor the
       names of its contributors may be used to endorse or promote products
       derived from this software without specific prior written permission.
 
@@ -25,24 +25,33 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-*/
+ */
 package net.foxopen.foxydocs;
 
 import static net.foxopen.foxydocs.utils.Logger.logStdout;
 import static net.foxopen.foxydocs.view.FoxyDocsMainWindow.getImage;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
+import java.nio.channels.FileChannel;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.WritableByteChannel;
+
 import net.foxopen.foxydocs.utils.WatchDog;
 import net.foxopen.foxydocs.view.FoxyDocsMainWindow;
 
 import org.eclipse.core.databinding.observable.Realm;
 import org.eclipse.jface.databinding.swt.SWTObservables;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Device;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.wb.swt.ResourceManager;
 import org.jconfig.Configuration;
 import org.jconfig.ConfigurationManager;
 import org.jconfig.ConfigurationManagerException;
@@ -60,7 +69,7 @@ import org.xml.sax.SAXParseException;
 public class FoxyDocs {
 
   public static WatchDog WATCHDOG;
-  
+
   public final static String FOX_MODULE_XPATH = "/xs:schema/xs:annotation/xs:appinfo/fm:module/";
 
   public final static int STATUS_UNKNOWN = 0x0;
@@ -113,7 +122,7 @@ public class FoxyDocs {
     try {
       ConfigurationManager.getInstance().load(xmlConfigHandler, APP_NAME);
     } catch (ConfigurationManagerException e1) {
-     // Nothing
+      // Nothing
     }
     appConfig = ConfigurationManager.getConfiguration(APP_NAME);
     appConfig.setLongProperty("lastRun", System.currentTimeMillis());
@@ -174,11 +183,59 @@ public class FoxyDocs {
     logStdout("Ended");
   }
 
-  public static void saveConfiguration(){
+  public static void saveConfiguration() {
     try {
       ConfigurationManager.getInstance().save(xmlConfigHandler, appConfig);
     } catch (ConfigurationManagerException e) {
       e.printStackTrace();
+    }
+  }
+
+  public static void duplicateResource(String resource, String path) throws IOException {
+    duplicateResource(resource, new File(path));
+  }
+
+  public static void duplicateResource(String resource, File target) throws IOException {
+    copyFile(getFile(resource), target);
+  }
+
+  public static InputStream getFile(String uri) {
+    InputStream resource = FoxyDocs.class.getClassLoader().getResourceAsStream(uri);
+    if (resource == null)
+      throw new IllegalArgumentException("Resource not found : " + uri);
+    return resource;
+  }
+
+  public static void copyFile(InputStream sourceInputStream, File destFile) throws IOException {
+    FileChannel destination = null;
+    ReadableByteChannel source = null;
+    try {
+      source = Channels.newChannel(sourceInputStream);
+      destination = new FileOutputStream(destFile).getChannel();
+      fastChannelCopy(source, destination);
+      source.close();
+      destination.close();
+
+    } finally {
+      if (source != null) {
+        source.close();
+      }
+      if (destination != null) {
+        destination.close();
+      }
+    }
+  }
+
+  public static void fastChannelCopy(final ReadableByteChannel source, final WritableByteChannel target) throws IOException {
+    final ByteBuffer buffer = ByteBuffer.allocateDirect(16 * 1024);
+    while (source.read(buffer) != -1) {
+      buffer.flip();
+      target.write(buffer);
+      buffer.compact();
+    }
+    buffer.flip();
+    while (buffer.hasRemaining()) {
+      target.write(buffer);
     }
   }
 

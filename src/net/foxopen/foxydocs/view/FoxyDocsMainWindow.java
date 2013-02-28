@@ -84,7 +84,6 @@ import org.eclipse.swt.widgets.Tree;
 import org.eclipse.wb.rcp.databinding.BeansListObservableFactory;
 import org.eclipse.wb.rcp.databinding.TreeBeanAdvisor;
 import org.eclipse.wb.rcp.databinding.TreeObservableLabelProvider;
-import org.eclipse.wb.swt.ResourceManager;
 import org.eclipse.wb.swt.SWTResourceManager;
 
 public class FoxyDocsMainWindow extends ApplicationWindow {
@@ -496,8 +495,7 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
   }
 
   public static Image getImage(String url) {
-    ImageDescriptor icon = ResourceManager.getImageDescriptor(FoxyDocsMainWindow.class, url);
-    Image image = icon.createImage();
+    Image image = SWTResourceManager.getImage(FoxyDocsMainWindow.class, url);
     if (image.getBounds().width > 25)
       return resize(image, 25, 25);
     return image;

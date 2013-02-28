@@ -1,6 +1,7 @@
 package net.foxopen.foxydocs.utils;
 
 import static net.foxopen.foxydocs.FoxyDocs.XML_SERIALISER;
+import static net.foxopen.foxydocs.FoxyDocs.duplicateResource;
 
 import java.awt.Desktop;
 import java.io.BufferedOutputStream;
@@ -12,9 +13,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Collections;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -26,10 +27,10 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.sax.SAXResult;
 import javax.xml.transform.stream.StreamSource;
 
+import net.foxopen.foxydocs.FoxyDocs;
 import net.foxopen.foxydocs.model.FoxModule;
 import net.foxopen.foxydocs.model.abstractObject.AbstractFSItem;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.fop.apps.Fop;
 import org.apache.fop.apps.FopFactory;
 import org.apache.fop.apps.MimeConstants;
@@ -61,7 +62,7 @@ public class Export {
 
   public static List<Content> transform(Document doc, String stylesheet) throws JDOMException {
     try {
-      Transformer transformer = TransformerFactory.newInstance().newTransformer(new StreamSource(stylesheet));
+      Transformer transformer = TransformerFactory.newInstance().newTransformer(new StreamSource(FoxyDocs.getFile(stylesheet)));
       JDOMSource in = new JDOMSource(doc);
       JDOMResult out = new JDOMResult();
       transformer.transform(in, out);
@@ -80,7 +81,7 @@ public class Export {
     DOMBuilder jbuilder = new DOMBuilder();
     Document doc = jbuilder.build(builder.parse(module));
 
-    List<Content> res = transform(doc, "assets/xsl/module.xsl");
+    List<Content> res = transform(doc, "xsl/module.xsl");
     Document resDoc = new Document();
 
     resDoc.addContent(new Element("html"));
@@ -94,8 +95,8 @@ public class Export {
       @Override
       public void run() throws Exception {
         targetDirectory.mkdir();
-        FileUtils.copyFile(new File("assets/xsl/logo.png"), new File(targetDirectory.getAbsolutePath() + "/logo.png"));
-        FileUtils.copyFile(new File("assets/xsl/style.css"), new File(targetDirectory.getAbsolutePath() + "/style.css"));
+        duplicateResource("xsl/logo.png", targetDirectory.getAbsolutePath() + "/logo.png");
+        duplicateResource("xsl/style.css", targetDirectory.getAbsolutePath() + "/style.css");
 
         File out = new File(targetDirectory.getAbsolutePath() + "/module.pdf");
 
@@ -108,7 +109,7 @@ public class Export {
 
     Document html = foxToHtml(foxModule);
 
-    List<Content> res = transform(html, "assets/xsl/xhtml2fo.xsl");
+    List<Content> res = transform(html, "xsl/xhtml2fo.xsl");
     Document fopDoc = new Document(res);
 
     OutputStream pdfout = new BufferedOutputStream(new FileOutputStream(out));
@@ -159,12 +160,13 @@ public class Export {
         // Create the target directory
         targetDirectory.mkdir();
         monitor.worked(1);
-        // Copy static ressources across
-        FileUtils.copyFile(new File("assets/xsl/logo.png"), new File(targetDirectory.getAbsolutePath() + "/logo.png"));
-        FileUtils.copyFile(new File("assets/xsl/bg.png"), new File(targetDirectory.getAbsolutePath() + "/bg.png"));
-        FileUtils.copyFile(new File("assets/xsl/style.css"), new File(targetDirectory.getAbsolutePath() + "/style.css"));
-        FileUtils.copyFile(new File("assets/xsl/index.html"), indexFile);
-        FileUtils.copyFile(new File("assets/xsl/summary.html"), new File(targetDirectory.getAbsolutePath() + "/summary.html"));
+        // Copy static resources across
+
+        duplicateResource("xsl/index.html", indexFile);
+        duplicateResource("xsl/logo.png", targetDirectory.getAbsolutePath() + "/logo.png");
+        duplicateResource("xsl/bg.png", targetDirectory.getAbsolutePath() + "/bg.png");
+        duplicateResource("xsl/style.css", targetDirectory.getAbsolutePath() + "/style.css");
+        duplicateResource("xsl/summary.html", targetDirectory.getAbsolutePath() + "/summary.html");
         monitor.worked(1);
 
         // Sort the collection
@@ -198,7 +200,7 @@ public class Export {
         }
 
         // Generate listing
-        Document listing = new Document(transform(moduleListXML, "assets/xsl/listing.xsl"));
+        Document listing = new Document(transform(moduleListXML, "xsl/listing.xsl"));
         FileOutputStream outhtml = new FileOutputStream(new File(targetDirectory.getAbsolutePath() + "/listing.html"), false);
         XML_SERIALISER.output(listing, outhtml);
         outhtml.close();
