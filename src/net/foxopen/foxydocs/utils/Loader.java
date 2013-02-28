@@ -47,6 +47,7 @@ import net.foxopen.foxydocs.view.FoxyDocsMainWindow;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.widgets.Display;
 
 public class Loader {
@@ -56,6 +57,9 @@ public class Loader {
     // Kill running WatchDog Thread
     if (FoxyDocs.WATCHDOG != null)
       FoxyDocs.WATCHDOG.interrupt();
+    for(CTabItem tab : FoxyDocsMainWindow.tabFolder.getItems()){
+      tab.dispose();
+    }
     return new ThreadPopulateStructure(target);
   }
 

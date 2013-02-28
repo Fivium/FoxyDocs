@@ -91,7 +91,7 @@ public class Tab extends CTabItem {
 
   private final StyledText codeText;
   private final FoxModule content;
-  private final ArrayList<DocumentedElement> docEntries;
+  private ArrayList<DocumentedElement> docEntries;
 
   private final CTabFolder tabFolderDoc;
   private CTabItem regularDocTab;
@@ -158,8 +158,8 @@ public class Tab extends CTabItem {
 
               if (headerDocTab != null)
                 headerDocTab.dispose();
+              
               if (selectedNode instanceof DocumentedElement) {
-
                 DocumentedElement doc = (DocumentedElement) selectedNode;
                 regularDocComposite.setVisible(true);
                 regularDocTab.getParent().setSelection(regularDocTab);
@@ -265,6 +265,7 @@ public class Tab extends CTabItem {
             content.addPropertyChangeListener("module", new PropertyChangeListener() {
               @Override
               public void propertyChange(PropertyChangeEvent evt) {
+                docEntries = content.getAllEntries();
                 treeViewer.expandAll();
               }
             });

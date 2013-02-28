@@ -92,7 +92,7 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
   private static AbstractFSItem root = new Directory(null);
 
   private TreeViewer treeViewerFileList;
-  private CTabFolder tabFolder;
+  public static CTabFolder tabFolder;
 
   private Action action_open;
   private Action action_close;

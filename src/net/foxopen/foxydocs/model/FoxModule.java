@@ -58,7 +58,7 @@ import org.xml.sax.SAXException;
 public class FoxModule extends AbstractFSItem {
 
   private final List<AbstractModelObject> documentationEntriesSet = Collections.synchronizedList(new ArrayList<AbstractModelObject>());
-  
+
   private Document jdomDoc;
   private ModuleInformation moduleInfo;
   private String fullStringContent;
@@ -93,11 +93,11 @@ public class FoxModule extends AbstractFSItem {
 
     // Cache the module as a String while parsing so opening a tab is faster
     fullStringContent = XML_SERIALISER.outputString(jdomDoc);
-  
+
     // Reset data structures
     docElements = new ArrayList<>();
     documentationEntriesSet.clear();
-  
+
     // Header
     List<Element> header = runXpath(FOX_MODULE_XPATH + "fm:header", jdomDoc);
     if (header.size() != 1) {
@@ -106,7 +106,7 @@ public class FoxModule extends AbstractFSItem {
     DocumentedElement headerElement = new DocumentedElement(header.get(0), this, true);
     documentationEntriesSet.add(headerElement);
     docElements.add(headerElement);
-   
+
     // Module informations (header content)
     moduleInfo = new ModuleInformation(header.get(0), headerElement);
 
@@ -171,9 +171,9 @@ public class FoxModule extends AbstractFSItem {
   public String toString() {
     return getName();
   }
-  
+
   @Override
-  public synchronized boolean isDirty(){
+  public synchronized boolean isDirty() {
     return super.isDirty() || (moduleInfo != null && moduleInfo.isDirty());
   }
 
@@ -192,11 +192,11 @@ public class FoxModule extends AbstractFSItem {
     FileOutputStream out = new FileOutputStream(getFile(), false);
     XML_SERIALISER.output(jdomDoc, out);
     out.close();
-    
+
     // Update the content
     reload();
-    jdomDoc = DOM_BUILDER.build(new ByteArrayInputStream(XML_SERIALISER.outputString(DOM_BUILDER.build(getFile())).getBytes("UTF-8")));
-    fullStringContent = XML_SERIALISER.outputString(jdomDoc);
+    //readContent();
+    fullStringContent = XML_SERIALISER.outputString(DOM_BUILDER.build(getFile()));
 
     Display.getDefault().asyncExec(new Runnable() {
       @Override
