@@ -5,6 +5,10 @@ A simple developer tool for adding, editing and exporting documentation for one 
 
 http://foxopen.net/
 
+## Demonstration Video
+
+https://dse-vmawaghv.vde.net.au/foxydocs_demo.avi
+
 ## Getting Started with Eclipse
 This section describes how to setup the project using Eclipse.
 
