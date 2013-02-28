@@ -30,12 +30,13 @@ package net.foxopen.foxydocs.model;
 
 import java.util.List;
 
+import net.foxopen.foxydocs.model.abstractObject.AbstractDocumentedElement;
 import net.foxopen.foxydocs.model.abstractObject.AbstractModelObject;
 
 import org.jdom2.Element;
 import org.jdom2.located.Located;
 
-public class DocumentedElement extends AbstractModelObject {
+public class DocumentedElement extends AbstractModelObject implements AbstractDocumentedElement {
   private String previousDocumentationContent;
   private String name;
   private final DocEntry documentationEntry;
@@ -105,6 +106,9 @@ public class DocumentedElement extends AbstractModelObject {
     firePropertyChange("name", this.name, this.name = name);
   }
 
+  /* (non-Javadoc)
+   * @see net.foxopen.foxydocs.model.AbstractDocumentedElement#getDocumentation()
+   */
   @Override
   public String getDocumentation() {
     return documentationEntry.getDescription() + documentationEntry.getComments() + documentationEntry.getPrecondition();
@@ -126,14 +130,26 @@ public class DocumentedElement extends AbstractModelObject {
     return documentationEntry.getStatus();
   }
 
+  /* (non-Javadoc)
+   * @see net.foxopen.foxydocs.model.AbstractDocumentedElement#getDescription()
+   */
+  @Override
   public String getDescription() {
     return documentationEntry.getDescription();
   }
 
+  /* (non-Javadoc)
+   * @see net.foxopen.foxydocs.model.AbstractDocumentedElement#getComments()
+   */
+  @Override
   public String getComments() {
     return documentationEntry.getComments();
   }
 
+  /* (non-Javadoc)
+   * @see net.foxopen.foxydocs.model.AbstractDocumentedElement#getPrecondition()
+   */
+  @Override
   public String getPrecondition() {
     return documentationEntry.getPrecondition();
   }

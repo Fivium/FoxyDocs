@@ -62,7 +62,7 @@ public class FoxModule extends AbstractFSItem {
   private Document jdomDoc;
   private ModuleInformation moduleInfo;
   private String fullStringContent;
-  private ArrayList<DocumentedElement> docElements = new ArrayList<>();
+  private ArrayList<DocumentedElement> docElements;
 
   public FoxModule(Path path, AbstractFSItem parent) throws NotAFoxModuleException, IOException {
     super(path, parent);
@@ -93,7 +93,11 @@ public class FoxModule extends AbstractFSItem {
 
     // Cache the module as a String while parsing so opening a tab is faster
     fullStringContent = XML_SERIALISER.outputString(jdomDoc);
-
+  
+    // Reset data structures
+    docElements = new ArrayList<>();
+    documentationEntriesSet.clear();
+  
     // Header
     List<Element> header = runXpath(FOX_MODULE_XPATH + "fm:header", jdomDoc);
     if (header.size() != 1) {
@@ -133,7 +137,7 @@ public class FoxModule extends AbstractFSItem {
       // Own set
       set.add(docElement);
 
-      // Flatted version
+      // Flat version
       docElements.add(docElement);
     }
     if (set.size() > 0) {
@@ -191,11 +195,13 @@ public class FoxModule extends AbstractFSItem {
     
     // Update the content
     reload();
-    jdomDoc = DOM_BUILDER.build(getFile());
+    jdomDoc = DOM_BUILDER.build(new ByteArrayInputStream(XML_SERIALISER.outputString(DOM_BUILDER.build(getFile())).getBytes("UTF-8")));
     fullStringContent = XML_SERIALISER.outputString(jdomDoc);
+
     Display.getDefault().asyncExec(new Runnable() {
       @Override
       public void run() {
+        firePropertyChange("module", null, this);
         firePropertyChange("code", null, getCode());
       }
     });

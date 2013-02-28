@@ -43,6 +43,7 @@ import java.util.Map.Entry;
 import net.foxopen.foxydocs.model.DocumentedElement;
 import net.foxopen.foxydocs.model.DocumentedElementSet;
 import net.foxopen.foxydocs.model.FoxModule;
+import net.foxopen.foxydocs.model.abstractObject.AbstractDocumentedElement;
 import net.foxopen.foxydocs.model.abstractObject.AbstractModelObject;
 
 import org.eclipse.core.databinding.DataBindingContext;
@@ -85,16 +86,17 @@ import org.jdom2.Element;
 
 public class Tab extends CTabItem {
 
-  private final TreeViewer treeViewer;
   private final HashMap<String, StyledText> docElements = new HashMap<String, StyledText>();
+  private final TreeViewer treeViewer;
 
   private final StyledText codeText;
   private final FoxModule content;
   private final ArrayList<DocumentedElement> docEntries;
-  private final CTabFolder tabFolderDoc;
 
+  private final CTabFolder tabFolderDoc;
   private CTabItem regularDocTab;
   private CTabItem headerDocTab;
+
   private final Composite regularDocComposite;
   private final ScrolledComposite moduleInfoWrapper;
 
@@ -156,23 +158,21 @@ public class Tab extends CTabItem {
 
               // Set focus and editable
               if (selectedNode instanceof DocumentedElement) {
+                DocumentedElement doc = (DocumentedElement) selectedNode;
+                regularDocComposite.setVisible(true);
                 regularDocTab.getParent().setSelection(regularDocTab);
                 docElements.get("description").setFocus();
-              } else {
-                // TODO Do something if a DocumentElementSet is selected
-              }
-
-              // Header or standard
-              if (selectedNode instanceof DocumentedElement) {
-                DocumentedElement doc = (DocumentedElement) selectedNode;
                 if (doc.isHeader()) {
-                  System.out.println("header");
                   headerDocTab = new CTabItem(tabFolderDoc, SWT.NONE);
                   headerDocTab.setText("Module Informations");
                   headerDocTab.setControl(moduleInfoWrapper);
                 } else if (headerDocTab != null) {
                   headerDocTab.dispose();
                 }
+              } else {
+                headerDocTab.dispose();
+                regularDocComposite.setVisible(false);
+                // TODO Do something if a DocumentElementSet is selected
               }
             }
           });
@@ -260,6 +260,14 @@ public class Tab extends CTabItem {
                 codeText.setText(content.getCode());
                 codeText.setTopIndex(topIndex);
                 goToCode(content);
+              }
+            });
+
+            // Reload module
+            content.addPropertyChangeListener("module", new PropertyChangeListener() {
+              @Override
+              public void propertyChange(PropertyChangeEvent evt) {
+                treeViewer.expandAll();
               }
             });
 
@@ -367,7 +375,7 @@ public class Tab extends CTabItem {
   private void bind(StyledText pStyledText, String pKey) {
     IObservableValue observeTextText_documentationObserveWidget = WidgetProperties.text(new int[] { SWT.Modify, SWT.FocusOut, SWT.DefaultSelection }).observe(pStyledText);
     IObservableValue observeSingleSelectionTreeViewer = ViewerProperties.singleSelection().observe(treeViewer);
-    IObservableValue treeViewerDocumentationObserveDetailValue = BeanProperties.value(DocumentedElement.class, pKey, String.class).observeDetail(observeSingleSelectionTreeViewer);
+    IObservableValue treeViewerDocumentationObserveDetailValue = BeanProperties.value(AbstractDocumentedElement.class, pKey, String.class).observeDetail(observeSingleSelectionTreeViewer);
     bindingContext.bindValue(observeTextText_documentationObserveWidget, treeViewerDocumentationObserveDetailValue, null, null);
   }
 
