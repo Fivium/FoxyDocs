@@ -45,7 +45,6 @@ import net.foxopen.foxydocs.model.abstractObject.AbstractModelObject;
 import net.foxopen.foxydocs.view.FoxyDocsMainWindow;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.widgets.Display;
@@ -54,9 +53,7 @@ public class Loader {
 
   public static IRunnableWithProgress LoadContent(AbstractFSItem target) {
     target.checkFile();
-    // Kill running WatchDog Thread
-    if (FoxyDocs.WATCHDOG != null)
-      FoxyDocs.WATCHDOG.interrupt();
+    FoxyDocs.stopWatchdog();
     for (CTabItem tab : FoxyDocsMainWindow.tabFolder.getItems()) {
       tab.dispose();
     }
@@ -82,7 +79,6 @@ public class Loader {
         public void run() {
           for (Object o : FoxyDocsMainWindow.getRoot().getChildren()) {
             AbstractModelObject c = (AbstractModelObject) o;
-            c.firePropertyChange("name", null, c.getName());
             c.firePropertyChange("status", null, c.getStatus());
           }
         }
@@ -122,8 +118,8 @@ public class Loader {
         monitorList.putAll(modules);
 
       } catch (Exception e) {
-        MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", e.getMessage());
         e.printStackTrace();
+        throw new InterruptedException(e.getMessage());
       }
 
       monitor.done();
@@ -156,6 +152,8 @@ public class Loader {
 
           @Override
           public void created(Path parentPath, Path entryPath) {
+            if (parentPath == null || entryPath == null)
+              return;
             try {
               FoxModule fox = new FoxModule(entryPath, resolv(parentPath));
               resolv(parentPath).getChildren().add(fox);

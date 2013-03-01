@@ -28,29 +28,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package net.foxopen.foxydocs.model;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import net.foxopen.foxydocs.model.abstractObject.AbstractDocumentedElement;
 import net.foxopen.foxydocs.model.abstractObject.AbstractModelObject;
 
-public class DocumentedElementSet extends AbstractModelObject implements AbstractDocumentedElement {
+public class DocumentedElementSet extends AbstractDocumentedElement  {
 
   private String type;
-  private final List<AbstractModelObject> documentedElements = Collections.synchronizedList(new ArrayList<AbstractModelObject>());
-
+ 
   public DocumentedElementSet(String type, AbstractModelObject parent) {
     super(parent);
     setType(type);
-  }
-
-  public List<AbstractModelObject> getDocumentationEntries() {
-    return documentedElements;
-  }
-
-  public void add(DocumentedElement e) {
-    documentedElements.add(e);
   }
 
   public void setType(String type) {
@@ -62,27 +49,12 @@ public class DocumentedElementSet extends AbstractModelObject implements Abstrac
   }
 
   public int size() {
-    return documentedElements.size();
+    return getChildren().size();
   }
 
   @Override
   public String getName() {
-    return getType() + " " + (isDirty() ? "*" : "");
-  }
-
-  @Override
-  public List<AbstractModelObject> getChildren() {
-    return getDocumentationEntries();
-  }
-
-  @Override
-  public String getDocumentation() {
-    String buffer = "";
-    for (AbstractModelObject doc : getChildren()) {
-      buffer += "- " + doc.getName() + "\n";
-      buffer += doc.getDocumentation() + "\n\n";
-    }
-    return buffer;
+    return type;
   }
 
   @Override

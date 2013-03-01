@@ -6,6 +6,7 @@ import static net.foxopen.foxydocs.FoxyDocs.duplicateResource;
 import java.awt.Desktop;
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -60,9 +61,9 @@ public class Export {
     }
   }
 
-  public static List<Content> transform(Document doc, String stylesheet) throws JDOMException {
+  public static List<Content> transform(Document doc, String stylesheet) throws JDOMException, FileNotFoundException {
     try {
-      Transformer transformer = TransformerFactory.newInstance().newTransformer(new StreamSource(FoxyDocs.getFile(stylesheet)));
+      Transformer transformer = TransformerFactory.newInstance().newTransformer(new StreamSource(FoxyDocs.getInternalFile(stylesheet)));
       JDOMSource in = new JDOMSource(doc);
       JDOMResult out = new JDOMResult();
       transformer.transform(in, out);
@@ -115,7 +116,6 @@ public class Export {
     OutputStream pdfout = new BufferedOutputStream(new FileOutputStream(out));
 
     try {
-      @SuppressWarnings("static-access")
       Fop fop = fopFactory.newFop(MimeConstants.MIME_PDF, pdfout);
       TransformerFactory factory = TransformerFactory.newInstance();
       Transformer transformer = factory.newTransformer();
@@ -173,7 +173,7 @@ public class Export {
         Collections.sort(modules, new Comparator<FoxModule>() {
           @Override
           public int compare(FoxModule o1, FoxModule o2) {
-            return o1.getName().compareTo(o2.getName());
+            return o1.getDisplayedName().compareTo(o2.getDisplayedName());
           }
         });
         // Generate HTML for each module
@@ -185,7 +185,7 @@ public class Export {
           Document html = foxToHtml(module.getFile());
 
           // Write it
-          File targetFile = new File(targetDirectory.getAbsolutePath() + "/" + module.getName() + ".html");
+          File targetFile = new File(targetDirectory.getAbsolutePath() + "/" + module.getDisplayedName() + ".html");
           targetFile.createNewFile();
           FileOutputStream outhtml = new FileOutputStream(targetFile, false);
           XML_SERIALISER.output(html, outhtml);

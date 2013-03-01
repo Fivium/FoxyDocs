@@ -34,7 +34,6 @@ import static net.foxopen.foxydocs.FoxyDocs.STATUS_OK;
 import static net.foxopen.foxydocs.FoxyDocs.STATUS_UNKNOWN;
 
 import java.util.HashMap;
-import java.util.List;
 
 import net.foxopen.foxydocs.model.abstractObject.AbstractModelObject;
 
@@ -58,12 +57,18 @@ public class DocEntry extends AbstractModelObject {
     if (docNode == null) {
       // Add a new empty node
       docNode = new Element("documentation", NAMESPACE_FM);
-      node.addContent(docNode);
+      // node.addContent(docNode);
     }
 
     for (String attr : attributeList) {
       attributes.put(attr, docNode.getChild(attr, NAMESPACE_FM));
     }
+  }
+
+  @Override
+  public void save() {
+    if (node.getChild("documentation", NAMESPACE_FM) == null)
+      node.addContent(docNode);
   }
 
   private Element getAttributeNode(String key) {
@@ -88,27 +93,25 @@ public class DocEntry extends AbstractModelObject {
     } else {
       tNode.removeContent();
     }
-    
+
     if (content != null && content.trim().length() > 0)
       tNode.addContent(content);
-    
+
     firePropertyChange("status", STATUS_UNKNOWN, getStatus());
     firePropertyChange("dirty", null, isDirty());
   }
 
   @Override
-  public String toString() {
-    return getDescription() + getComments() + getPrecondition();
-  }
-
-  @Override
-  public List<AbstractModelObject> getChildren() {
-    return null;
-  }
-
-  @Override
   public String getName() {
-    return null;
+    return getParent().getName();
+  }
+
+  public String getHash(){
+    StringBuilder hash = new StringBuilder();
+    for(String attr : attributes.keySet()){
+      hash.append(getAttributeText(attr).hashCode());
+    }
+    return hash.toString();
   }
 
   public int getStatus(String key) {

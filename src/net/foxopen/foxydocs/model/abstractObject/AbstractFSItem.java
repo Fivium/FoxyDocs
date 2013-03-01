@@ -49,9 +49,7 @@ public abstract class AbstractFSItem extends AbstractModelObject {
   abstract public HashMap<String, FoxModule> getFoxModules();
 
   public AbstractFSItem(String path, AbstractFSItem parent) {
-    this(parent);
-    internalPath = Paths.get(path);
-    checkFile();
+    this(Paths.get(path), parent);
   }
 
   public AbstractFSItem(Path path, AbstractFSItem parent) {
@@ -64,19 +62,13 @@ public abstract class AbstractFSItem extends AbstractModelObject {
     super(parent);
   }
 
-  public void open(String path) {
+  public final void open(String path) {
     internalPath = Paths.get(path);
     checkFile();
     clear();
   }
 
-  @Override
-  public synchronized String getName() {
-    checkFile();
-    return internalPath.getFileName() + " " + (isDirty() ? "*" : "");
-  }
-
-  public void reload() {
+  public final void reload() {
     internalPath = Paths.get(getAbsolutePath());
     checkFile();
     firePropertyChange("status", null, getStatus());
@@ -88,9 +80,32 @@ public abstract class AbstractFSItem extends AbstractModelObject {
    * @return true if the file is not writable, false otherwise
    * @throws IOException
    */
-  public boolean isReadOnly() {
+  public final boolean isReadOnly() {
     checkFile();
     return !getFile().canWrite();
+  }
+
+  public final String getAbsolutePath() {
+    checkFile();
+    return getFile().getAbsolutePath().toString();
+  }
+
+  public final Path getPath() {
+    checkFile();
+    return internalPath;
+  }
+
+  public final File getFile() {
+    return internalPath.toFile();
+  }
+
+  public final void checkFile() {
+    if (internalPath == null)
+      throw new IllegalArgumentException("The file system item must be loaded");
+    // Can we read the file ?
+    if (!getFile().canRead()) {
+      throw new IllegalArgumentException("Cannot read the file");
+    }
   }
 
   @Override
@@ -99,28 +114,6 @@ public abstract class AbstractFSItem extends AbstractModelObject {
       return new Image(Display.getCurrent(), super.getImage(), SWT.IMAGE_DISABLE);
     }
     return super.getImage();
-  }
-
-  public String getAbsolutePath() {
-    checkFile();
-    return getFile().getAbsolutePath().toString();
-  }
-
-  public Path getPath() {
-    return internalPath;
-  }
-
-  public File getFile() {
-    return internalPath.toFile();
-  }
-
-  public void checkFile() {
-    if (internalPath == null)
-      throw new IllegalArgumentException("The file system item must be loaded");
-    // Can we read the file ?
-    if (!getFile().canRead()) {
-      throw new IllegalArgumentException("Cannot read the file");
-    }
   }
 
   @Override

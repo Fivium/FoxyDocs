@@ -28,23 +28,26 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package net.foxopen.foxydocs.model;
 
-import static net.foxopen.foxydocs.FoxyDocs.*;
+import static net.foxopen.foxydocs.FoxyDocs.DOM_BUILDER;
+import static net.foxopen.foxydocs.FoxyDocs.FOX_MODULE_XPATH;
+import static net.foxopen.foxydocs.FoxyDocs.NAMESPACE_FM;
+import static net.foxopen.foxydocs.FoxyDocs.NAMESPACE_XS;
+import static net.foxopen.foxydocs.FoxyDocs.XML_SERIALISER;
 
-import java.io.ByteArrayInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import net.foxopen.foxydocs.FoxyDocs;
 import net.foxopen.foxydocs.model.abstractObject.AbstractFSItem;
-import net.foxopen.foxydocs.model.abstractObject.AbstractModelObject;
 
 import org.eclipse.swt.widgets.Display;
 import org.jdom2.Document;
@@ -56,8 +59,6 @@ import org.jdom2.xpath.XPathFactory;
 import org.xml.sax.SAXException;
 
 public class FoxModule extends AbstractFSItem {
-
-  private final List<AbstractModelObject> documentationEntriesSet = Collections.synchronizedList(new ArrayList<AbstractModelObject>());
 
   private Document jdomDoc;
   private ModuleInformation moduleInfo;
@@ -74,74 +75,18 @@ public class FoxModule extends AbstractFSItem {
       throw new NotAFoxModuleException("Invalid XML file " + getAbsolutePath());
   }
 
-  /**
-   * Parse the XML content
-   * 
-   * @param internalPath
-   *          the input file
-   * @return the data structure with the code and the documentation entry
-   * @throws ParserConfigurationException
-   * @throws IOException
-   * @throws SAXException
-   * @throws JDOMException
-   * @throws NotAFoxModuleException
-   */
-  @Override
-  public Collection<AbstractFSItem> readContent() throws ParserConfigurationException, SAXException, IOException, JDOMException, NotAFoxModuleException {
-    // Parse the document two times to have a proper location for each element
-    jdomDoc = DOM_BUILDER.build(new ByteArrayInputStream(XML_SERIALISER.outputString(DOM_BUILDER.build(getFile())).getBytes("UTF-8")));
-
-    // Cache the module as a String while parsing so opening a tab is faster
-    fullStringContent = XML_SERIALISER.outputString(jdomDoc);
-
-    // Reset data structures
-    docElements = new ArrayList<>();
-    documentationEntriesSet.clear();
-
-    // Header
-    List<Element> header = runXpath(FOX_MODULE_XPATH + "fm:header", jdomDoc);
-    if (header.size() != 1) {
-      throw new NotAFoxModuleException(getName());
-    }
-    DocumentedElement headerElement = new DocumentedElement(header.get(0), this, true);
-    documentationEntriesSet.add(headerElement);
-    docElements.add(headerElement);
-
-    // Module informations (header content)
-    moduleInfo = new ModuleInformation(header.get(0), headerElement);
-
-    // Entry themes
-    addEntries(documentationEntriesSet, jdomDoc, "Entry Themes", FOX_MODULE_XPATH + "fm:entry-theme-list/fm:entry-theme");
-
-    // Module actions
-    addEntries(documentationEntriesSet, jdomDoc, "Module Actions", FOX_MODULE_XPATH + "fm:action-list/fm:action");
-
-    // States actions
-    List<Element> states = runXpath(FOX_MODULE_XPATH + "fm:state-list/fm:state", jdomDoc);
-    for (Element state : states) {
-      String name = state.getAttributeValue("name");
-      addEntries(documentationEntriesSet, jdomDoc, "State " + name + " Actions", FOX_MODULE_XPATH + "/fm:state-list/fm:state[@name='" + name + "']//fm:action");
-    }
-
-    if (documentationEntriesSet.size() == 0) {
-      throw new NotAFoxModuleException(getName());
-    }
-
-    return null;
-  }
-
-  private void addEntries(List<AbstractModelObject> data, org.jdom2.Document document, String key, String xpath) {
+  private void addEntries(String key, String xpath) {
     DocumentedElementSet set = new DocumentedElementSet(key, this);
-    for (Element e : runXpath(xpath, document)) {
+    for (Element e : runXpath(xpath, jdomDoc)) {
       DocumentedElement docElement = new DocumentedElement(e, set);
       // Own set
-      set.add(docElement);
+      set.addChild(docElement);
 
       // Flat version
       docElements.add(docElement);
     }
     if (set.size() > 0) {
-      data.add(set);
+      addChild(set);
     }
   }
 
@@ -150,9 +95,22 @@ public class FoxModule extends AbstractFSItem {
     getParent().firePropertyChange("children", null, getParent().getChildren());
   }
 
+  public ArrayList<DocumentedElement> getAllEntries() {
+    return docElements;
+  }
+
+  public static List<Element> runXpath(String xpath, org.jdom2.Document document) {
+    XPathExpression<Element> actionsXPath = XPathFactory.instance().compile(xpath, Filters.element(), null, NAMESPACE_FM, NAMESPACE_XS);
+    return actionsXPath.evaluate(document);
+  }
+
+  public ModuleInformation getModuleInfo() {
+    return moduleInfo;
+  }
+
   @Override
-  public List<AbstractModelObject> getChildren() {
-    return documentationEntriesSet;
+  public String getName() {
+    return getFile().getName().replaceAll(".xml", "");
   }
 
   @Override
@@ -169,7 +127,7 @@ public class FoxModule extends AbstractFSItem {
 
   @Override
   public String toString() {
-    return getName();
+    return getDisplayedName();
   }
 
   @Override
@@ -195,7 +153,7 @@ public class FoxModule extends AbstractFSItem {
 
     // Update the content
     reload();
-    //readContent();
+    // readContent();
     fullStringContent = XML_SERIALISER.outputString(DOM_BUILDER.build(getFile()));
 
     Display.getDefault().asyncExec(new Runnable() {
@@ -207,13 +165,67 @@ public class FoxModule extends AbstractFSItem {
     });
   }
 
-  public ArrayList<DocumentedElement> getAllEntries() {
-    return docElements;
-  }
+  /**
+   * Parse the XML content
+   * 
+   * @param internalPath
+   *          the input file
+   * @return the data structure with the code and the documentation entry
+   * @throws ParserConfigurationException
+   * @throws IOException
+   * @throws SAXException
+   * @throws JDOMException
+   * @throws NotAFoxModuleException
+   */
+  @Override
+  public Collection<AbstractFSItem> readContent() throws ParserConfigurationException, SAXException, IOException, JDOMException, NotAFoxModuleException {
+    // TODO Patch raw file to handle duplicate namespaces
 
-  public static List<Element> runXpath(String xpath, org.jdom2.Document document) {
-    XPathExpression<Element> actionsXPath = XPathFactory.instance().compile(xpath, Filters.element(), null, NAMESPACE_FM, NAMESPACE_XS);
-    return actionsXPath.evaluate(document);
+    // Parse the document two times to have a proper location for each element
+    Document firstRun = DOM_BUILDER.build(getFile());
+    // Cache the module as a String while parsing so opening a tab is faster
+    fullStringContent = XML_SERIALISER.outputString(firstRun);
+    jdomDoc = DOM_BUILDER.build(new StringReader(fullStringContent));
+
+    // TODO Store namespaces
+    jdomDoc.getRootElement().addNamespaceDeclaration(FoxyDocs.NAMESPACE_XSI);
+    jdomDoc.getRootElement().addNamespaceDeclaration(FoxyDocs.NAMESPACE_XS);
+    jdomDoc.getRootElement().addNamespaceDeclaration(FoxyDocs.NAMESPACE_FM);
+
+    // Reset data structures
+    docElements = new ArrayList<>();
+    getChildren().clear();
+
+    // Header
+    List<Element> header = runXpath(FOX_MODULE_XPATH + "fm:header", jdomDoc);
+    if (header.size() != 1) {
+      throw new NotAFoxModuleException(getDisplayedName());
+    }
+    DocumentedElement headerElement = new DocumentedElement(header.get(0), this, true);
+    addChild(headerElement);
+    docElements.add(headerElement);
+
+    // Module informations (header content)
+    moduleInfo = new ModuleInformation(header.get(0), headerElement);
+
+    // Entry themes
+    addEntries("Entry Themes", FOX_MODULE_XPATH + "fm:entry-theme-list/fm:entry-theme");
+
+    // Module actions
+    addEntries("Module Actions", FOX_MODULE_XPATH + "fm:action-list/fm:action");
+
+    // States actions
+    List<Element> states = runXpath(FOX_MODULE_XPATH + "fm:state-list/fm:state", jdomDoc);
+    for (Element state : states) {
+      String name = state.getAttributeValue("name");
+      addEntries("State " + name + " Actions", FOX_MODULE_XPATH + "/fm:state-list/fm:state[@name='" + name + "']//fm:action");
+    }
+
+    if (getChildren().size() == 0) {
+      throw new NotAFoxModuleException(getDisplayedName());
+    }
+
+    return null;
   }
 
   public static class NotAFoxModuleException extends Exception {
@@ -222,9 +234,5 @@ public class FoxModule extends AbstractFSItem {
     public NotAFoxModuleException(String name) {
       super(name + " is not a valid FoxModule");
     }
-  }
-
-  public ModuleInformation getModuleInfo() {
-    return moduleInfo;
   }
 }

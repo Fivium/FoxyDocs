@@ -32,6 +32,7 @@ import static net.foxopen.foxydocs.utils.Logger.logStdout;
 import static net.foxopen.foxydocs.view.FoxyDocsMainWindow.getImage;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,7 +40,6 @@ import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
-import java.nio.channels.WritableByteChannel;
 
 import net.foxopen.foxydocs.utils.WatchDog;
 import net.foxopen.foxydocs.view.FoxyDocsMainWindow;
@@ -60,7 +60,9 @@ import org.jdom2.Namespace;
 import org.jdom2.input.SAXBuilder;
 import org.jdom2.input.sax.XMLReaderSAX2Factory;
 import org.jdom2.located.LocatedJDOMFactory;
+import org.jdom2.output.EscapeStrategy;
 import org.jdom2.output.Format;
+import org.jdom2.output.Format.TextMode;
 import org.jdom2.output.XMLOutputter;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
@@ -96,6 +98,7 @@ public class FoxyDocs {
 
   public static final Namespace NAMESPACE_FM = Namespace.getNamespace("fm", "http://www.og.dti.gov/fox_module");
   public static final Namespace NAMESPACE_XS = Namespace.getNamespace("xs", "http://www.w3.org/2001/XMLSchema");
+  public static final Namespace NAMESPACE_XSI = Namespace.getNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
 
   public static SAXBuilder DOM_BUILDER;
   public static XMLOutputter XML_SERIALISER;
@@ -116,7 +119,7 @@ public class FoxyDocs {
    * @throws ConfigurationManagerException
    */
   public static void main(String args[]) {
-    logStdout("FDE started");
+    logStdout("FoxyDocs started");
 
     // Loading configuration
     try {
@@ -128,11 +131,14 @@ public class FoxyDocs {
     appConfig.setLongProperty("lastRun", System.currentTimeMillis());
     saveConfiguration();
 
+    logStdout("Configuration loaded");
+
     // Creating dom builder
     DOM_BUILDER = new SAXBuilder(new XMLReaderSAX2Factory(false, "net.sf.saxon.aelfred.SAXDriver"));
     DOM_BUILDER.setJDOMFactory(new LocatedJDOMFactory());
     // Bullet proof-ish parser as a FoxModule is not a valid XML due to
     // duplicate namespaces
+    // FIXME this builder simply ignore duplicate namespaces. It is bad.
     DOM_BUILDER.setErrorHandler(new ErrorHandler() {
 
       @Override
@@ -142,23 +148,46 @@ public class FoxyDocs {
 
       @Override
       public void fatalError(SAXParseException exception) throws SAXException {
-        // Empty
-        // TODO
+        throw exception;
       }
 
       @Override
       public void error(SAXParseException exception) throws SAXException {
-        // Empty
-        // TODO
+        // Disable duplicate attribute name exception
+        if (!exception.getMessage().startsWith("duplicate attribute name")) {
+          throw exception;
+        } else {
+          // FIXME store and restore those namespaces
+          System.err.println(exception.getMessage());
+        }
       }
     });
+
+    logStdout("DOM Builder created");
 
     // Create and configure the XML Serialiser
     XML_SERIALISER = new XMLOutputter();
     Format prettyPrint = Format.getPrettyFormat();
     prettyPrint.setIndent("  ");
     prettyPrint.setEncoding("UTF-8");
+    prettyPrint.setTextMode(TextMode.TRIM_FULL_WHITE);
+    prettyPrint.setIgnoreTrAXEscapingPIs(true);
+    prettyPrint.setExpandEmptyElements(false);
+    prettyPrint.setEscapeStrategy(new EscapeStrategy() {
+      @Override
+      public boolean shouldEscape(char ch) {
+        switch (ch) {
+        case '<':
+          return true;
+        default:
+          return false;
+        }
+      }
+    });
+    prettyPrint.setSpecifiedAttributesOnly(false);
     XML_SERIALISER.setFormat(prettyPrint);
+
+    logStdout("XML Serialiser created");
 
     // Create the interface
     Display display = Display.getDefault();
@@ -174,8 +203,7 @@ public class FoxyDocs {
           e.printStackTrace();
         } finally {
           // Kill the watch dog thread
-          if (FoxyDocs.WATCHDOG != null)
-            FoxyDocs.WATCHDOG.interrupt();
+          stopWatchdog();
         }
       }
     });
@@ -183,6 +211,17 @@ public class FoxyDocs {
     logStdout("Ended");
   }
 
+  /**
+   * Stop the watch dog by interrupting the thread
+   */
+  public static void stopWatchdog() {
+    if (FoxyDocs.WATCHDOG != null)
+      FoxyDocs.WATCHDOG.interrupt();
+  }
+
+  /**
+   * Save the configuration.
+   */
   public static void saveConfiguration() {
     try {
       ConfigurationManager.getInstance().save(xmlConfigHandler, appConfig);
@@ -196,46 +235,53 @@ public class FoxyDocs {
   }
 
   public static void duplicateResource(String resource, File target) throws IOException {
-    copyFile(getFile(resource), target);
+    copyFile(getInternalFile(resource), target);
   }
 
-  public static InputStream getFile(String uri) {
+  /**
+   * Get an internal file (in the File System or inside the JAR)
+   * 
+   * @param uri
+   *          The file path
+   * @return The file as InputStream
+   * @throws FileNotFoundException
+   */
+  public static InputStream getInternalFile(String uri) throws FileNotFoundException {
     InputStream resource = FoxyDocs.class.getClassLoader().getResourceAsStream(uri);
     if (resource == null)
-      throw new IllegalArgumentException("Resource not found : " + uri);
+      throw new FileNotFoundException("Resource not found : " + uri);
     return resource;
   }
 
   public static void copyFile(InputStream sourceInputStream, File destFile) throws IOException {
     FileChannel destination = null;
     ReadableByteChannel source = null;
+    final ByteBuffer buffer = ByteBuffer.allocateDirect(16 * 1024);
+
     try {
       source = Channels.newChannel(sourceInputStream);
       destination = new FileOutputStream(destFile).getChannel();
-      fastChannelCopy(source, destination);
-      source.close();
-      destination.close();
 
-    } finally {
+      // Copy the file from the source to the target file
+      while (source.read(buffer) != -1) {
+        buffer.flip();
+        destination.write(buffer);
+        buffer.compact();
+      }
+      buffer.flip();
+      while (buffer.hasRemaining()) {
+        destination.write(buffer);
+      }
+
+    }
+    // Is something goes wrong, those the channels anyway
+    finally {
       if (source != null) {
         source.close();
       }
       if (destination != null) {
         destination.close();
       }
-    }
-  }
-
-  public static void fastChannelCopy(final ReadableByteChannel source, final WritableByteChannel target) throws IOException {
-    final ByteBuffer buffer = ByteBuffer.allocateDirect(16 * 1024);
-    while (source.read(buffer) != -1) {
-      buffer.flip();
-      target.write(buffer);
-      buffer.compact();
-    }
-    buffer.flip();
-    while (buffer.hasRemaining()) {
-      target.write(buffer);
     }
   }
 

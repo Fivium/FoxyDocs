@@ -33,6 +33,8 @@ import static net.foxopen.foxydocs.FoxyDocs.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Observable;
 
@@ -41,23 +43,19 @@ import org.eclipse.swt.widgets.Display;
 
 public abstract class AbstractModelObject extends Observable {
 
+  private final List<AbstractModelObject> children = Collections.synchronizedList(new ArrayList<AbstractModelObject>());
+
   private final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
-  protected AbstractModelObject parent;
-  protected Image image;
-
-  abstract public List<AbstractModelObject> getChildren();
-
-  abstract public String getName();
+  protected final AbstractModelObject parent;
 
   protected AbstractModelObject(AbstractModelObject parent) {
-
     this.parent = parent;
 
     // Dirty property : does the file need saving ?
     addPropertyChangeListener("dirty", new PropertyChangeListener() {
       @Override
       public void propertyChange(PropertyChangeEvent evt) {
-        firePropertyChange("name", null, getName());
+        firePropertyChange("displayedName", null, getDisplayedName());
         if (getParent() != null) {
           // Cascade propagate the change
           getParent().firePropertyChange("dirty", evt.getOldValue(), evt.getNewValue());
@@ -69,7 +67,7 @@ public abstract class AbstractModelObject extends Observable {
     addPropertyChangeListener("status", new PropertyChangeListener() {
       @Override
       public void propertyChange(PropertyChangeEvent evt) {
-        firePropertyChange("name", null, getName());
+        firePropertyChange("displayedName", null, getDisplayedName());
         if (getParent() != null) {
           // Cascade propagate the change
           getParent().firePropertyChange("status", evt.getOldValue(), evt.getNewValue());
@@ -78,24 +76,34 @@ public abstract class AbstractModelObject extends Observable {
     });
   }
 
-  public synchronized void addPropertyChangeListener(PropertyChangeListener listener) {
+  public final synchronized void addPropertyChangeListener(PropertyChangeListener listener) {
     propertyChangeSupport.addPropertyChangeListener(listener);
   }
 
-  public synchronized void addPropertyChangeListener(String propertyName, PropertyChangeListener listener) {
+  public final synchronized void addPropertyChangeListener(String propertyName, PropertyChangeListener listener) {
     propertyChangeSupport.addPropertyChangeListener(propertyName, listener);
   }
 
-  public synchronized void removePropertyChangeListener(PropertyChangeListener listener) {
+  public final synchronized void removePropertyChangeListener(PropertyChangeListener listener) {
     propertyChangeSupport.removePropertyChangeListener(listener);
   }
 
-  public synchronized void removePropertyChangeListener(String propertyName, PropertyChangeListener listener) {
+  public final synchronized void removePropertyChangeListener(String propertyName, PropertyChangeListener listener) {
     propertyChangeSupport.removePropertyChangeListener(propertyName, listener);
   }
 
-  public synchronized void firePropertyChange(String propertyName, Object oldValue, Object newValue) {
+  public final synchronized void firePropertyChange(String propertyName, Object oldValue, Object newValue) {
     propertyChangeSupport.firePropertyChange(propertyName, oldValue, newValue);
+  }
+
+  public abstract String getName();
+
+  public final String getDisplayedName() {
+    return getName() + (isDirty() ? " *" : "");
+  }
+
+  public final List<AbstractModelObject> getChildren() {
+    return children;
   }
 
   public void save() throws Exception {
@@ -106,7 +114,7 @@ public abstract class AbstractModelObject extends Observable {
     }
   }
 
-  public synchronized void addChild(AbstractModelObject child) {
+  public synchronized final void addChild(AbstractModelObject child) {
     getChildren().add(child);
   }
 
@@ -121,7 +129,7 @@ public abstract class AbstractModelObject extends Observable {
     return status;
   }
 
-  public void clear() {
+  public final void clear() {
     if (getHasChildren()) {
       for (AbstractModelObject child : getChildren()) {
         child.clear();
@@ -132,22 +140,14 @@ public abstract class AbstractModelObject extends Observable {
   }
 
   public boolean getHasChildren() {
-    return getChildren() != null && getChildren().size() > 0;
-  }
-
-  public String getDocumentation() {
-    throw new IllegalArgumentException("You cannot call this method directly. Please override it.");
+    return getChildren() != null && !getChildren().isEmpty();
   }
 
   public String getCode() {
-    throw new IllegalArgumentException("You cannot call this method directly. Please override it.");
+    throw new RuntimeException("You cannot call this method directly. Please override it.");
   }
 
-  public void setDocumentation(String documentation) {
-    throw new IllegalArgumentException("You cannot call this method directly. Please override it.");
-  }
-
-  public AbstractModelObject getParent() {
+  public final AbstractModelObject getParent() {
     return parent;
   }
 

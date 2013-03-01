@@ -29,7 +29,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package net.foxopen.foxydocs.model;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -38,7 +37,7 @@ import static net.foxopen.foxydocs.FoxyDocs.NAMESPACE_FM;
 
 import org.jdom2.Element;
 
-public class ModuleInformation extends AbstractModelObject{
+public class ModuleInformation extends AbstractModelObject {
 
   private final static String[] attributeList = new String[] { "name", "title", "application-title", "version-desc", "description", "build-notes", "help-text", };
 
@@ -65,6 +64,12 @@ public class ModuleInformation extends AbstractModelObject{
     return attributes.entrySet();
   }
 
+  public void change(String key, String text) {
+    attributes.get(key).removeContent();
+    attributes.get(key).addContent(text);
+    parent.firePropertyChange("dirty", false, isDirty());
+  }
+
   @Override
   public String toString() {
     StringBuffer buffer = new StringBuffer();
@@ -84,21 +89,14 @@ public class ModuleInformation extends AbstractModelObject{
     oldContent = this.toString();
   }
 
-  public void change(String key, String text) {
-    attributes.get(key).removeContent();
-    attributes.get(key).addContent(text);
-    parent.firePropertyChange("dirty", false, isDirty());
-  }
-
   @Override
-  public List<AbstractModelObject> getChildren() {
-    // No children
-    return null;
+  public boolean getHasChildren() {
+    return false;
   }
 
   @Override
   public String getName() {
-   return getParent().getName();
+    return getParent().getName();
   }
 
 }

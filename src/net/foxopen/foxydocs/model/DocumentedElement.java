@@ -28,16 +28,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package net.foxopen.foxydocs.model;
 
-import java.util.List;
-
 import net.foxopen.foxydocs.model.abstractObject.AbstractDocumentedElement;
 import net.foxopen.foxydocs.model.abstractObject.AbstractModelObject;
 
 import org.jdom2.Element;
 import org.jdom2.located.Located;
 
-public class DocumentedElement extends AbstractModelObject implements AbstractDocumentedElement {
-  private String previousDocumentationContent;
+public class DocumentedElement extends AbstractDocumentedElement {
+  private String previousDocumentationHash;
   private String name;
   private final DocEntry documentationEntry;
   private final Element node;
@@ -49,7 +47,7 @@ public class DocumentedElement extends AbstractModelObject implements AbstractDo
     this.isHeader = isHeader;
 
     documentationEntry = new DocEntry(node, this);
-    previousDocumentationContent = documentationEntry.toString();
+    previousDocumentationHash = documentationEntry.getHash();
 
     String nodeName = node.getAttributeValue("name");
     if (nodeName == null) {
@@ -81,47 +79,30 @@ public class DocumentedElement extends AbstractModelObject implements AbstractDo
   }
 
   @Override
-  public String getName() {
-    return name + " " + (isDirty() ? "*" : "");
-  }
-
-  @Override
   public synchronized boolean isDirty() {
-    return !documentationEntry.toString().equals(previousDocumentationContent);
+    return !documentationEntry.getHash().equals(previousDocumentationHash);
   }
 
   @Override
   public void save() throws Exception {
     if (!isDirty())
       return;
+    
+    documentationEntry.save();
 
     // New become old
-    previousDocumentationContent = documentationEntry.toString();
+    previousDocumentationHash = documentationEntry.getHash();
     firePropertyChange("dirty", true, isDirty());
   }
 
   public void setName(String name) {
     if (name == null || name.trim() == "")
       throw new IllegalArgumentException("Entry name is null");
-    firePropertyChange("name", this.name, this.name = name);
-  }
-
-  /* (non-Javadoc)
-   * @see net.foxopen.foxydocs.model.AbstractDocumentedElement#getDocumentation()
-   */
-  @Override
-  public String getDocumentation() {
-    return documentationEntry.getDescription() + documentationEntry.getComments() + documentationEntry.getPrecondition();
+    firePropertyChange("displayedName", this.name, this.name = name);
   }
 
   @Override
-  public List<AbstractModelObject> getChildren() {
-    // No children at this point
-    return null;
-  }
-
-  @Override
-  public synchronized boolean  getHasChildren() {
+  public synchronized boolean getHasChildren() {
     return false;
   }
 
@@ -167,6 +148,11 @@ public class DocumentedElement extends AbstractModelObject implements AbstractDo
   @Override
   public void setPrecondition(String content) {
     documentationEntry.setPrecondition(content);
+  }
+  
+  @Override
+  public String getName() {
+    return name;
   }
 
 }

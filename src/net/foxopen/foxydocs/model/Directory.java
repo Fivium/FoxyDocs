@@ -35,17 +35,12 @@ import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
-
 import net.foxopen.foxydocs.model.FoxModule.NotAFoxModuleException;
 import net.foxopen.foxydocs.model.abstractObject.AbstractFSItem;
 import net.foxopen.foxydocs.model.abstractObject.AbstractModelObject;
 
 public class Directory extends AbstractFSItem {
-
-  private final List<AbstractModelObject> contentList = Collections.synchronizedList(new ArrayList<AbstractModelObject>());
 
   public Directory(Directory parent) {
     super(parent);
@@ -54,16 +49,7 @@ public class Directory extends AbstractFSItem {
   public Directory(Path path, Directory parent) {
     super(path, parent);
   }
-
-  @Override
-  public List<AbstractModelObject> getChildren() {
-    return contentList;
-  }
-
-  public void addChild(AbstractFSItem e) {
-    contentList.add(e);
-  }
-
+  
   public void walk(Directory entry, Collection<AbstractFSItem> directories) throws IOException {
     for (Path path : Files.newDirectoryStream(entry.getPath())) {
       BasicFileAttributes attr = Files.getFileAttributeView(path, BasicFileAttributeView.class).readAttributes();
@@ -104,7 +90,7 @@ public class Directory extends AbstractFSItem {
     checkFile();
 
     // Reset or init the content list
-    contentList.clear();
+    clear();
     firePropertyChange("children", null, getChildren());
 
     // Recursive Walk through directories
@@ -122,6 +108,11 @@ public class Directory extends AbstractFSItem {
       buffer.putAll(((AbstractFSItem) e).getFoxModules());
     }
     return buffer;
+  }
+  
+  @Override
+  public String getName() {
+    return getFile().getName();
   }
 
 }
