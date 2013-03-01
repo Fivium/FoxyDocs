@@ -134,35 +134,9 @@ public class FoxyDocs {
     logStdout("Configuration loaded");
 
     // Creating dom builder
-    DOM_BUILDER = new SAXBuilder(new XMLReaderSAX2Factory(false, "net.sf.saxon.aelfred.SAXDriver"));
+    DOM_BUILDER = new SAXBuilder();
     DOM_BUILDER.setJDOMFactory(new LocatedJDOMFactory());
-    // Bullet proof-ish parser as a FoxModule is not a valid XML due to
-    // duplicate namespaces
-    // FIXME this builder simply ignore duplicate namespaces. It is bad.
-    DOM_BUILDER.setErrorHandler(new ErrorHandler() {
-
-      @Override
-      public void warning(SAXParseException exception) throws SAXException {
-        throw exception;
-      }
-
-      @Override
-      public void fatalError(SAXParseException exception) throws SAXException {
-        throw exception;
-      }
-
-      @Override
-      public void error(SAXParseException exception) throws SAXException {
-        // Disable duplicate attribute name exception
-        if (!exception.getMessage().startsWith("duplicate attribute name")) {
-          throw exception;
-        } else {
-          // FIXME store and restore those namespaces
-          System.err.println(exception.getMessage());
-        }
-      }
-    });
-
+   
     logStdout("DOM Builder created");
 
     // Create and configure the XML Serialiser
