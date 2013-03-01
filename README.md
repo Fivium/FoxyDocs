@@ -52,7 +52,6 @@ In the future, the relevant JARs will be added in the lib directory so we won't 
 5. Export the directory to HTML (Ctrl + H) or the currently open module to PDF (Ctrl + P)
 
 ## Known issues
-* __The Parser ignores duplicate namespaces while writing the file. Those namespaces are removed from the module, making the Fox Module unusable__
 * The Pretty Print function does not align with the XMLSpy one
 * Empty folders (i.e. without any Fox Module inside them) are displayed
 * Adding or removing folders or files within the opened folder may behave improperly
