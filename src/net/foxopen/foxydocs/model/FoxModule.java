@@ -34,7 +34,6 @@ import static net.foxopen.foxydocs.FoxyDocs.NAMESPACE_FM;
 import static net.foxopen.foxydocs.FoxyDocs.NAMESPACE_XS;
 import static net.foxopen.foxydocs.FoxyDocs.XML_SERIALISER;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.nio.file.Files;
@@ -46,9 +45,9 @@ import java.util.List;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import net.foxopen.foxydocs.FoxyDocs;
 import net.foxopen.foxydocs.model.abstractObject.AbstractFSItem;
 
+import org.apache.commons.io.FileUtils;
 import org.eclipse.swt.widgets.Display;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -147,14 +146,8 @@ public class FoxModule extends AbstractFSItem {
     moduleInfo.save();
 
     // Write into the file
-    FileOutputStream out = new FileOutputStream(getFile(), false);
-    XML_SERIALISER.output(jdomDoc, out);
-    out.close();
-
-    // Update the content
-    reload();
-    // readContent();
-    fullStringContent = XML_SERIALISER.outputString(DOM_BUILDER.build(getFile()));
+    fullStringContent = XML_SERIALISER.outputString(jdomDoc).replaceAll("xmlns:(.+?)=\"(.+?)(/$1)\"", "xmlns:$1=\"$2/$1\"");
+    FileUtils.writeStringToFile(getFile(), fullStringContent, "UTF-8");
 
     Display.getDefault().asyncExec(new Runnable() {
       @Override
@@ -179,18 +172,15 @@ public class FoxModule extends AbstractFSItem {
    */
   @Override
   public Collection<AbstractFSItem> readContent() throws ParserConfigurationException, SAXException, IOException, JDOMException, NotAFoxModuleException {
-    // TODO Patch raw file to handle duplicate namespaces
+    // Patch raw file to handle duplicate namespaces
+    String rawFile = FileUtils.readFileToString(getFile());
+    rawFile = rawFile.replaceAll("xmlns:(.+?)=\"(.+?)\"", "xmlns:$1=\"$2/$1\"");
 
     // Parse the document two times to have a proper location for each element
-    Document firstRun = DOM_BUILDER.build(getFile());
+    Document firstRun = DOM_BUILDER.build(new StringReader(rawFile));
     // Cache the module as a String while parsing so opening a tab is faster
     fullStringContent = XML_SERIALISER.outputString(firstRun);
     jdomDoc = DOM_BUILDER.build(new StringReader(fullStringContent));
-
-    // TODO Store namespaces
-    jdomDoc.getRootElement().addNamespaceDeclaration(FoxyDocs.NAMESPACE_XSI);
-    jdomDoc.getRootElement().addNamespaceDeclaration(FoxyDocs.NAMESPACE_XS);
-    jdomDoc.getRootElement().addNamespaceDeclaration(FoxyDocs.NAMESPACE_FM);
 
     // Reset data structures
     docElements = new ArrayList<>();
