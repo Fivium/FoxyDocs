@@ -3,6 +3,8 @@ FoxyDocs : A FOXopen documentation Editor
 
 A simple developer tool for adding, editing and exporting documentation for one or more Fox Modules.
 
+___WARNING:_ The actual version is not yet ready to be used.__
+
 http://foxopen.net/
 
 ## Demonstration Video
@@ -52,6 +54,7 @@ In the future, the relevant JARs will be added in the lib directory so we won't 
 5. Export the directory to HTML (Ctrl + H) or the currently open module to PDF (Ctrl + P)
 
 ## Known issues
+* There is some issues with namespaces
 * The Pretty Print function does not align with the XMLSpy one
 * Empty folders (i.e. without any Fox Module inside them) are displayed
 * Adding or removing folders or files within the opened folder may behave improperly
