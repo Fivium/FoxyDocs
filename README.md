@@ -7,7 +7,7 @@ http://foxopen.net/
 
 ## Demonstration Video
 
-https://dse-vmawaghv.vde.net.au/foxydocs_demo.avi
+https://www.youtube.com/watch?v=J8tuOmkc5YA
 
 ## Getting Started with Eclipse
 This section describes how to setup the project using Eclipse.
