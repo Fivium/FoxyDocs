@@ -146,7 +146,7 @@ public class FoxModule extends AbstractFSItem {
     moduleInfo.save();
 
     // Write into the file
-    fullStringContent = XML_SERIALISER.outputString(jdomDoc).replaceAll("xmlns:(.+?)=\"(.+?)(/$1)\"", "xmlns:$1=\"$2/$1\"");
+    fullStringContent = stripNamespacesUnicity(XML_SERIALISER.outputString(jdomDoc));
     FileUtils.writeStringToFile(getFile(), fullStringContent, "UTF-8");
 
     Display.getDefault().asyncExec(new Runnable() {
@@ -174,13 +174,16 @@ public class FoxModule extends AbstractFSItem {
   public Collection<AbstractFSItem> readContent() throws ParserConfigurationException, SAXException, IOException, JDOMException, NotAFoxModuleException {
     // Patch raw file to handle duplicate namespaces
     String rawFile = FileUtils.readFileToString(getFile());
-    rawFile = rawFile.replaceAll("xmlns:(.+?)=\"(.+?)\"", "xmlns:$1=\"$2/$1\"");
+    rawFile = fixNamespacesUnicity(rawFile);
 
     // Parse the document two times to have a proper location for each element
     Document firstRun = DOM_BUILDER.build(new StringReader(rawFile));
+    rawFile = XML_SERIALISER.outputString(firstRun);
+    jdomDoc = DOM_BUILDER.build(new StringReader(rawFile));
+
     // Cache the module as a String while parsing so opening a tab is faster
-    fullStringContent = XML_SERIALISER.outputString(firstRun);
-    jdomDoc = DOM_BUILDER.build(new StringReader(fullStringContent));
+    // Strip the namespace hack of the displayed file
+    fullStringContent = stripNamespacesUnicity(rawFile);
 
     // Reset data structures
     docElements = new ArrayList<>();
@@ -216,6 +219,14 @@ public class FoxModule extends AbstractFSItem {
     }
 
     return null;
+  }
+
+  public String stripNamespacesUnicity(String input) {
+    return input.replaceAll("xmlns:(.+?)=\"(.+?)/\\1\"", "xmlns:$1=\"$2\"");
+  }
+
+  public String fixNamespacesUnicity(String input) {
+    return input.replaceAll("xmlns:(.+?)=\"(.+?)\"", "xmlns:$1=\"$2/$1\"");
   }
 
   public static class NotAFoxModuleException extends Exception {

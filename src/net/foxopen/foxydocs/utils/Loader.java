@@ -31,6 +31,7 @@ package net.foxopen.foxydocs.utils;
 import static net.foxopen.foxydocs.FoxyDocs.*;
 import static net.foxopen.foxydocs.utils.Logger.logStderr;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
@@ -131,23 +132,36 @@ public class Loader {
       try {
         WATCHDOG = new WatchDog(target.getPath(), new WatchDogEventHandler() {
 
-          private AbstractFSItem resolv(Path path) {
-            return monitorList.get(path.toFile().getAbsolutePath());
+          private AbstractFSItem resolv(Path path) throws FileNotFoundException {
+            AbstractFSItem item = monitorList.get(path.toFile().getAbsolutePath());
+            if (item == null)
+              throw new FileNotFoundException();
+            return item;
           }
 
           @Override
           public void modified(Path entryPath) {
             if (entryPath != null) {
-              resolv(entryPath).getParent().firePropertyChange("children", null, resolv(entryPath).getParent().getChildren());
-              resolv(entryPath).refreshUI();
+              try {
+                resolv(entryPath).getParent().firePropertyChange("children", null, resolv(entryPath).getParent().getChildren());
+                resolv(entryPath).refreshUI();
+              } catch (FileNotFoundException e) {
+                // Nothing
+              }
+
             }
           }
 
           @Override
           public void deleted(Path entryPath) {
-            resolv(entryPath).getParent().getChildren().remove(resolv(entryPath));
-            resolv(entryPath).refreshUI();
-            monitorList.remove(resolv(entryPath));
+            try {
+              resolv(entryPath).getParent().getChildren().remove(resolv(entryPath));
+              resolv(entryPath).refreshUI();
+              monitorList.remove(resolv(entryPath));
+            } catch (FileNotFoundException e) {
+              // Nothing
+            }
+
           }
 
           @Override
@@ -158,8 +172,12 @@ public class Loader {
               FoxModule fox = new FoxModule(entryPath, resolv(parentPath));
               resolv(parentPath).getChildren().add(fox);
               resolv(parentPath).refreshUI();
-            } catch (NotAFoxModuleException | IOException e) {
+            } catch (FileNotFoundException e) {
+              // Nothing
+            } catch (IOException e) {
               e.printStackTrace();
+            } catch (NotAFoxModuleException e) {
+              // Nothing
             }
           }
         });
