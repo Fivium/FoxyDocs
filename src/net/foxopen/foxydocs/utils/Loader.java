@@ -42,7 +42,6 @@ import net.foxopen.foxydocs.FoxyDocs;
 import net.foxopen.foxydocs.model.FoxModule;
 import net.foxopen.foxydocs.model.FoxModule.NotAFoxModuleException;
 import net.foxopen.foxydocs.model.abstractObject.AbstractFSItem;
-import net.foxopen.foxydocs.model.abstractObject.AbstractModelObject;
 import net.foxopen.foxydocs.view.FoxyDocsMainWindow;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -78,10 +77,7 @@ public class Loader {
       Display.getDefault().asyncExec(new Runnable() {
         @Override
         public void run() {
-          for (Object o : FoxyDocsMainWindow.getRoot().getChildren()) {
-            AbstractModelObject c = (AbstractModelObject) o;
-            c.firePropertyChange("status", null, c.getStatus());
-          }
+          FoxyDocsMainWindow.getRoot().firePropertyChange("status", FoxyDocs.STATUS_UNKNOWN, FoxyDocsMainWindow.getRoot().getStatus());
         }
       });
     }

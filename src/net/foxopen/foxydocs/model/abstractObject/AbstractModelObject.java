@@ -120,11 +120,8 @@ public abstract class AbstractModelObject extends Observable {
 
   public synchronized int getStatus() {
     int status = STATUS_UNKNOWN;
-    for (Object child : getChildren()) {
-      if (child instanceof AbstractModelObject) {
-        AbstractModelObject c = (AbstractModelObject) child;
-        status |= c.getStatus();
-      }
+    for (AbstractModelObject child : getChildren()) {
+      status |= child.getStatus();
     }
     return status;
   }

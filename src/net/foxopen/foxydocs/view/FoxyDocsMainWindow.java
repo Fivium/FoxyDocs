@@ -34,17 +34,22 @@ import static net.foxopen.foxydocs.FoxyDocs.appConfig;
 import static net.foxopen.foxydocs.FoxyDocs.saveConfiguration;
 import static net.foxopen.foxydocs.utils.Logger.logStdout;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 
+import net.foxopen.foxydocs.FoxyDocs;
 import net.foxopen.foxydocs.model.Directory;
 import net.foxopen.foxydocs.model.FoxModule;
 import net.foxopen.foxydocs.model.abstractObject.AbstractFSItem;
+import net.foxopen.foxydocs.model.abstractObject.AbstractModelObject;
 import net.foxopen.foxydocs.utils.Export;
 import net.foxopen.foxydocs.utils.Loader;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
+import org.eclipse.core.databinding.observable.IDisposeListener;
 import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.MenuManager;
@@ -60,6 +65,8 @@ import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.window.ApplicationWindow;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
@@ -91,7 +98,7 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
 
   private static AbstractFSItem root = new Directory(null);
 
-  private TreeViewer treeViewerFileList;
+  public TreeViewer treeViewerFileList;
   public static CTabFolder tabFolder;
 
   private Action action_open;
@@ -135,12 +142,22 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
       SashForm sashForm = new SashForm(container, SWT.NONE);
       sashForm.setSashWidth(4);
       {
-        Composite composite = new Composite(sashForm, SWT.NONE);
+        final Composite composite = new Composite(sashForm, SWT.NONE);
         composite.setLayout(new TreeColumnLayout());
         {
           treeViewerFileList = new TreeViewer(composite, SWT.BORDER);
           treeViewerFileList.setExpandPreCheckFilters(true);
           treeViewerFileList.setAutoExpandLevel(3);
+          treeViewerFileList.addFilter(new ViewerFilter() {
+            @Override
+            public boolean select(Viewer viewer, Object parentElement, Object element) {
+              if (element instanceof AbstractModelObject) {
+                AbstractModelObject o = (AbstractModelObject) element;
+                return o.getStatus() > FoxyDocs.STATUS_UNKNOWN;
+              }
+              return true;
+            }
+          });
           treeViewerFileList.addDoubleClickListener(new IDoubleClickListener() {
             @Override
             public void doubleClick(DoubleClickEvent event) {
@@ -157,6 +174,14 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
               }
             }
           });
+
+          root.addPropertyChangeListener("status", new PropertyChangeListener() {
+            @Override
+            public void propertyChange(PropertyChangeEvent evt) {
+              treeViewerFileList.refresh(); // FIXME
+            }
+          });
+
           Tree tree = treeViewerFileList.getTree();
           tree.addMouseListener(new MouseListener() {
 
