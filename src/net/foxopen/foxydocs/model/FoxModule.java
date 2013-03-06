@@ -171,7 +171,9 @@ public class FoxModule extends AbstractFSItem {
    * @throws NotAFoxModuleException
    */
   @Override
-  public Collection<AbstractFSItem> readContent() throws ParserConfigurationException, SAXException, IOException, JDOMException, NotAFoxModuleException {
+  public synchronized Collection<AbstractFSItem> readContent() throws ParserConfigurationException, SAXException, IOException, JDOMException, NotAFoxModuleException {
+    reload();
+    
     // Patch raw file to handle duplicate namespaces
     String rawFile = FileUtils.readFileToString(getFile());
     rawFile = fixNamespacesUnicity(rawFile);

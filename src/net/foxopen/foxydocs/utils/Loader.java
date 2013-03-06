@@ -139,10 +139,14 @@ public class Loader {
           public void modified(Path entryPath) {
             if (entryPath != null) {
               try {
-                resolv(entryPath).getParent().firePropertyChange("children", null, resolv(entryPath).getParent().getChildren());
-                resolv(entryPath).refreshUI();
+                AbstractFSItem targetModule = resolv(entryPath);
+                targetModule.readContent();
+                targetModule.getParent().firePropertyChange("children", null, targetModule.getParent().getChildren());
+                targetModule.refreshUI();
               } catch (FileNotFoundException e) {
                 // Nothing
+              } catch (Exception e) {
+                e.printStackTrace();
               }
 
             }

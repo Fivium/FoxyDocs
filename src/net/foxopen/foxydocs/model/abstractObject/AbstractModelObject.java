@@ -177,6 +177,7 @@ public abstract class AbstractModelObject extends Observable {
       @Override
       public void run() {
         firePropertyChange("status", null, getStatus());
+        firePropertyChange("code", null, getCode());
         if (getParent() != null) {
           getParent().firePropertyChange("children", null, getParent().getChildren());
         }

@@ -258,6 +258,7 @@ public class Tab extends CTabItem {
                 codeText.setText(content.getCode());
                 codeText.setTopIndex(topIndex);
                 goToCode(content);
+                treeViewer.expandAll();
               }
             });
 
@@ -276,7 +277,7 @@ public class Tab extends CTabItem {
           }
           // Horizontal Sash
           sashFormTabContent.setSashWidth(10);
-          sashFormTabContent.setWeights(new int[] { 1, 5 });
+          sashFormTabContent.setWeights(new int[] { 1, 3 });
         }
       }
     }

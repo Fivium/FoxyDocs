@@ -71,7 +71,6 @@ public abstract class AbstractFSItem extends AbstractModelObject {
   public final void reload() {
     internalPath = Paths.get(getAbsolutePath());
     checkFile();
-    firePropertyChange("status", null, getStatus());
   }
 
   /**

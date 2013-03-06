@@ -210,7 +210,7 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
         tabFolder.setSelectionBackground(Display.getCurrent().getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));
         // Tab here...
       }
-      sashForm.setWeights(new int[] { 1, 5 });
+      sashForm.setWeights(new int[] { 1, 3 });
     }
     initDataBindings();
 
