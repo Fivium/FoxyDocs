@@ -43,6 +43,7 @@ import java.util.Map.Entry;
 import net.foxopen.foxydocs.model.DocumentedElement;
 import net.foxopen.foxydocs.model.DocumentedElementSet;
 import net.foxopen.foxydocs.model.FoxModule;
+import net.foxopen.foxydocs.model.ModuleInformation;
 import net.foxopen.foxydocs.model.abstractObject.AbstractDocumentedElement;
 import net.foxopen.foxydocs.model.abstractObject.AbstractModelObject;
 
@@ -80,7 +81,6 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.wb.rcp.databinding.BeansListObservableFactory;
 import org.eclipse.wb.rcp.databinding.TreeBeanAdvisor;
 import org.eclipse.wb.rcp.databinding.TreeObservableLabelProvider;
-
 import org.eclipse.swt.widgets.Label;
 import org.jdom2.Element;
 
@@ -91,7 +91,7 @@ public class Tab extends CTabItem {
 
   private final StyledText codeText;
   private final FoxModule content;
-  private ArrayList<DocumentedElement> docEntries;
+  private ArrayList<AbstractDocumentedElement> docEntries;
 
   private final CTabFolder tabFolderDoc;
   private CTabItem regularDocTab;
@@ -158,19 +158,22 @@ public class Tab extends CTabItem {
 
               if (headerDocTab != null)
                 headerDocTab.dispose();
-              
+
+              if (regularDocTab != null)
+                regularDocTab.dispose();
+
+              if (selectedNode instanceof ModuleInformation) {
+                headerDocTab = new CTabItem(tabFolderDoc, SWT.NONE);
+                headerDocTab.setText("Module Informations");
+                headerDocTab.setControl(moduleInfoWrapper);
+                headerDocTab.getParent().setSelection(headerDocTab);
+              }
+
               if (selectedNode instanceof DocumentedElement) {
-                DocumentedElement doc = (DocumentedElement) selectedNode;
-                regularDocComposite.setVisible(true);
+                regularDocTab = new CTabItem(tabFolderDoc, SWT.NONE);
+                regularDocTab.setText("Documentation");
+                regularDocTab.setControl(regularDocComposite);
                 regularDocTab.getParent().setSelection(regularDocTab);
-                docElements.get("description").setFocus();
-                if (doc.isHeader()) {
-                  headerDocTab = new CTabItem(tabFolderDoc, SWT.NONE);
-                  headerDocTab.setText("Module Informations");
-                  headerDocTab.setControl(moduleInfoWrapper);
-                }
-              } else {
-                regularDocComposite.setVisible(false);
               }
             }
           });
@@ -181,10 +184,6 @@ public class Tab extends CTabItem {
             tabFolderDoc = new CTabFolder(sashFormCodeDoc, SWT.BORDER | SWT.NONE);
             tabFolderDoc.setSelectionBackground(Display.getCurrent().getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));
 
-            regularDocTab = new CTabItem(tabFolderDoc, SWT.NONE);
-            regularDocTab.setText("Documentation");
-            tabFolderDoc.setSelection(regularDocTab); // Default tab
-
             // Regular documentation composite
             regularDocComposite = new Composite(tabFolderDoc, SWT.NONE);
             regularDocComposite.setLayout(new GridLayout(2, false));
@@ -193,8 +192,6 @@ public class Tab extends CTabItem {
             addElement(regularDocComposite, "description");
             addElement(regularDocComposite, "comments");
             addElement(regularDocComposite, "precondition");
-
-            regularDocTab.setControl(regularDocComposite);
 
             // Module Info Composite
             moduleInfoWrapper = new ScrolledComposite(tabFolderDoc, SWT.BORDER | SWT.V_SCROLL);

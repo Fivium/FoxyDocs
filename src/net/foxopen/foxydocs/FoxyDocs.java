@@ -132,7 +132,7 @@ public class FoxyDocs {
     // Creating dom builder
     DOM_BUILDER = new SAXBuilder();
     DOM_BUILDER.setJDOMFactory(new LocatedJDOMFactory());
-   
+
     logStdout("DOM Builder created");
 
     // Create and configure the XML Serialiser

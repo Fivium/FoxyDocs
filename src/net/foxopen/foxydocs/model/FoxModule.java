@@ -45,6 +45,7 @@ import java.util.List;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import net.foxopen.foxydocs.model.abstractObject.AbstractDocumentedElement;
 import net.foxopen.foxydocs.model.abstractObject.AbstractFSItem;
 
 import org.apache.commons.io.FileUtils;
@@ -62,7 +63,7 @@ public class FoxModule extends AbstractFSItem {
   private Document jdomDoc;
   private ModuleInformation moduleInfo;
   private String fullStringContent;
-  private ArrayList<DocumentedElement> docElements;
+  private ArrayList<AbstractDocumentedElement> docElements;
 
   public FoxModule(Path path, AbstractFSItem parent) throws NotAFoxModuleException, IOException {
     super(path, parent);
@@ -94,7 +95,7 @@ public class FoxModule extends AbstractFSItem {
     getParent().firePropertyChange("children", null, getParent().getChildren());
   }
 
-  public ArrayList<DocumentedElement> getAllEntries() {
+  public ArrayList<AbstractDocumentedElement> getAllEntries() {
     return docElements;
   }
 
@@ -173,7 +174,7 @@ public class FoxModule extends AbstractFSItem {
   @Override
   public synchronized Collection<AbstractFSItem> readContent() throws ParserConfigurationException, SAXException, IOException, JDOMException, NotAFoxModuleException {
     reload();
-    
+
     // Patch raw file to handle duplicate namespaces
     String rawFile = FileUtils.readFileToString(getFile());
     rawFile = fixNamespacesUnicity(rawFile);
@@ -196,12 +197,15 @@ public class FoxModule extends AbstractFSItem {
     if (header.size() != 1) {
       throw new NotAFoxModuleException(getDisplayedName());
     }
-    DocumentedElement headerElement = new DocumentedElement(header.get(0), this, true);
-    addChild(headerElement);
-    docElements.add(headerElement);
+    // DocumentedElement headerElement = new DocumentedElement(header.get(0),
+    // this, true);
+    // addChild(headerElement);
+    // docElements.add(headerElement);
 
     // Module informations (header content)
-    moduleInfo = new ModuleInformation(header.get(0), headerElement);
+    moduleInfo = new ModuleInformation(header.get(0), this);
+    addChild(moduleInfo);
+    docElements.add(moduleInfo);
 
     // Entry themes
     addEntries("Entry Themes", FOX_MODULE_XPATH + "fm:entry-theme-list/fm:entry-theme");

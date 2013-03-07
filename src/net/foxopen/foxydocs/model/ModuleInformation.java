@@ -32,12 +32,13 @@ import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import net.foxopen.foxydocs.model.abstractObject.AbstractDocumentedElement;
 import net.foxopen.foxydocs.model.abstractObject.AbstractModelObject;
 import static net.foxopen.foxydocs.FoxyDocs.NAMESPACE_FM;
 
 import org.jdom2.Element;
 
-public class ModuleInformation extends AbstractModelObject {
+public class ModuleInformation extends AbstractDocumentedElement {
 
   private final static String[] attributeList = new String[] { "name", "title", "application-title", "version-desc", "description", "build-notes", "help-text", };
 
@@ -95,8 +96,49 @@ public class ModuleInformation extends AbstractModelObject {
   }
 
   @Override
-  public String getName() {
-    return getParent().getName();
+  public String getDescription() {
+    // TODO Auto-generated method stub
+    return null;
   }
 
+  @Override
+  public String getComments() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public String getPrecondition() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public void setDescription(String c) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void setComments(String c) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void setPrecondition(String c) {
+    // TODO Auto-generated method stub
+    
+  }
+  
+  @Override
+  public synchronized int getStatus(){
+    return 1;//TODO
+  }
+  
+  @Override
+  public String getName(){
+    return "Header";
+  }
+  
 }

@@ -49,7 +49,6 @@ import net.foxopen.foxydocs.utils.Loader;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
-import org.eclipse.core.databinding.observable.IDisposeListener;
 import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.MenuManager;
