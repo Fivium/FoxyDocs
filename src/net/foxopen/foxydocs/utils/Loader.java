@@ -35,6 +35,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -42,6 +44,7 @@ import net.foxopen.foxydocs.FoxyDocs;
 import net.foxopen.foxydocs.model.FoxModule;
 import net.foxopen.foxydocs.model.FoxModule.NotAFoxModuleException;
 import net.foxopen.foxydocs.model.abstractObject.AbstractFSItem;
+import net.foxopen.foxydocs.model.abstractObject.AbstractModelObject;
 import net.foxopen.foxydocs.view.FoxyDocsMainWindow;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -73,27 +76,22 @@ public class Loader {
       }
     }
 
-    private void refreshUI() {
-      Display.getDefault().asyncExec(new Runnable() {
-        @Override
-        public void run() {
-          FoxyDocsMainWindow.getRoot().firePropertyChange("status", FoxyDocs.STATUS_UNKNOWN, FoxyDocsMainWindow.getRoot().getStatus());
-        }
-      });
-    }
-
     @Override
     public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
       monitor.beginTask("Opening " + target.getAbsolutePath(), IProgressMonitor.UNKNOWN);
-      final HashMap<String, AbstractFSItem> monitorList = new HashMap<String, AbstractFSItem>();
+      HashMap<String, AbstractFSItem> monitorList = new HashMap<String, AbstractFSItem>();
+      ConcurrentLinkedQueue<AbstractFSItem> directories = new ConcurrentLinkedQueue<AbstractFSItem>();
+      final ArrayList<AbstractFSItem> directoryList = new ArrayList<>();
 
       try {
         // Walk into the root directory
-        ConcurrentLinkedQueue<AbstractFSItem> directories = new ConcurrentLinkedQueue<AbstractFSItem>();
-        directories.addAll(target.readContent());
-        while (!directories.isEmpty()) {
-          directories.addAll(directories.poll().readContent());
-        }
+        directories.add(target);
+        do {
+          Collection<AbstractFSItem> subDir = directories.poll().readContent();
+          directories.addAll(subDir);
+          directoryList.addAll(subDir);
+        } while (!directories.isEmpty());
+        
         // Get all modules
         HashMap<String, FoxModule> modules = target.getFoxModules();
 
@@ -120,11 +118,27 @@ public class Loader {
       }
 
       monitor.done();
-      refreshUI();
+
+      Display.getDefault().asyncExec(new Runnable() {
+        @Override
+        public void run() {
+          target.firePropertyChange("status", null, target.getStatus());
+          // Copy all children as they may change
+          AbstractModelObject children[] = directoryList.toArray(new AbstractModelObject[0]);
+          for (AbstractModelObject o : children) {
+            o.firePropertyChange("status", null, o.getStatus());
+          }
+        }
+      });
+
       if (monitor.isCanceled()) {
         throw new InterruptedException("The long running operation was cancelled");
       }
 
+      startWatchDog(monitorList);
+    }
+
+    private void startWatchDog(final HashMap<String, AbstractFSItem> monitorList) {
       try {
         WATCHDOG = new WatchDog(target.getPath(), new WatchDogEventHandler() {
 
@@ -148,7 +162,6 @@ public class Loader {
               } catch (Exception e) {
                 e.printStackTrace();
               }
-
             }
           }
 
@@ -161,7 +174,6 @@ public class Loader {
             } catch (FileNotFoundException e) {
               // Nothing
             }
-
           }
 
           @Override
@@ -186,5 +198,6 @@ public class Loader {
         e.printStackTrace();
       }
     }
+
   }
 }

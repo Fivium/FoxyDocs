@@ -5,12 +5,12 @@ All rights reserved.
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
-    * Redistributions of source code must retain the above copyright notice, 
+ * Redistributions of source code must retain the above copyright notice, 
       this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above copyright notice, 
+ * Redistributions in binary form must reproduce the above copyright notice, 
       this list of conditions and the following disclaimer in the documentation 
       and/or other materials provided with the distribution.
-    * Neither the name of the DEPARTMENT OF ENERGY AND CLIMATE CHANGE nor the
+ * Neither the name of the DEPARTMENT OF ENERGY AND CLIMATE CHANGE nor the
       names of its contributors may be used to endorse or promote products
       derived from this software without specific prior written permission.
 
@@ -25,7 +25,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-*/
+ */
 package net.foxopen.foxydocs.model.abstractObject;
 
 import static net.foxopen.foxydocs.FoxyDocs.*;
@@ -37,6 +37,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Observable;
+
+import net.foxopen.foxydocs.FoxyDocs;
 
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
@@ -55,7 +57,7 @@ public abstract class AbstractModelObject extends Observable {
     addPropertyChangeListener("dirty", new PropertyChangeListener() {
       @Override
       public void propertyChange(PropertyChangeEvent evt) {
-        firePropertyChange("displayedName", null, getDisplayedName());
+        firePropertyChange("name", null, getName());
         if (getParent() != null) {
           // Cascade propagate the change
           getParent().firePropertyChange("dirty", evt.getOldValue(), evt.getNewValue());
@@ -67,7 +69,10 @@ public abstract class AbstractModelObject extends Observable {
     addPropertyChangeListener("status", new PropertyChangeListener() {
       @Override
       public void propertyChange(PropertyChangeEvent evt) {
-        firePropertyChange("displayedName", null, getDisplayedName());
+        if (getStatus() == FoxyDocs.STATUS_UNKNOWN) {
+         delete();
+        }
+        firePropertyChange("name", null, getName());
         if (getParent() != null) {
           // Cascade propagate the change
           getParent().firePropertyChange("status", evt.getOldValue(), evt.getNewValue());
@@ -98,11 +103,7 @@ public abstract class AbstractModelObject extends Observable {
 
   public abstract String getName();
 
-  public final String getDisplayedName() {
-    return getName() + (isDirty() ? " *" : "");
-  }
-
-  public final List<AbstractModelObject> getChildren() {
+  public synchronized final List<AbstractModelObject> getChildren() {
     return children;
   }
 
@@ -116,6 +117,12 @@ public abstract class AbstractModelObject extends Observable {
 
   public synchronized final void addChild(AbstractModelObject child) {
     getChildren().add(child);
+    firePropertyChange("children", null, getChildren());
+  }
+  
+  public synchronized void delete() {
+    getParent().getChildren().remove(this);
+    getParent().firePropertyChange("children", null, getParent().getChildren());
   }
 
   public synchronized int getStatus() {

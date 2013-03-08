@@ -40,6 +40,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
@@ -81,18 +82,13 @@ public class FoxModule extends AbstractFSItem {
       DocumentedElement docElement = new DocumentedElement(e, set);
       // Own set
       set.addChild(docElement);
-
       // Flat version
       docElements.add(docElement);
     }
     if (set.size() > 0) {
       addChild(set);
     }
-  }
 
-  public void delete() {
-    getParent().getChildren().remove(this);
-    getParent().firePropertyChange("children", null, getParent().getChildren());
   }
 
   public ArrayList<AbstractDocumentedElement> getAllEntries() {
@@ -127,7 +123,7 @@ public class FoxModule extends AbstractFSItem {
 
   @Override
   public String toString() {
-    return getDisplayedName();
+    return getName();
   }
 
   @Override
@@ -195,7 +191,7 @@ public class FoxModule extends AbstractFSItem {
     // Header
     List<Element> header = runXpath(FOX_MODULE_XPATH + "fm:header", jdomDoc);
     if (header.size() != 1) {
-      throw new NotAFoxModuleException(getDisplayedName());
+      throw new NotAFoxModuleException(getName());
     }
     // DocumentedElement headerElement = new DocumentedElement(header.get(0),
     // this, true);
@@ -221,7 +217,7 @@ public class FoxModule extends AbstractFSItem {
     }
 
     if (getChildren().size() == 0) {
-      throw new NotAFoxModuleException(getDisplayedName());
+      throw new NotAFoxModuleException(getName());
     }
 
     return null;
@@ -241,5 +237,19 @@ public class FoxModule extends AbstractFSItem {
     public NotAFoxModuleException(String name) {
       super(name + " is not a valid FoxModule");
     }
+  }
+
+  public static Comparator<? super FoxModule> foxModuleComparator;
+
+  public static Comparator<? super FoxModule> getComparator() {
+    if (foxModuleComparator == null) {
+      foxModuleComparator = new Comparator<FoxModule>() {
+        @Override
+        public int compare(FoxModule o1, FoxModule o2) {
+          return o1.getName().compareTo(o2.getName());
+        }
+      };
+    }
+    return foxModuleComparator;
   }
 }

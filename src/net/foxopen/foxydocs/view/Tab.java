@@ -80,7 +80,6 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.wb.rcp.databinding.BeansListObservableFactory;
 import org.eclipse.wb.rcp.databinding.TreeBeanAdvisor;
-import org.eclipse.wb.rcp.databinding.TreeObservableLabelProvider;
 import org.eclipse.swt.widgets.Label;
 import org.jdom2.Element;
 
@@ -119,14 +118,14 @@ public class Tab extends CTabItem {
     this.content = content;
     this.docEntries = content.getAllEntries();
     {
-      setText(content.getDisplayedName());
-      content.addPropertyChangeListener("displayedName", new PropertyChangeListener() {
+      setText(FoxLabelProvider.getDirtyName(content));
+      content.addPropertyChangeListener("name", new PropertyChangeListener() {
 
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
           // Update the tab name, for display the dirty star for instance
           if (!isDisposed())
-            setText(content.getDisplayedName());
+            setText(FoxLabelProvider.getDirtyName(content));
         }
       });
       {
@@ -280,9 +279,9 @@ public class Tab extends CTabItem {
     }
     //
     BeansListObservableFactory treeObservableFactory = new BeansListObservableFactory(AbstractModelObject.class, "children");
-    TreeBeanAdvisor treeAdvisor = new TreeBeanAdvisor(AbstractModelObject.class, "displayedName", "children", null);
+    TreeBeanAdvisor treeAdvisor = new TreeBeanAdvisor(AbstractModelObject.class, "name", "children", null);
     ObservableListTreeContentProvider treeContentProvider = new ObservableListTreeContentProvider(treeObservableFactory, treeAdvisor);
-    treeViewer.setLabelProvider(new TreeObservableLabelProvider(treeContentProvider.getKnownElements(), AbstractModelObject.class, "displayedName", "image"));
+    treeViewer.setLabelProvider(new FoxLabelProvider(treeContentProvider.getKnownElements(), AbstractModelObject.class, "name", "image"));
     treeViewer.setContentProvider(treeContentProvider);
     //
     IObservableList childrenRootObserveList = BeanProperties.list("children").observe(content);

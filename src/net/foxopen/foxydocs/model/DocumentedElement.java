@@ -98,7 +98,7 @@ public class DocumentedElement extends AbstractDocumentedElement {
   public void setName(String name) {
     if (name == null || name.trim() == "")
       throw new IllegalArgumentException("Entry name is null");
-    firePropertyChange("displayedName", this.name, this.name = name);
+    firePropertyChange("name", this.name, this.name = name);
   }
 
   @Override

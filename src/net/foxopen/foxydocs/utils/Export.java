@@ -15,7 +15,6 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -34,7 +33,6 @@ import net.foxopen.foxydocs.model.abstractObject.AbstractFSItem;
 
 import org.apache.fop.apps.Fop;
 import org.apache.fop.apps.FopFactory;
-import org.apache.fop.apps.MimeConstants;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.jdom2.Content;
@@ -116,7 +114,7 @@ public class Export {
     OutputStream pdfout = new BufferedOutputStream(new FileOutputStream(out));
 
     try {
-      Fop fop = fopFactory.newFop(MimeConstants.MIME_PDF, pdfout);
+      Fop fop = fopFactory.newFop(org.apache.xmlgraphics.util.MimeConstants.MIME_PDF, pdfout);
       TransformerFactory factory = TransformerFactory.newInstance();
       Transformer transformer = factory.newTransformer();
       JDOMSource src = new JDOMSource(fopDoc);
@@ -170,12 +168,7 @@ public class Export {
         monitor.worked(1);
 
         // Sort the collection
-        Collections.sort(modules, new Comparator<FoxModule>() {
-          @Override
-          public int compare(FoxModule o1, FoxModule o2) {
-            return o1.getDisplayedName().compareTo(o2.getDisplayedName());
-          }
-        });
+        Collections.sort(modules, FoxModule.getComparator());
         // Generate HTML for each module
         for (FoxModule module : modules) {
           if (monitor.isCanceled())
@@ -185,7 +178,7 @@ public class Export {
           Document html = foxToHtml(module.getFile());
 
           // Write it
-          File targetFile = new File(targetDirectory.getAbsolutePath() + "/" + module.getDisplayedName() + ".html");
+          File targetFile = new File(targetDirectory.getAbsolutePath() + "/" + module.getName() + ".html");
           targetFile.createNewFile();
           FileOutputStream outhtml = new FileOutputStream(targetFile, false);
           XML_SERIALISER.output(html, outhtml);

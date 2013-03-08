@@ -34,16 +34,12 @@ import static net.foxopen.foxydocs.FoxyDocs.appConfig;
 import static net.foxopen.foxydocs.FoxyDocs.saveConfiguration;
 import static net.foxopen.foxydocs.utils.Logger.logStdout;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 
-import net.foxopen.foxydocs.FoxyDocs;
 import net.foxopen.foxydocs.model.Directory;
 import net.foxopen.foxydocs.model.FoxModule;
 import net.foxopen.foxydocs.model.abstractObject.AbstractFSItem;
-import net.foxopen.foxydocs.model.abstractObject.AbstractModelObject;
 import net.foxopen.foxydocs.utils.Export;
 import net.foxopen.foxydocs.utils.Loader;
 
@@ -58,44 +54,42 @@ import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.databinding.viewers.ObservableListTreeContentProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.layout.TreeColumnLayout;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.window.ApplicationWindow;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
-import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.ShellAdapter;
 import org.eclipse.swt.events.ShellEvent;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.FormAttachment;
+import org.eclipse.swt.layout.FormData;
+import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.wb.rcp.databinding.BeansListObservableFactory;
 import org.eclipse.wb.rcp.databinding.TreeBeanAdvisor;
-import org.eclipse.wb.rcp.databinding.TreeObservableLabelProvider;
 import org.eclipse.wb.swt.SWTResourceManager;
 
 public class FoxyDocsMainWindow extends ApplicationWindow {
   private Action action_exit;
 
-  private static AbstractFSItem root = new Directory(null);
+  private final AbstractFSItem root = new Directory(null);
 
   public TreeViewer treeViewerFileList;
   public static CTabFolder tabFolder;
@@ -111,6 +105,8 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
   private Action action_export_pdf;
   private Action action_load_last;
   private Action action_export_html;
+  private Text searchField;
+  private FormData fd_searchField;
 
   /**
    * Create the application window.
@@ -121,10 +117,6 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
     addToolBar(SWT.FLAT | SWT.WRAP);
     addMenuBar();
     addStatusLine();
-  }
-
-  public static AbstractFSItem getRoot() {
-    return root;
   }
 
   /**
@@ -139,24 +131,30 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
     container.setLayout(new FillLayout(SWT.HORIZONTAL));
     {
       SashForm sashForm = new SashForm(container, SWT.NONE);
-      sashForm.setSashWidth(4);
+      sashForm.setSashWidth(5);
       {
         final Composite composite = new Composite(sashForm, SWT.NONE);
-        composite.setLayout(new TreeColumnLayout());
+        composite.setLayout(new FormLayout());
+        {
+          searchField = new Text(composite, SWT.BORDER);
+          fd_searchField = new FormData();
+          fd_searchField.bottom = new FormAttachment(0, 26);
+          fd_searchField.top = new FormAttachment(0);
+          searchField.setLayoutData(fd_searchField);
+        }
         {
           treeViewerFileList = new TreeViewer(composite, SWT.BORDER);
+          Tree fileList = treeViewerFileList.getTree();
+          fd_searchField.left = new FormAttachment(fileList, 0, SWT.LEFT);
+          fd_searchField.right = new FormAttachment(fileList, 0, SWT.RIGHT);
+          FormData fd_fileList = new FormData();
+          fd_fileList.top = new FormAttachment(searchField, 6);
+          fd_fileList.bottom = new FormAttachment(100);
+          fd_fileList.left = new FormAttachment(0);
+          fd_fileList.right = new FormAttachment(100);
+          fileList.setLayoutData(fd_fileList);
           treeViewerFileList.setExpandPreCheckFilters(true);
           treeViewerFileList.setAutoExpandLevel(3);
-          treeViewerFileList.addFilter(new ViewerFilter() {
-            @Override
-            public boolean select(Viewer viewer, Object parentElement, Object element) {
-              if (element instanceof AbstractModelObject) {
-                AbstractModelObject o = (AbstractModelObject) element;
-                return o.getStatus() > FoxyDocs.STATUS_UNKNOWN;
-              }
-              return true;
-            }
-          });
           treeViewerFileList.addDoubleClickListener(new IDoubleClickListener() {
             @Override
             public void doubleClick(DoubleClickEvent event) {
@@ -173,41 +171,12 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
               }
             }
           });
-
-          root.addPropertyChangeListener("status", new PropertyChangeListener() {
-            @Override
-            public void propertyChange(PropertyChangeEvent evt) {
-              treeViewerFileList.refresh(); // FIXME
-            }
-          });
-
-          Tree tree = treeViewerFileList.getTree();
-          tree.addMouseListener(new MouseListener() {
-
-            @Override
-            public void mouseUp(MouseEvent e) {
-              // Empty
-            }
-
-            @Override
-            public void mouseDown(MouseEvent e) {
-              // If root is empty, you can open a folder by clicking on the tree
-              if (!root.getHasChildren())
-                action_open.run();
-            }
-
-            @Override
-            public void mouseDoubleClick(MouseEvent e) {
-              // Empty
-            }
-          });
         }
       }
       {
         tabFolder = new CTabFolder(sashForm, SWT.BORDER | SWT.CLOSE);
         tabFolder.setSimple(false);
         tabFolder.setSelectionBackground(Display.getCurrent().getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));
-        // Tab here...
       }
       sashForm.setWeights(new int[] { 1, 3 });
     }
@@ -249,7 +218,6 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
 
           if (lastUsedPath != null) {
             try {
-              root.open(lastUsedPath);
               new ProgressMonitorDialog(getShell()).run(true, true, Loader.LoadContent(root));
             } catch (InterruptedException e) {
               e.printStackTrace();
@@ -355,7 +323,7 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
               MessageDialog.openInformation(getShell(), "Cancelled", e.getMessage());
             } catch (Exception e) {
               e.printStackTrace();
-              MessageDialog.openInformation(getShell(), "Error", e.getMessage());
+              MessageDialog.openInformation(getParentShell(), "Error", e.getMessage());
             }
           } else {
             MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "No last location");
@@ -494,7 +462,7 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
     BeansListObservableFactory treeObservableFactory = new BeansListObservableFactory(AbstractFSItem.class, "children");
     TreeBeanAdvisor treeAdvisor = new TreeBeanAdvisor(AbstractFSItem.class, "parent", "children", "hasChildren");
     ObservableListTreeContentProvider treeContentProvider = new ObservableListTreeContentProvider(treeObservableFactory, treeAdvisor);
-    treeViewerFileList.setLabelProvider(new TreeObservableLabelProvider(treeContentProvider.getKnownElements(), AbstractFSItem.class, "displayedName", "image"));
+    treeViewerFileList.setLabelProvider(new FoxLabelProvider(treeContentProvider.getKnownElements(), AbstractFSItem.class, "name", "image"));
     treeViewerFileList.setContentProvider(treeContentProvider);
     //
     IObservableList childrenRootObserveList = BeanProperties.list("children").observe(root);
