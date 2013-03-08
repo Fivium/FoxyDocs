@@ -30,6 +30,7 @@ import javax.xml.transform.stream.StreamSource;
 import net.foxopen.foxydocs.FoxyDocs;
 import net.foxopen.foxydocs.model.FoxModule;
 import net.foxopen.foxydocs.model.abstractObject.AbstractFSItem;
+import net.foxopen.foxydocs.model.abstractObject.AbstractModelObject;
 
 import org.apache.fop.apps.Fop;
 import org.apache.fop.apps.FopFactory;
@@ -168,7 +169,7 @@ public class Export {
         monitor.worked(1);
 
         // Sort the collection
-        Collections.sort(modules, FoxModule.getComparator());
+        Collections.sort(modules, AbstractModelObject.getComparator());
         // Generate HTML for each module
         for (FoxModule module : modules) {
           if (monitor.isCanceled())

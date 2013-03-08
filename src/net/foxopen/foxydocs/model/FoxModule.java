@@ -40,7 +40,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
@@ -239,17 +238,4 @@ public class FoxModule extends AbstractFSItem {
     }
   }
 
-  public static Comparator<? super FoxModule> foxModuleComparator;
-
-  public static Comparator<? super FoxModule> getComparator() {
-    if (foxModuleComparator == null) {
-      foxModuleComparator = new Comparator<FoxModule>() {
-        @Override
-        public int compare(FoxModule o1, FoxModule o2) {
-          return o1.getName().compareTo(o2.getName());
-        }
-      };
-    }
-    return foxModuleComparator;
-  }
 }

@@ -35,10 +35,12 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Observable;
 
 import net.foxopen.foxydocs.FoxyDocs;
+import net.foxopen.foxydocs.model.ModuleInformation;
 
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
@@ -46,6 +48,7 @@ import org.eclipse.swt.widgets.Display;
 public abstract class AbstractModelObject extends Observable {
 
   private final List<AbstractModelObject> children = Collections.synchronizedList(new ArrayList<AbstractModelObject>());
+  private static Comparator<? super AbstractModelObject> modelComparator;
 
   private final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
   protected final AbstractModelObject parent;
@@ -70,7 +73,7 @@ public abstract class AbstractModelObject extends Observable {
       @Override
       public void propertyChange(PropertyChangeEvent evt) {
         if (getStatus() == FoxyDocs.STATUS_UNKNOWN) {
-         delete();
+          delete();
         }
         firePropertyChange("name", null, getName());
         if (getParent() != null) {
@@ -116,10 +119,11 @@ public abstract class AbstractModelObject extends Observable {
   }
 
   public synchronized final void addChild(AbstractModelObject child) {
-    getChildren().add(child);
+    children.add(child);
+    Collections.sort(children, getComparator());
     firePropertyChange("children", null, getChildren());
   }
-  
+
   public synchronized void delete() {
     getParent().getChildren().remove(this);
     getParent().firePropertyChange("children", null, getParent().getChildren());
@@ -191,5 +195,24 @@ public abstract class AbstractModelObject extends Observable {
         firePropertyChange("children", null, getChildren());
       }
     });
+  }
+
+  public static Comparator<? super AbstractModelObject> getComparator() {
+    if (modelComparator == null) {
+      modelComparator = new Comparator<AbstractModelObject>() {
+        @Override
+        public int compare(AbstractModelObject o1, AbstractModelObject o2) {
+          // Always bump module information at the top
+          if (o1 instanceof ModuleInformation)
+            return -1;
+          if (o2 instanceof ModuleInformation)
+            return 1;
+
+          // Alphabetical ordering on names
+          return o1.getName().compareTo(o2.getName());
+        }
+      };
+    }
+    return modelComparator;
   }
 }
