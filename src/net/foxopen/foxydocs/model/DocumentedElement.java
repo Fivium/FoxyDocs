@@ -28,6 +28,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package net.foxopen.foxydocs.model;
 
+import static net.foxopen.foxydocs.FoxyDocs.NAMESPACE_FM;
+import net.foxopen.foxydocs.FoxyDocs;
 import net.foxopen.foxydocs.model.abstractObject.AbstractDocumentedElement;
 import net.foxopen.foxydocs.model.abstractObject.AbstractModelObject;
 
@@ -37,17 +39,18 @@ import org.jdom2.located.Located;
 public class DocumentedElement extends AbstractDocumentedElement {
   private String previousDocumentationHash;
   private String name;
-  private final DocEntry documentationEntry;
-  private final Element node;
-  private final boolean isHeader;
-  
-  public  DocumentedElement(Element node, AbstractModelObject parent, boolean isHeader){
-    super(parent);
-    this.node = node;
-    this.isHeader = isHeader;
+  private Element elementNode;
 
-    documentationEntry = new DocEntry(node, this);
-    previousDocumentationHash = documentationEntry.getHash();
+  public DocumentedElement(Element node, AbstractModelObject parent) {
+    super(parent, node.getChild("documentation", NAMESPACE_FM), FoxyDocs.ELEMENT_FIELDS);
+    this.elementNode = node;
+
+    // Get an existing documentation node. If it does not exist, create it
+    if (getNode() == null) {
+      setNode(new Element("documentation", NAMESPACE_FM));
+    }
+
+    previousDocumentationHash = getHash();
 
     String nodeName = node.getAttributeValue("name");
     if (nodeName == null) {
@@ -56,42 +59,32 @@ public class DocumentedElement extends AbstractDocumentedElement {
       setName(nodeName);
     }
   }
-  public DocumentedElement(Element node, AbstractModelObject parent) {
-    this(node, parent, false);
-  }
-  
-  public boolean isHeader(){
-    return isHeader;
-  }
 
   public int getLineNumber() {
     // Extract the line number. Must use SAX and a located element
-    if (node instanceof Located) {
-      Located locatedNode = (Located) node;
+    if (elementNode instanceof Located) {
+      Located locatedNode = (Located) elementNode;
       return locatedNode.getLine();
     }
     return 0;
   }
 
   @Override
-  public String getCode() {
-    return getParent().getCode();
-  }
-
-  @Override
   public synchronized boolean isDirty() {
-    return !documentationEntry.getHash().equals(previousDocumentationHash);
+    return !getHash().equals(previousDocumentationHash);
   }
 
   @Override
   public void save() throws Exception {
     if (!isDirty())
       return;
-    
-    documentationEntry.save();
+
+    if (elementNode.getChild("documentation", NAMESPACE_FM) == null) {
+      this.elementNode.addContent(getNode());
+    }
 
     // New become old
-    previousDocumentationHash = documentationEntry.getHash();
+    previousDocumentationHash = getHash();
     firePropertyChange("dirty", true, isDirty());
   }
 
@@ -106,50 +99,6 @@ public class DocumentedElement extends AbstractDocumentedElement {
     return false;
   }
 
-  @Override
-  public synchronized int getStatus() {
-    return documentationEntry.getStatus();
-  }
-
-  /* (non-Javadoc)
-   * @see net.foxopen.foxydocs.model.AbstractDocumentedElement#getDescription()
-   */
-  @Override
-  public String getDescription() {
-    return documentationEntry.getDescription();
-  }
-
-  /* (non-Javadoc)
-   * @see net.foxopen.foxydocs.model.AbstractDocumentedElement#getComments()
-   */
-  @Override
-  public String getComments() {
-    return documentationEntry.getComments();
-  }
-
-  /* (non-Javadoc)
-   * @see net.foxopen.foxydocs.model.AbstractDocumentedElement#getPrecondition()
-   */
-  @Override
-  public String getPrecondition() {
-    return documentationEntry.getPrecondition();
-  }
-  
-  @Override
-  public void setDescription(String content) {
-    documentationEntry.setDescription(content);
-  }
-  
-  @Override
-  public void setComments(String content) {
-    documentationEntry.setComments(content);
-  }
-  
-  @Override
-  public void setPrecondition(String content) {
-    documentationEntry.setPrecondition(content);
-  }
-  
   @Override
   public String getName() {
     return name;

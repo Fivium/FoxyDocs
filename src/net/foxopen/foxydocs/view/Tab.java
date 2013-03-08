@@ -38,16 +38,19 @@ import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map.Entry;
 
+import net.foxopen.foxydocs.FoxyDocs;
 import net.foxopen.foxydocs.model.DocumentedElement;
 import net.foxopen.foxydocs.model.DocumentedElementSet;
+import net.foxopen.foxydocs.model.EntryDoc;
 import net.foxopen.foxydocs.model.FoxModule;
 import net.foxopen.foxydocs.model.ModuleInformation;
 import net.foxopen.foxydocs.model.abstractObject.AbstractDocumentedElement;
+import net.foxopen.foxydocs.model.abstractObject.AbstractFSItem;
 import net.foxopen.foxydocs.model.abstractObject.AbstractModelObject;
 
 import org.eclipse.core.databinding.DataBindingContext;
+import org.eclipse.core.databinding.UpdateValueStrategy;
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
@@ -77,29 +80,31 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.wb.rcp.databinding.BeansListObservableFactory;
 import org.eclipse.wb.rcp.databinding.TreeBeanAdvisor;
-import org.eclipse.swt.widgets.Label;
-import org.jdom2.Element;
 
 public class Tab extends CTabItem {
 
+  // StyledText associated to the DocumentedElement fields
   private final HashMap<String, StyledText> docElements = new HashMap<String, StyledText>();
   private final TreeViewer treeViewer;
 
   private final StyledText codeText;
   private final FoxModule content;
+  // List of all entries
   private ArrayList<AbstractDocumentedElement> docEntries;
 
   private final CTabFolder tabFolderDoc;
   private CTabItem regularDocTab;
   private CTabItem headerDocTab;
 
-  private final Composite regularDocComposite;
+  private Composite regularDocComposite;
   private final ScrolledComposite moduleInfoWrapper;
 
   private final Composite moduleInfoDocComposite;
+
   private final DataBindingContext bindingContext = new DataBindingContext();
 
   /**
@@ -155,24 +160,33 @@ public class Tab extends CTabItem {
               Object selectedNode = thisSelection.getFirstElement();
               goToCode(selectedNode);
 
-              if (headerDocTab != null)
-                headerDocTab.dispose();
-
-              if (regularDocTab != null)
-                regularDocTab.dispose();
-
+              // Open the Module Information tab
               if (selectedNode instanceof ModuleInformation) {
-                headerDocTab = new CTabItem(tabFolderDoc, SWT.NONE);
-                headerDocTab.setText("Module Informations");
-                headerDocTab.setControl(moduleInfoWrapper);
-                headerDocTab.getParent().setSelection(headerDocTab);
+                if (regularDocTab != null)
+                  regularDocTab.dispose();
+                if (headerDocTab == null || headerDocTab.isDisposed()) {
+                  headerDocTab = new CTabItem(tabFolderDoc, SWT.NONE);
+                  headerDocTab.setText("Module Informations");
+                  headerDocTab.setControl(moduleInfoWrapper);
+                  headerDocTab.getParent().setSelection(headerDocTab);
+                }
               }
 
+              // Open the Documented Element tab
               if (selectedNode instanceof DocumentedElement) {
-                regularDocTab = new CTabItem(tabFolderDoc, SWT.NONE);
-                regularDocTab.setText("Documentation");
-                regularDocTab.setControl(regularDocComposite);
-                regularDocTab.getParent().setSelection(regularDocTab);
+                if (headerDocTab != null)
+                  headerDocTab.dispose();
+                if (regularDocTab == null || regularDocTab.isDisposed()) {
+                  regularDocTab = new CTabItem(tabFolderDoc, SWT.NONE);
+                  regularDocTab.setText("Documentation");
+                  regularDocTab.getParent().setSelection(regularDocTab);
+                  regularDocTab.setControl(regularDocComposite);
+                  // Bind correct fields
+                  for (EntryDoc e : ((DocumentedElement) selectedNode).getElements()) {
+                    StyledText target = docElements.get(e.getKey());
+                    bind(target, e);
+                  }
+                }
               }
             }
           });
@@ -183,15 +197,6 @@ public class Tab extends CTabItem {
             tabFolderDoc = new CTabFolder(sashFormCodeDoc, SWT.BORDER | SWT.NONE);
             tabFolderDoc.setSelectionBackground(Display.getCurrent().getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));
 
-            // Regular documentation composite
-            regularDocComposite = new Composite(tabFolderDoc, SWT.NONE);
-            regularDocComposite.setLayout(new GridLayout(2, false));
-
-            // Fields
-            addElement(regularDocComposite, "description");
-            addElement(regularDocComposite, "comments");
-            addElement(regularDocComposite, "precondition");
-
             // Module Info Composite
             moduleInfoWrapper = new ScrolledComposite(tabFolderDoc, SWT.BORDER | SWT.V_SCROLL);
             moduleInfoWrapper.setExpandHorizontal(true);
@@ -199,13 +204,39 @@ public class Tab extends CTabItem {
 
             moduleInfoDocComposite = new Composite(moduleInfoWrapper, SWT.BORDER);
             moduleInfoDocComposite.setLayout(new GridLayout(2, false));
-            for (Entry<String, Element> e : content.getModuleInfo().getContent()) {
-              addStaticElement(moduleInfoDocComposite, e);
+            for (EntryDoc e : content.getModuleInfo().getElements()) {
+              addElement(moduleInfoDocComposite, e);
             }
 
             moduleInfoDocComposite.pack(true);
             moduleInfoWrapper.setContent(moduleInfoDocComposite);
             moduleInfoWrapper.setMinSize(moduleInfoDocComposite.computeSize(SWT.NONE, SWT.DEFAULT));
+
+            // Regular documentation composite
+            if (regularDocComposite != null)
+              regularDocComposite.dispose();
+            regularDocComposite = new Composite(tabFolderDoc, SWT.NONE);
+            regularDocComposite.setLayout(new GridLayout(2, false));
+
+            // Empty fields
+            for (String key : FoxyDocs.ELEMENT_FIELDS) {
+              // Label with first upper letter
+              Label tLabel = new Label(regularDocComposite, SWT.HORIZONTAL);
+              tLabel.setText(EntryDoc.getDisplayedName(key));
+
+              tLabel.setLayoutData(new GridData(GridData.BEGINNING, GridData.CENTER, false, false, 1, 3));
+
+              // Editable text
+              final StyledText tText = new StyledText(regularDocComposite, SWT.BORDER | SWT.V_SCROLL | SWT.WRAP);
+              tText.setFont(FONT_DEFAULT);
+              GridData layout = new GridData(GridData.FILL, GridData.FILL, true, true, 1, 3);
+              layout.heightHint = 50;
+              tText.setLayoutData(layout);
+
+              if (key.startsWith("*"))
+                key = key.substring(1);
+              docElements.put(key, tText);
+            }
 
             Group grpCode = new Group(sashFormCodeDoc, SWT.NONE);
             grpCode.setText("Code");
@@ -214,7 +245,7 @@ public class Tab extends CTabItem {
             codeText = new StyledText(grpCode, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.READ_ONLY);
             codeText.setFont(FONT_DEFAULT);
 
-            // Add the syntax colouring handler
+            // Add the syntax coloring handler
             SyntaxHighlighter.addSyntaxHighligherListener(codeText);
 
             // Browse Listener
@@ -291,36 +322,6 @@ public class Tab extends CTabItem {
   }
 
   /**
-   * Add a dynamic element Label|Styled Text and bind it to the model
-   * 
-   * @param parent
-   *          The parent to add to
-   * @param key
-   *          The name of the variable to bind
-   */
-  private void addElement(Composite parent, String key) {
-    if (!(parent.getLayout() instanceof GridLayout)) {
-      throw new IllegalArgumentException("The parent composite must have a Grid Layout");
-    }
-    if (key == null || key.trim().isEmpty()) {
-      throw new IllegalArgumentException("The key must not be null or empty");
-    }
-
-    // Label with first upper letter
-    Label tLabel = new Label(parent, SWT.HORIZONTAL);
-    tLabel.setText(key.substring(0, 1).toUpperCase() + key.substring(1));
-    tLabel.setLayoutData(new GridData(GridData.BEGINNING, GridData.CENTER, false, false));
-
-    // Editable text
-    StyledText tText = new StyledText(parent, SWT.BORDER | SWT.V_SCROLL | SWT.WRAP);
-    tText.setFont(FONT_DEFAULT);
-    tText.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, true));
-    docElements.put(key, tText);
-
-    bind(tText, key);
-  }
-
-  /**
    * Add a static element Label|Styled Text
    * 
    * @param parent
@@ -329,7 +330,7 @@ public class Tab extends CTabItem {
    *          The variable to display
    * @return The Styled Text created
    */
-  private void addStaticElement(Composite parent, final Entry<String, Element> entry) {
+  private void addElement(Composite parent, final EntryDoc entry) {
     if (!(parent.getLayout() instanceof GridLayout)) {
       throw new IllegalArgumentException("The parent composite must have a Grid Layout");
     }
@@ -339,7 +340,7 @@ public class Tab extends CTabItem {
 
     // Label with first upper letter
     Label tLabel = new Label(parent, SWT.HORIZONTAL);
-    tLabel.setText(entry.getKey().substring(0, 1).toUpperCase() + entry.getKey().substring(1));
+    tLabel.setText(entry.getName());
     tLabel.setLayoutData(new GridData(GridData.BEGINNING, GridData.CENTER, false, false, 1, 3));
 
     // Editable text
@@ -348,14 +349,13 @@ public class Tab extends CTabItem {
     GridData layout = new GridData(GridData.FILL, GridData.FILL, true, true, 1, 3);
     layout.heightHint = 50;
     tText.setLayoutData(layout);
-    docElements.put(entry.getKey(), tText);
 
     // Manual binding
-    tText.setText(entry.getValue().getTextNormalize());
+    tText.setText(entry.getValue());
     tText.addModifyListener(new ModifyListener() {
       @Override
       public void modifyText(ModifyEvent e) {
-        content.getModuleInfo().change(entry.getKey(), tText.getText());
+        entry.setValue(tText.getText());
       }
     });
   }
@@ -368,10 +368,10 @@ public class Tab extends CTabItem {
    * @param pKey
    *          the name of the variable in the model to bind to
    */
-  private void bind(StyledText pStyledText, String pKey) {
+  private void bind(StyledText pStyledText, EntryDoc entry) {
     IObservableValue observeTextText_documentationObserveWidget = WidgetProperties.text(new int[] { SWT.Modify, SWT.FocusOut, SWT.DefaultSelection }).observe(pStyledText);
     IObservableValue observeSingleSelectionTreeViewer = ViewerProperties.singleSelection().observe(treeViewer);
-    IObservableValue treeViewerDocumentationObserveDetailValue = BeanProperties.value(AbstractDocumentedElement.class, pKey, String.class).observeDetail(observeSingleSelectionTreeViewer);
+    IObservableValue treeViewerDocumentationObserveDetailValue = BeanProperties.value(AbstractDocumentedElement.class, "elements", EntryDoc.class).observeDetail(observeSingleSelectionTreeViewer);
     bindingContext.bindValue(observeTextText_documentationObserveWidget, treeViewerDocumentationObserveDetailValue, null, null);
   }
 

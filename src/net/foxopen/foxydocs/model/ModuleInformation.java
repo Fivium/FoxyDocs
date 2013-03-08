@@ -28,54 +28,27 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package net.foxopen.foxydocs.model;
 
-import java.util.HashMap;
-import java.util.Map.Entry;
-import java.util.Set;
-
+import net.foxopen.foxydocs.FoxyDocs;
 import net.foxopen.foxydocs.model.abstractObject.AbstractDocumentedElement;
 import net.foxopen.foxydocs.model.abstractObject.AbstractModelObject;
-import static net.foxopen.foxydocs.FoxyDocs.NAMESPACE_FM;
 
 import org.jdom2.Element;
 
 public class ModuleInformation extends AbstractDocumentedElement {
 
-  private final static String[] attributeList = new String[] { "name", "title", "application-title", "version-desc", "description", "build-notes", "help-text", };
-
-  private final HashMap<String, Element> attributes = new HashMap<String, Element>();
-
   private String oldContent;
 
   public ModuleInformation(Element node, AbstractModelObject parent) {
-    super(parent);
-    // Some extra fields
-    for (String attr : attributeList) {
-      Element attributeElement = node.getChild(attr, NAMESPACE_FM);
-      if (attributeElement == null) {
-        attributeElement = new Element(attr, NAMESPACE_FM);
-        node.addContent(attributeElement);
-      }
-      attributes.put(attr, attributeElement);
-    }
-
+    super(parent, node, FoxyDocs.MODULE_FIELDS);
+    // Set the oldContent to the current content
     save();
-  }
-
-  public Set<Entry<String, Element>> getContent() {
-    return attributes.entrySet();
-  }
-
-  public void change(String key, String text) {
-    attributes.get(key).removeContent();
-    attributes.get(key).addContent(text);
-    parent.firePropertyChange("dirty", false, isDirty());
   }
 
   @Override
   public String toString() {
     StringBuffer buffer = new StringBuffer();
-    for (Element e : attributes.values()) {
-      buffer.append(e.getTextNormalize());
+    for (EntryDoc e : elements) {
+      buffer.append(e.getValue());
     }
     return buffer.toString();
   }
@@ -96,49 +69,8 @@ public class ModuleInformation extends AbstractDocumentedElement {
   }
 
   @Override
-  public String getDescription() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public String getComments() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public String getPrecondition() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public void setDescription(String c) {
-    // TODO Auto-generated method stub
-    
-  }
-
-  @Override
-  public void setComments(String c) {
-    // TODO Auto-generated method stub
-    
-  }
-
-  @Override
-  public void setPrecondition(String c) {
-    // TODO Auto-generated method stub
-    
-  }
-  
-  @Override
-  public synchronized int getStatus(){
-    return 1;//TODO
-  }
-  
-  @Override
-  public String getName(){
+  public String getName() {
     return "Header";
   }
-  
+
 }

@@ -28,13 +28,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package net.foxopen.foxydocs.model;
 
-import net.foxopen.foxydocs.model.abstractObject.AbstractDocumentedElement;
 import net.foxopen.foxydocs.model.abstractObject.AbstractModelObject;
 
-public class DocumentedElementSet extends AbstractDocumentedElement  {
+public class DocumentedElementSet extends AbstractModelObject {
 
   private String type;
- 
+
   public DocumentedElementSet(String type, AbstractModelObject parent) {
     super(parent);
     setType(type);
@@ -48,47 +47,8 @@ public class DocumentedElementSet extends AbstractDocumentedElement  {
     return type;
   }
 
-  public int size() {
-    return getChildren().size();
-  }
-
   @Override
   public String getName() {
     return type;
-  }
-
-  @Override
-  public String getCode() {
-    return getParent().getCode();
-  }
-
-  @Override
-  public String getDescription() {
-    return "";
-  }
-
-  @Override
-  public String getComments() {
-    return "";
-  }
-
-  @Override
-  public String getPrecondition() {
-    return "";
-  }
-
-  @Override
-  public void setDescription(String c) {
-    // Nothing
-  }
-
-  @Override
-  public void setComments(String c) {
-    // Nothing
-  }
-
-  @Override
-  public void setPrecondition(String c) {
-    // Nothing
   }
 }

@@ -45,13 +45,13 @@ import net.foxopen.foxydocs.model.ModuleInformation;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 
-public abstract class AbstractModelObject extends Observable {
+public abstract class AbstractModelObject extends Observable{
 
   private final List<AbstractModelObject> children = Collections.synchronizedList(new ArrayList<AbstractModelObject>());
   private static Comparator<? super AbstractModelObject> modelComparator;
 
   private final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
-  protected final AbstractModelObject parent;
+  private final AbstractModelObject parent;
 
   protected AbstractModelObject(AbstractModelObject parent) {
     this.parent = parent;
@@ -118,15 +118,17 @@ public abstract class AbstractModelObject extends Observable {
     }
   }
 
-  public synchronized final void addChild(AbstractModelObject child) {
+  public synchronized void addChild(AbstractModelObject child) {
     children.add(child);
     Collections.sort(children, getComparator());
     firePropertyChange("children", null, getChildren());
   }
 
   public synchronized void delete() {
-    getParent().getChildren().remove(this);
-    getParent().firePropertyChange("children", null, getParent().getChildren());
+    if (getParent() != null) {
+      getParent().getChildren().remove(this);
+      getParent().firePropertyChange("children", null, getParent().getChildren());
+    }
   }
 
   public synchronized int getStatus() {

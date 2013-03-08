@@ -91,7 +91,7 @@ public class Loader {
           directories.addAll(subDir);
           directoryList.addAll(subDir);
         } while (!directories.isEmpty());
-        
+
         // Get all modules
         HashMap<String, FoxModule> modules = target.getFoxModules();
 
@@ -124,8 +124,7 @@ public class Loader {
         public void run() {
           target.firePropertyChange("status", null, target.getStatus());
           // Copy all children as they may change
-          AbstractModelObject children[] = directoryList.toArray(new AbstractModelObject[0]);
-          for (AbstractModelObject o : children) {
+          for (AbstractModelObject o : target.getChildren()) {
             o.firePropertyChange("status", null, o.getStatus());
           }
         }

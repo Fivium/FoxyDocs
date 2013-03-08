@@ -47,6 +47,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import net.foxopen.foxydocs.model.abstractObject.AbstractDocumentedElement;
 import net.foxopen.foxydocs.model.abstractObject.AbstractFSItem;
+import net.foxopen.foxydocs.model.abstractObject.AbstractModelObject;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.swt.widgets.Display;
@@ -63,7 +64,6 @@ public class FoxModule extends AbstractFSItem {
   private Document jdomDoc;
   private ModuleInformation moduleInfo;
   private String fullStringContent;
-  private ArrayList<AbstractDocumentedElement> docElements;
 
   public FoxModule(Path path, AbstractFSItem parent) throws NotAFoxModuleException, IOException {
     super(path, parent);
@@ -78,20 +78,26 @@ public class FoxModule extends AbstractFSItem {
   private void addEntries(String key, String xpath) {
     DocumentedElementSet set = new DocumentedElementSet(key, this);
     for (Element e : runXpath(xpath, jdomDoc)) {
-      DocumentedElement docElement = new DocumentedElement(e, set);
-      // Own set
+      AbstractDocumentedElement docElement = new DocumentedElement(e, set);
       set.addChild(docElement);
-      // Flat version
-      docElements.add(docElement);
     }
-    if (set.size() > 0) {
+    if (set.getHasChildren()) {
       addChild(set);
     }
 
   }
 
   public ArrayList<AbstractDocumentedElement> getAllEntries() {
-    return docElements;
+    ArrayList<AbstractDocumentedElement> buffer = new ArrayList<AbstractDocumentedElement>();
+    buffer.add(moduleInfo);
+    for (AbstractModelObject o : getChildren()) {
+      for (AbstractModelObject c : o.getChildren()) {
+        if (c instanceof AbstractDocumentedElement) {
+          buffer.add((AbstractDocumentedElement) c);
+        }
+      }
+    }
+    return buffer;
   }
 
   public static List<Element> runXpath(String xpath, org.jdom2.Document document) {
@@ -99,7 +105,7 @@ public class FoxModule extends AbstractFSItem {
     return actionsXPath.evaluate(document);
   }
 
-  public ModuleInformation getModuleInfo() {
+  public AbstractDocumentedElement getModuleInfo() {
     return moduleInfo;
   }
 
@@ -184,7 +190,6 @@ public class FoxModule extends AbstractFSItem {
     fullStringContent = stripNamespacesUnicity(rawFile);
 
     // Reset data structures
-    docElements = new ArrayList<>();
     getChildren().clear();
 
     // Header
@@ -192,15 +197,10 @@ public class FoxModule extends AbstractFSItem {
     if (header.size() != 1) {
       throw new NotAFoxModuleException(getName());
     }
-    // DocumentedElement headerElement = new DocumentedElement(header.get(0),
-    // this, true);
-    // addChild(headerElement);
-    // docElements.add(headerElement);
 
     // Module informations (header content)
     moduleInfo = new ModuleInformation(header.get(0), this);
     addChild(moduleInfo);
-    docElements.add(moduleInfo);
 
     // Entry themes
     addEntries("Entry Themes", FOX_MODULE_XPATH + "fm:entry-theme-list/fm:entry-theme");

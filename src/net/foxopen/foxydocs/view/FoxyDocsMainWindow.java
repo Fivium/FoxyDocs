@@ -218,6 +218,7 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
 
           if (lastUsedPath != null) {
             try {
+              root.open(lastUsedPath);
               new ProgressMonitorDialog(getShell()).run(true, true, Loader.LoadContent(root));
             } catch (InterruptedException e) {
               e.printStackTrace();
@@ -323,7 +324,7 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
               MessageDialog.openInformation(getShell(), "Cancelled", e.getMessage());
             } catch (Exception e) {
               e.printStackTrace();
-              MessageDialog.openInformation(getParentShell(), "Error", e.getMessage());
+              MessageDialog.openError(getParentShell(), "Error", e.getMessage());
             }
           } else {
             MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "No last location");

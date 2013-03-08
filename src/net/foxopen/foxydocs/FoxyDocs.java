@@ -108,6 +108,10 @@ public class FoxyDocs {
   public static Configuration appConfig;
   private static final XMLFileHandler xmlConfigHandler = new XMLFileHandler("config.xml");
 
+  // Order matters. Prefix a field with a star to make it mandatory
+  public static final String[] ELEMENT_FIELDS = new String[] { "*description", "*comments", "pre-condition" };
+  public static final String[] MODULE_FIELDS = new String[] { "*name", "*title", "*application-title", "version-desc", "*description", "build-notes", "help-text" };
+
   /**
    * Launch the application.
    * 
