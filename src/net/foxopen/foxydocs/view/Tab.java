@@ -46,17 +46,15 @@ import net.foxopen.foxydocs.model.EntryDoc;
 import net.foxopen.foxydocs.model.FoxModule;
 import net.foxopen.foxydocs.model.ModuleInformation;
 import net.foxopen.foxydocs.model.abstractObject.AbstractDocumentedElement;
-import net.foxopen.foxydocs.model.abstractObject.AbstractFSItem;
 import net.foxopen.foxydocs.model.abstractObject.AbstractModelObject;
 
 import org.eclipse.core.databinding.DataBindingContext;
-import org.eclipse.core.databinding.UpdateValueStrategy;
 import org.eclipse.core.databinding.beans.BeanProperties;
+import org.eclipse.core.databinding.beans.BeansObservables;
 import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
-import org.eclipse.jface.databinding.swt.WidgetProperties;
+import org.eclipse.jface.databinding.swt.SWTObservables;
 import org.eclipse.jface.databinding.viewers.ObservableListTreeContentProvider;
-import org.eclipse.jface.databinding.viewers.ViewerProperties;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -105,7 +103,7 @@ public class Tab extends CTabItem {
 
   private final Composite moduleInfoDocComposite;
 
-  private final DataBindingContext bindingContext = new DataBindingContext();
+  private final DataBindingContext bindingContext = new DataBindingContext();;
 
   /**
    * A new tab with dynamic content
@@ -181,11 +179,13 @@ public class Tab extends CTabItem {
                   regularDocTab.setText("Documentation");
                   regularDocTab.getParent().setSelection(regularDocTab);
                   regularDocTab.setControl(regularDocComposite);
-                  // Bind correct fields
-                  for (EntryDoc e : ((DocumentedElement) selectedNode).getElements()) {
-                    StyledText target = docElements.get(e.getKey());
-                    bind(target, e);
-                  }
+                }
+
+                // Bind correct fields
+                bindingContext.dispose();
+                for (EntryDoc e : ((DocumentedElement) selectedNode).getElements()) {
+                  StyledText target = docElements.get(e.getKey());
+                  bind(target, e);
                 }
               }
             }
@@ -369,10 +369,14 @@ public class Tab extends CTabItem {
    *          the name of the variable in the model to bind to
    */
   private void bind(StyledText pStyledText, EntryDoc entry) {
-    IObservableValue observeTextText_documentationObserveWidget = WidgetProperties.text(new int[] { SWT.Modify, SWT.FocusOut, SWT.DefaultSelection }).observe(pStyledText);
-    IObservableValue observeSingleSelectionTreeViewer = ViewerProperties.singleSelection().observe(treeViewer);
-    IObservableValue treeViewerDocumentationObserveDetailValue = BeanProperties.value(AbstractDocumentedElement.class, "elements", EntryDoc.class).observeDetail(observeSingleSelectionTreeViewer);
-    bindingContext.bindValue(observeTextText_documentationObserveWidget, treeViewerDocumentationObserveDetailValue, null, null);
+    // Set content
+    pStyledText.setText(entry.getValue());
+
+    // Bind
+    IObservableValue codeObserveWidget = SWTObservables.observeText(pStyledText, SWT.Modify);
+    IObservableValue codeObserveValue = BeansObservables.observeValue(entry, "value");
+    bindingContext.bindValue(codeObserveWidget, codeObserveValue, null, null);
+
   }
 
   /**
