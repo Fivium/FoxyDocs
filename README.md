@@ -54,18 +54,14 @@ In the future, the relevant JARs will be added in the lib directory so we won't 
 5. Export the directory to HTML (Ctrl + H) or the currently open module to PDF (Ctrl + P)
 
 ## Known issues
-* There is some issues with namespaces
 * The Pretty Print function does not align with the XMLSpy one
-* Empty folders (i.e. without any Fox Module inside them) are displayed
 * Adding or removing folders or files within the opened folder may behave improperly
 * The user can select multiple text fields at the same time
 * Comments within a documentation node are not accessible
-* Module names in the HTML export contain the file extension 
 * There is no CSS nor image in the PDF export
 * It is not possible to export an entire directory as PDF
 * After saving a file, the currently opened entry is not highlighted anymore
 * You can close an unsaved tab without any warning
-* After saving a file, the code highlighting can be a few lines off
 
 ## Credits
 
