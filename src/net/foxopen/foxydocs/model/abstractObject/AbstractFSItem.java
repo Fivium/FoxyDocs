@@ -80,7 +80,6 @@ public abstract class AbstractFSItem extends AbstractModelObject {
    * @throws IOException
    */
   public final boolean isReadOnly() {
-    checkFile();
     return !getFile().canWrite();
   }
 

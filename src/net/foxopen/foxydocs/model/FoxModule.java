@@ -28,11 +28,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package net.foxopen.foxydocs.model;
 
-import static net.foxopen.foxydocs.FoxyDocs.DOM_BUILDER;
+import static net.foxopen.foxydocs.FoxyDocs.*;
 import static net.foxopen.foxydocs.FoxyDocs.FOX_MODULE_XPATH;
 import static net.foxopen.foxydocs.FoxyDocs.NAMESPACE_FM;
 import static net.foxopen.foxydocs.FoxyDocs.NAMESPACE_XS;
-import static net.foxopen.foxydocs.FoxyDocs.XML_SERIALISER;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -45,6 +44,7 @@ import java.util.List;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import net.foxopen.foxydocs.FoxyDocs;
 import net.foxopen.foxydocs.model.abstractObject.AbstractDocumentedElement;
 import net.foxopen.foxydocs.model.abstractObject.AbstractFSItem;
 import net.foxopen.foxydocs.model.abstractObject.AbstractModelObject;
@@ -148,7 +148,7 @@ public class FoxModule extends AbstractFSItem {
     moduleInfo.save();
 
     // Write into the file
-    fullStringContent = stripNamespacesUnicity(XML_SERIALISER.outputString(jdomDoc));
+    fullStringContent = stripNamespacesUnicity(FoxyDocs.getSerialiser().outputString(jdomDoc));
     FileUtils.writeStringToFile(getFile(), fullStringContent, "UTF-8");
 
     Display.getDefault().asyncExec(new Runnable() {
@@ -181,9 +181,9 @@ public class FoxModule extends AbstractFSItem {
     rawFile = fixNamespacesUnicity(rawFile);
 
     // Parse the document two times to have a proper location for each element
-    Document firstRun = DOM_BUILDER.build(new StringReader(rawFile));
-    rawFile = XML_SERIALISER.outputString(firstRun);
-    jdomDoc = DOM_BUILDER.build(new StringReader(rawFile));
+    Document firstRun = getDOMBuilder().build(new StringReader(rawFile));
+    rawFile = getSerialiser().outputString(firstRun);
+    jdomDoc = getDOMBuilder().build(new StringReader(rawFile));
 
     // Cache the module as a String while parsing so opening a tab is faster
     // Strip the namespace hack of the displayed file

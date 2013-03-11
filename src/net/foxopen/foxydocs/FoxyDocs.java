@@ -30,17 +30,6 @@ package net.foxopen.foxydocs;
 
 import static net.foxopen.foxydocs.utils.Logger.logStdout;
 import static net.foxopen.foxydocs.view.FoxyDocsMainWindow.getImage;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.ByteBuffer;
-import java.nio.channels.Channels;
-import java.nio.channels.FileChannel;
-import java.nio.channels.ReadableByteChannel;
-
 import net.foxopen.foxydocs.utils.WatchDog;
 import net.foxopen.foxydocs.view.FoxyDocsMainWindow;
 
@@ -96,17 +85,14 @@ public class FoxyDocs {
   public static final Namespace NAMESPACE_XS = Namespace.getNamespace("xs", "http://www.w3.org/2001/XMLSchema/xs");
   public static final Namespace NAMESPACE_XSI = Namespace.getNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance/xsi");
 
-  public static SAXBuilder DOM_BUILDER;
-  public static XMLOutputter XML_SERIALISER;
-
   public static final int EVENT_DOWN = 5402;
   public static final int EVENT_UP = 5403;
-  public static final int EVENT_NEXT = 5404;
-  public static final int EVENT_PREVIOUS = 5405;
 
   public static final String APP_NAME = "FoyxDocs";
   public static Configuration appConfig;
   private static final XMLFileHandler xmlConfigHandler = new XMLFileHandler("config.xml");
+  private static SAXBuilder domBuilder;
+  private static XMLOutputter xmlSerialiser;
 
   // Order matters. Prefix a field with a star to make it mandatory
   public static final String[] ELEMENT_FIELDS = new String[] { "*description", "*comments", "pre-condition" };
@@ -134,13 +120,13 @@ public class FoxyDocs {
     logStdout("Configuration loaded");
 
     // Creating dom builder
-    DOM_BUILDER = new SAXBuilder();
-    DOM_BUILDER.setJDOMFactory(new LocatedJDOMFactory());
+    domBuilder = new SAXBuilder();
+    domBuilder.setJDOMFactory(new LocatedJDOMFactory());
 
     logStdout("DOM Builder created");
 
     // Create and configure the XML Serialiser
-    XML_SERIALISER = new XMLOutputter();
+    xmlSerialiser = new XMLOutputter();
     Format prettyPrint = Format.getPrettyFormat();
     prettyPrint.setIndent("  ");
     prettyPrint.setEncoding("UTF-8");
@@ -159,7 +145,7 @@ public class FoxyDocs {
       }
     });
     prettyPrint.setSpecifiedAttributesOnly(false);
-    XML_SERIALISER.setFormat(prettyPrint);
+    xmlSerialiser.setFormat(prettyPrint);
 
     logStdout("XML Serialiser created");
 
@@ -185,6 +171,14 @@ public class FoxyDocs {
     logStdout("Ended");
   }
 
+  public static XMLOutputter getSerialiser() {
+    return xmlSerialiser;
+  }
+
+  public static SAXBuilder getDOMBuilder() {
+    return domBuilder;
+  }
+
   /**
    * Stop the watch dog by interrupting the thread
    */
@@ -201,61 +195,6 @@ public class FoxyDocs {
       ConfigurationManager.getInstance().save(xmlConfigHandler, appConfig);
     } catch (ConfigurationManagerException e) {
       e.printStackTrace();
-    }
-  }
-
-  public static void duplicateResource(String resource, String path) throws IOException {
-    duplicateResource(resource, new File(path));
-  }
-
-  public static void duplicateResource(String resource, File target) throws IOException {
-    copyFile(getInternalFile(resource), target);
-  }
-
-  /**
-   * Get an internal file (in the File System or inside the JAR)
-   * 
-   * @param uri
-   *          The file path
-   * @return The file as InputStream
-   * @throws FileNotFoundException
-   */
-  public static InputStream getInternalFile(String uri) throws FileNotFoundException {
-    InputStream resource = FoxyDocs.class.getClassLoader().getResourceAsStream(uri);
-    if (resource == null)
-      throw new FileNotFoundException("Resource not found : " + uri);
-    return resource;
-  }
-
-  public static void copyFile(InputStream sourceInputStream, File destFile) throws IOException {
-    FileChannel destination = null;
-    ReadableByteChannel source = null;
-    final ByteBuffer buffer = ByteBuffer.allocateDirect(16 * 1024);
-
-    try {
-      source = Channels.newChannel(sourceInputStream);
-      destination = new FileOutputStream(destFile).getChannel();
-
-      // Copy the file from the source to the target file
-      while (source.read(buffer) != -1) {
-        buffer.flip();
-        destination.write(buffer);
-        buffer.compact();
-      }
-      buffer.flip();
-      while (buffer.hasRemaining()) {
-        destination.write(buffer);
-      }
-
-    }
-    // Is something goes wrong, those the channels anyway
-    finally {
-      if (source != null) {
-        source.close();
-      }
-      if (destination != null) {
-        destination.close();
-      }
     }
   }
 
