@@ -30,7 +30,7 @@ public class EntryDoc extends AbstractModelObject {
   }
 
   @Override
-  public int getStatus() {
+  public synchronized int getStatus() {
     if (!mandatory)
       return FoxyDocs.STATUS_UNKNOWN;
     if (node == null || node.getTextTrim().length() == 0)

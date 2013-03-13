@@ -124,7 +124,8 @@ public class Loader {
         public void run() {
           target.firePropertyChange("status", null, target.getStatus());
           // Copy all children as they may change
-          for (AbstractModelObject o : target.getChildren()) {
+          AbstractModelObject[] children = target.getChildren().toArray(new AbstractModelObject[0]);
+          for (AbstractModelObject o : children) {
             o.firePropertyChange("status", null, o.getStatus());
           }
         }
