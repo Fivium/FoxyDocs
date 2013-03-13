@@ -103,7 +103,7 @@ public class Tab extends CTabItem {
 
   private final Composite moduleInfoDocComposite;
 
-  private final DataBindingContext bindingContext = new DataBindingContext();;
+  private final DataBindingContext bindingContext = new DataBindingContext();
 
   /**
    * A new tab with dynamic content
