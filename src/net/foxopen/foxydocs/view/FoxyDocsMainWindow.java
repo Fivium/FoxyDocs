@@ -67,7 +67,6 @@ import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.ShellAdapter;
 import org.eclipse.swt.events.ShellEvent;
-import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
@@ -196,7 +195,7 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
           close();
         }
       };
-      action_exit.setImageDescriptor(getIcon("/img/metro/Other/Power - Shut Down.png"));
+      action_exit.setImageDescriptor(getIcon("/img/icons/emblem-unreadable.png"));
       action_exit.setAccelerator(SWT.CTRL | 'Q');
     }
     {
@@ -231,7 +230,7 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
         }
       };
       action_open.setAccelerator(SWT.CTRL | 'O');
-      action_open.setImageDescriptor(getIcon("/img/metro/FoldersOS/Explorer.png"));
+      action_open.setImageDescriptor(getIcon("/img/icons/folder-open.png"));
     }
     {
       action_close = new Action("&Close Tab") {
@@ -251,7 +250,7 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
           MessageDialog.openInformation(getShell(), "About", "A Fox Documentation Editor\n\nDeveloper : pierredominique.putallaz@fivium.co.uk\nWith the help of mike.leonard@fivium.co.uk\nXSL : william.friesen@fivium.co.uk\n\nhttps://github.com/Akkenar/FoxyDocs");
         }
       };
-      action_about.setImageDescriptor(getIcon("/img/metro/Other/Default.png"));
+      action_about.setImageDescriptor(getIcon("/img/icons/help-browser.png"));
     }
     {
       action_nextentry = new Action("Next Entry") {
@@ -263,6 +262,8 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
         }
       };
       action_nextentry.setAccelerator(SWT.ALT | 'S');
+      action_nextentry.setImageDescriptor(getIcon("/img/icons/go-down.png"));
+      
     }
     {
       action_previousentry = new Action("Previous Entry") {
@@ -274,6 +275,8 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
         }
       };
       action_previousentry.setAccelerator(SWT.ALT | 'W');
+      action_previousentry.setImageDescriptor(getIcon("/img/icons/go-up.png"));
+      
     }
     {
       action_save = new Action("&Save") {
@@ -287,7 +290,7 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
           }
         }
       };
-      action_save.setImageDescriptor(getIcon("/img/metro/Other/Save.png"));
+      action_save.setImageDescriptor(getIcon("/img/icons/media-floppy.png"));
       action_save.setAccelerator(SWT.CTRL | 'S');
     }
     {
@@ -308,7 +311,7 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
           }
         }
       };
-      action_export_pdf.setImageDescriptor(getIcon("/img/metro/Adobe Acrobat Reader.png"));
+      action_export_pdf.setImageDescriptor(getIcon("/img/icons/x-office-document.png"));
       action_export_pdf.setAccelerator(SWT.CTRL | 'P');
     }
     {
@@ -331,7 +334,7 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
           }
         }
       };
-      action_load_last.setImageDescriptor(getIcon("/img/metro/Other/Power - Restart.png"));
+      action_load_last.setImageDescriptor(getIcon("/img/icons/view-refresh.png"));
       action_load_last.setAccelerator(SWT.CTRL | 'R');
     }
     {
@@ -350,7 +353,6 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
         }
       };
       action_export_html.setAccelerator(SWT.CTRL | 'H');
-      action_export_html.setImageDescriptor(getIcon("/img/metro/Google Chrome.png"));
     }
   }
 
@@ -429,7 +431,7 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
    */
   @Override
   protected void configureShell(final Shell newShell) {
-    newShell.setImage(SWTResourceManager.getImage(FoxyDocsMainWindow.class, "/img/actions/Burn.png"));
+    newShell.setImage(SWTResourceManager.getImage(FoxyDocsMainWindow.class, "/img/icons/face-monkey.png"));
 
     newShell.addDisposeListener(new DisposeListener() {
       @Override
@@ -472,25 +474,12 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
     return bindingContext;
   }
 
-  private static Image resize(Image image, int width, int height) {
-    Image scaled = new Image(Display.getDefault(), width, height);
-    GC gc = new GC(scaled);
-    gc.setAntialias(SWT.ON);
-    gc.setInterpolation(SWT.HIGH);
-    gc.drawImage(image, 0, 0, image.getBounds().width, image.getBounds().height, 0, 0, width, height);
-    gc.dispose();
-    image.dispose(); // don't forget about me!
-    return scaled;
-  }
-
   public static ImageDescriptor getIcon(String url) {
     return ImageDescriptor.createFromImage(getImage(url));
   }
 
   public static Image getImage(String url) {
-    Image image = SWTResourceManager.getImage(FoxyDocsMainWindow.class, url);
-    if (image.getBounds().width > 25)
-      return resize(image, 25, 25);
-    return image;
+    return SWTResourceManager.getImage(FoxyDocsMainWindow.class, url);
+   
   }
 }
