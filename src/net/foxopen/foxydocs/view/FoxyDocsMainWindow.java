@@ -36,8 +36,12 @@ import static net.foxopen.foxydocs.utils.Logger.logStdout;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 
+import net.foxopen.foxydocs.analysers.ScopeAnalyser;
 import net.foxopen.foxydocs.model.Directory;
+import net.foxopen.foxydocs.model.DocumentedElement;
 import net.foxopen.foxydocs.model.FoxModule;
 import net.foxopen.foxydocs.model.abstractObject.AbstractFSItem;
 import net.foxopen.foxydocs.utils.Export;
@@ -62,6 +66,7 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.window.ApplicationWindow;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
+import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -106,6 +111,7 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
   private Action action_export_html;
   private Text searchField;
   private FormData fd_searchField;
+  private Action action_check_references;
 
   /**
    * Create the application window.
@@ -218,6 +224,7 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
           if (lastUsedPath != null) {
             try {
               root.open(lastUsedPath);
+              getStatusLineManager().setMessage(lastUsedPath);
               new ProgressMonitorDialog(getShell()).run(true, true, Loader.LoadContent(root));
             } catch (InterruptedException e) {
               e.printStackTrace();
@@ -263,7 +270,7 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
       };
       action_nextentry.setAccelerator(SWT.ALT | 'S');
       action_nextentry.setImageDescriptor(getIcon("/img/icons/go-down.png"));
-      
+
     }
     {
       action_previousentry = new Action("Previous Entry") {
@@ -276,7 +283,7 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
       };
       action_previousentry.setAccelerator(SWT.ALT | 'W');
       action_previousentry.setImageDescriptor(getIcon("/img/icons/go-up.png"));
-      
+
     }
     {
       action_save = new Action("&Save") {
@@ -322,6 +329,7 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
           if (lastUsedPath != null) {
             try {
               root.open(lastUsedPath);
+              getStatusLineManager().setMessage(lastUsedPath);
               new ProgressMonitorDialog(getShell()).run(true, true, Loader.LoadContent(root));
             } catch (InterruptedException e) {
               MessageDialog.openInformation(getShell(), "Cancelled", e.getMessage());
@@ -353,6 +361,19 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
         }
       };
       action_export_html.setAccelerator(SWT.CTRL | 'H');
+    }
+    {
+      action_check_references = new Action("Ch&eck References") {
+        @Override
+        public void run() {
+          try {
+            new ProgressMonitorDialog(getShell()).run(true, true, new ScopeAnalyser.CheckReference());
+          } catch (InvocationTargetException | InterruptedException e) {
+            e.printStackTrace();
+          }
+        }
+      };
+      action_check_references.setAccelerator(SWT.CTRL | 'E');
     }
   }
 
@@ -391,6 +412,7 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
     menu_entries.add(action_previousentry);
     menu_entries.add(action_nextentry);
     menu_entries.add(new Separator());
+    menu_entries.add(action_check_references);
     menu_entries.add(new Separator());
     menu_entries.add(action_close);
 
@@ -480,6 +502,6 @@ public class FoxyDocsMainWindow extends ApplicationWindow {
 
   public static Image getImage(String url) {
     return SWTResourceManager.getImage(FoxyDocsMainWindow.class, url);
-   
+
   }
 }

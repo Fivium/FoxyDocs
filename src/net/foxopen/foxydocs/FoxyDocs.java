@@ -95,8 +95,8 @@ public class FoxyDocs {
   private static XMLOutputter xmlSerialiser;
 
   // Order matters. Prefix a field with a star to make it mandatory
-  public static final String[] ELEMENT_FIELDS = new String[] { "*description", "*comments", "pre-condition" };
-  public static final String[] MODULE_FIELDS = new String[] { "*name", "*title", "*application-title", "version-desc", "*description", "build-notes", "help-text" };
+  public static final String[] ELEMENT_FIELDS = "*description comments pre-condition".split(" "); 
+  public static final String[] MODULE_FIELDS = "*name *title *application-title version-desc *description build-notes help-text".split(" ");
 
   /**
    * Launch the application.

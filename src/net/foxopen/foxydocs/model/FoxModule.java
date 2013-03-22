@@ -28,10 +28,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package net.foxopen.foxydocs.model;
 
-import static net.foxopen.foxydocs.FoxyDocs.*;
 import static net.foxopen.foxydocs.FoxyDocs.FOX_MODULE_XPATH;
-import static net.foxopen.foxydocs.FoxyDocs.NAMESPACE_FM;
-import static net.foxopen.foxydocs.FoxyDocs.NAMESPACE_XS;
+import static net.foxopen.foxydocs.FoxyDocs.getDOMBuilder;
+import static net.foxopen.foxydocs.FoxyDocs.getSerialiser;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -45,6 +44,7 @@ import java.util.List;
 import javax.xml.parsers.ParserConfigurationException;
 
 import net.foxopen.foxydocs.FoxyDocs;
+import net.foxopen.foxydocs.analysers.ScopeAnalyser;
 import net.foxopen.foxydocs.model.abstractObject.AbstractDocumentedElement;
 import net.foxopen.foxydocs.model.abstractObject.AbstractFSItem;
 import net.foxopen.foxydocs.model.abstractObject.AbstractModelObject;
@@ -54,9 +54,6 @@ import org.eclipse.swt.widgets.Display;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
-import org.jdom2.filter.Filters;
-import org.jdom2.xpath.XPathExpression;
-import org.jdom2.xpath.XPathFactory;
 import org.xml.sax.SAXException;
 
 public class FoxModule extends AbstractFSItem {
@@ -64,6 +61,7 @@ public class FoxModule extends AbstractFSItem {
   private Document jdomDoc;
   private ModuleInformation moduleInfo;
   private String fullStringContent;
+  private List<String> scope = new ArrayList<String>();
 
   public FoxModule(Path path, AbstractFSItem parent) throws NotAFoxModuleException, IOException {
     super(path, parent);
@@ -75,8 +73,9 @@ public class FoxModule extends AbstractFSItem {
       throw new NotAFoxModuleException("Invalid XML file " + getAbsolutePath());
   }
 
-  private void addEntries(String key, String xpath) {
+  private DocumentedElementSet addEntries(String key, String xpath) {
     DocumentedElementSet set = new DocumentedElementSet(key, this);
+
     for (Element e : runXpath(xpath, jdomDoc)) {
       AbstractDocumentedElement docElement = new DocumentedElement(e, set);
       set.addChild(docElement);
@@ -85,24 +84,18 @@ public class FoxModule extends AbstractFSItem {
       addChild(set);
     }
 
+    return set;
   }
 
   public ArrayList<AbstractDocumentedElement> getAllEntries() {
     ArrayList<AbstractDocumentedElement> buffer = new ArrayList<AbstractDocumentedElement>();
     buffer.add(moduleInfo);
     for (AbstractModelObject o : getChildren()) {
-      for (AbstractModelObject c : o.getChildren()) {
-        if (c instanceof AbstractDocumentedElement) {
-          buffer.add((AbstractDocumentedElement) c);
-        }
+      for (AbstractDocumentedElement c : o.getChildren(AbstractDocumentedElement.class)) {
+        buffer.add(c);
       }
     }
     return buffer;
-  }
-
-  public static List<Element> runXpath(String xpath, org.jdom2.Document document) {
-    XPathExpression<Element> actionsXPath = XPathFactory.instance().compile(xpath, Filters.element(), null, NAMESPACE_FM, NAMESPACE_XS);
-    return actionsXPath.evaluate(document);
   }
 
   public AbstractDocumentedElement getModuleInfo() {
@@ -173,24 +166,29 @@ public class FoxModule extends AbstractFSItem {
    * @throws NotAFoxModuleException
    */
   @Override
-  public synchronized Collection<AbstractFSItem> readContent() throws ParserConfigurationException, SAXException, IOException, JDOMException, NotAFoxModuleException {
-    reload();
+  public synchronized Collection<AbstractFSItem> readContent() throws NotAFoxModuleException {
+    try {
+      reload();
+      // Patch raw file to handle duplicate namespaces
+      String rawFile = FileUtils.readFileToString(getFile());
+      rawFile = fixNamespacesUnicity(rawFile);
 
-    // Patch raw file to handle duplicate namespaces
-    String rawFile = FileUtils.readFileToString(getFile());
-    rawFile = fixNamespacesUnicity(rawFile);
+      // Parse the document two times to have a proper location for each element
+      Document firstRun = getDOMBuilder().build(new StringReader(rawFile));
+      rawFile = getSerialiser().outputString(firstRun);
+      jdomDoc = getDOMBuilder().build(new StringReader(rawFile));
 
-    // Parse the document two times to have a proper location for each element
-    Document firstRun = getDOMBuilder().build(new StringReader(rawFile));
-    rawFile = getSerialiser().outputString(firstRun);
-    jdomDoc = getDOMBuilder().build(new StringReader(rawFile));
+      // Cache the module as a String while parsing so opening a tab is faster
+      // Strip the namespace hack of the displayed file
+      fullStringContent = stripNamespacesUnicity(rawFile);
 
-    // Cache the module as a String while parsing so opening a tab is faster
-    // Strip the namespace hack of the displayed file
-    fullStringContent = stripNamespacesUnicity(rawFile);
+      // Reset data structures
+      getChildren().clear();
 
-    // Reset data structures
-    getChildren().clear();
+    } catch (IOException | JDOMException e) {
+      System.err.println(getFile().getName() + ": " + e.getMessage());
+      throw new NotAFoxModuleException(getFile().getName());
+    }
 
     // Header
     List<Element> header = runXpath(FOX_MODULE_XPATH + "fm:header", jdomDoc);
@@ -215,11 +213,37 @@ public class FoxModule extends AbstractFSItem {
       addEntries("State " + name + " Actions", FOX_MODULE_XPATH + "/fm:state-list/fm:state[@name='" + name + "']//fm:action");
     }
 
+    // Module calls
+    // TODO
+
     if (getChildren().size() == 0) {
       throw new NotAFoxModuleException(getName());
     }
 
+    // Extract libraries
+    List<Element> libraries = runXpath(FOX_MODULE_XPATH + "/fm:library-list/fm:library", jdomDoc);
+    for (Element e : libraries) {
+      scope.add(e.getTextNormalize());
+    }
+
     return null;
+  }
+
+  public DocumentedElement getGlobalAction(String name) {
+    for (DocumentedElementSet es : getChildren(DocumentedElementSet.class)) {
+      if (es.getName().equals("Module Actions")) {
+        for (DocumentedElement e : es.getChildren(DocumentedElement.class)) {
+          if (e.getName().equals(name)) {
+            return e;
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  public List<String> getLibraries() {
+    return scope;
   }
 
   public String stripNamespacesUnicity(String input) {
@@ -238,4 +262,15 @@ public class FoxModule extends AbstractFSItem {
     }
   }
 
+  public List<DocumentedElement> getActions() {
+    List<DocumentedElement> actions = new ArrayList<>();
+
+    for (DocumentedElementSet e : getChildren(DocumentedElementSet.class)) {
+      for (DocumentedElement doc : e.getChildren(DocumentedElement.class)) {
+        actions.addAll(doc.getActions());
+      }
+    }
+
+    return actions;
+  }
 }

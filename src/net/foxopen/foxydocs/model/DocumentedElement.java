@@ -29,6 +29,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package net.foxopen.foxydocs.model;
 
 import static net.foxopen.foxydocs.FoxyDocs.NAMESPACE_FM;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import net.foxopen.foxydocs.FoxyDocs;
 import net.foxopen.foxydocs.model.abstractObject.AbstractDocumentedElement;
 import net.foxopen.foxydocs.model.abstractObject.AbstractModelObject;
@@ -58,6 +62,7 @@ public class DocumentedElement extends AbstractDocumentedElement {
     } else {
       setName(nodeName);
     }
+
   }
 
   public int getLineNumber() {
@@ -102,6 +107,36 @@ public class DocumentedElement extends AbstractDocumentedElement {
   @Override
   public String getName() {
     return name;
+  }
+
+  @Override
+  public String toString() {
+    return getFoxModule().getName() + "::" + name;
+  }
+
+  public List<String> getActionCalls() {
+    List<String> actionCalls = new ArrayList<>();
+    // Action calls
+    List<Element> aCalls = runXpath("//fm:call", elementNode);
+    for (Element e : aCalls) {
+      actionCalls.add(e.getAttributeValue("action"));
+    }
+
+    return actionCalls;
+  }
+
+  public List<DocumentedElement> getActions() {
+    List<DocumentedElement> actions = new ArrayList<>();
+    if (elementNode.getName().equals("action")) {
+      actions.add(this);
+      return actions;
+    }
+
+    for (DocumentedElement e : getChildren(DocumentedElement.class)) {
+      actions.addAll(e.getActions());
+    }
+
+    return actions;
   }
 
 }

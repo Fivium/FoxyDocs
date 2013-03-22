@@ -41,6 +41,7 @@ import java.util.HashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import net.foxopen.foxydocs.FoxyDocs;
+import net.foxopen.foxydocs.analysers.ScopeAnalyser;
 import net.foxopen.foxydocs.model.FoxModule;
 import net.foxopen.foxydocs.model.FoxModule.NotAFoxModuleException;
 import net.foxopen.foxydocs.model.abstractObject.AbstractFSItem;
@@ -111,6 +112,10 @@ public class Loader {
         }
         // Assign a WatchDog
         monitorList.putAll(modules);
+
+        // Build the graph
+        monitor.beginTask("Computing the graph", IProgressMonitor.UNKNOWN);
+        ScopeAnalyser.computeGraph(modules.values());
 
       } catch (Exception e) {
         e.printStackTrace();

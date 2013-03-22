@@ -37,9 +37,12 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 
 import net.foxopen.foxydocs.FoxyDocs;
+import net.foxopen.foxydocs.analysers.ScopeAnalyser;
 import net.foxopen.foxydocs.model.DocumentedElement;
 import net.foxopen.foxydocs.model.DocumentedElementSet;
 import net.foxopen.foxydocs.model.EntryDoc;
@@ -97,6 +100,7 @@ public class Tab extends CTabItem {
   private final CTabFolder tabFolderDoc;
   private CTabItem regularDocTab;
   private CTabItem headerDocTab;
+  private CTabItem generalInfo;
 
   private Composite regularDocComposite;
   private final ScrolledComposite moduleInfoWrapper;
@@ -163,7 +167,7 @@ public class Tab extends CTabItem {
                 if (regularDocTab != null)
                   regularDocTab.dispose();
                 if (headerDocTab == null || headerDocTab.isDisposed()) {
-                  headerDocTab = new CTabItem(tabFolderDoc, SWT.NONE);
+                  headerDocTab = new CTabItem(tabFolderDoc, SWT.NONE, 0);
                   headerDocTab.setText("Module Informations");
                   headerDocTab.setControl(moduleInfoWrapper);
                   headerDocTab.getParent().setSelection(headerDocTab);
@@ -175,7 +179,7 @@ public class Tab extends CTabItem {
                 if (headerDocTab != null)
                   headerDocTab.dispose();
                 if (regularDocTab == null || regularDocTab.isDisposed()) {
-                  regularDocTab = new CTabItem(tabFolderDoc, SWT.NONE);
+                  regularDocTab = new CTabItem(tabFolderDoc, SWT.NONE, 0);
                   regularDocTab.setText("Documentation");
                   regularDocTab.getParent().setSelection(regularDocTab);
                   regularDocTab.setControl(regularDocComposite);
@@ -217,6 +221,41 @@ public class Tab extends CTabItem {
               regularDocComposite.dispose();
             regularDocComposite = new Composite(tabFolderDoc, SWT.NONE);
             regularDocComposite.setLayout(new GridLayout(2, false));
+
+            // General info composite
+            ScrolledComposite generalInfoWrapper = new ScrolledComposite(tabFolderDoc, SWT.BORDER | SWT.V_SCROLL);
+            generalInfoWrapper.setExpandHorizontal(true);
+            generalInfoWrapper.setExpandVertical(false);
+            generalInfo = new CTabItem(tabFolderDoc, SWT.NONE);
+            generalInfo.setText("Statistics");
+
+            //
+            Composite statistics = new Composite(generalInfoWrapper, SWT.NONE);
+            statistics.setLayout(new GridLayout(1, false));
+
+            Label numberOfLibraries = new Label(statistics, SWT.NONE);
+            numberOfLibraries.setText("Number of libraries: " + content.getLibraries().size());
+
+            Label numberOfExtendedLibraries = new Label(statistics, SWT.NONE);
+            List<FoxModule> extendedLibraries = new ArrayList<FoxModule>(ScopeAnalyser.getExtendedLibraries(content));
+            Collections.sort(extendedLibraries);
+            numberOfExtendedLibraries.setText("Number of extended libraries: " + extendedLibraries.size());
+            for (FoxModule lib : extendedLibraries) {
+              new Label(statistics, SWT.NONE).setText(" > " + lib.getName());
+            }
+
+            Label numberOfModuleUsing = new Label(statistics, SWT.NONE);
+            List<FoxModule> libs = ScopeAnalyser.getInputLinks(content.getName());
+            numberOfModuleUsing.setText("Number of modules using this library: " + libs.size());
+            for (FoxModule lib : libs) {
+              new Label(statistics, SWT.NONE).setText(" > " + lib.getName());
+            }
+
+            statistics.pack(true);
+            generalInfoWrapper.setContent(statistics);
+            generalInfoWrapper.setMinSize(statistics.computeSize(SWT.NONE, SWT.DEFAULT));
+
+            generalInfo.setControl(generalInfoWrapper);
 
             // Empty fields
             for (String key : FoxyDocs.ELEMENT_FIELDS) {
@@ -455,6 +494,15 @@ public class Tab extends CTabItem {
 
   public FoxModule getContent() {
     return content;
+  }
+
+  public DocumentedElement getSelection() {
+    IStructuredSelection thisSelection = (IStructuredSelection) treeViewer.getSelection();
+    Object selectedNode = thisSelection.getFirstElement();
+    if (selectedNode instanceof DocumentedElement) {
+      return (DocumentedElement) selectedNode;
+    }
+    return null;
   }
 
 }

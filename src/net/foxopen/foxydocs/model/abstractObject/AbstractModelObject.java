@@ -35,20 +35,23 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Observable;
 
 import net.foxopen.foxydocs.FoxyDocs;
+import net.foxopen.foxydocs.model.FoxModule;
 import net.foxopen.foxydocs.model.ModuleInformation;
 
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
+import org.jdom2.Element;
+import org.jdom2.filter.Filters;
+import org.jdom2.xpath.XPathExpression;
+import org.jdom2.xpath.XPathFactory;
 
-public abstract class AbstractModelObject extends Observable{
+public abstract class AbstractModelObject extends Observable implements Comparable<AbstractModelObject> {
 
   private final List<AbstractModelObject> children = Collections.synchronizedList(new ArrayList<AbstractModelObject>());
-  private static Comparator<? super AbstractModelObject> modelComparator;
 
   private final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
   private final AbstractModelObject parent;
@@ -110,6 +113,29 @@ public abstract class AbstractModelObject extends Observable{
     return children;
   }
 
+  public synchronized final <T extends AbstractModelObject> List<T> getChildren(Class<T> targetClass) {
+    ArrayList<T> buffer = new ArrayList<>();
+    for (AbstractModelObject o : children) {
+      try {
+        buffer.add(targetClass.cast(o));
+      } catch (ClassCastException e) {
+        // Empty
+      }
+    }
+    return buffer;
+  }
+
+  public FoxModule getFoxModule() {
+    if (getParent() == null)
+      return null;
+
+    if (getParent() instanceof FoxModule) {
+      return (FoxModule) getParent();
+    }
+
+    return getParent().getFoxModule();
+  }
+
   public void save() throws Exception {
     if (!isDirty())
       return;
@@ -120,7 +146,7 @@ public abstract class AbstractModelObject extends Observable{
 
   public synchronized void addChild(AbstractModelObject child) {
     children.add(child);
-    Collections.sort(children, getComparator());
+    Collections.sort(children);
     firePropertyChange("children", null, getChildren());
   }
 
@@ -175,12 +201,10 @@ public abstract class AbstractModelObject extends Observable{
   }
 
   public synchronized boolean isDirty() {
-    for (Object child : getChildren()) {
-      if (child instanceof AbstractModelObject) {
-        AbstractModelObject c = (AbstractModelObject) child;
-        if (c.isDirty())
-          return true;
-      }
+    for (AbstractModelObject child : getChildren()) {
+      if (child.isDirty())
+        return true;
+
     }
     return false;
   }
@@ -199,22 +223,25 @@ public abstract class AbstractModelObject extends Observable{
     });
   }
 
-  public static Comparator<? super AbstractModelObject> getComparator() {
-    if (modelComparator == null) {
-      modelComparator = new Comparator<AbstractModelObject>() {
-        @Override
-        public int compare(AbstractModelObject o1, AbstractModelObject o2) {
-          // Always bump module information at the top
-          if (o1 instanceof ModuleInformation)
-            return -1;
-          if (o2 instanceof ModuleInformation)
-            return 1;
+  @Override
+  public int compareTo(AbstractModelObject that) {
+    // Always bump module information at the top
+    if (this instanceof ModuleInformation)
+      return -1;
+    if (that instanceof ModuleInformation)
+      return 1;
 
-          // Alphabetical ordering on names
-          return o1.getName().compareTo(o2.getName());
-        }
-      };
-    }
-    return modelComparator;
+    // Alphabetical ordering on names
+    return this.getName().compareTo(that.getName());
+  }
+
+  public static List<Element> runXpath(String xpath, org.jdom2.Document document) {
+    XPathExpression<Element> actionsXPath = XPathFactory.instance().compile(xpath, Filters.element(), null, NAMESPACE_FM, NAMESPACE_XS);
+    return actionsXPath.evaluate(document);
+  }
+  
+  public static List<Element> runXpath(String xpath, Element root) {
+    XPathExpression<Element> actionsXPath = XPathFactory.instance().compile(xpath, Filters.element(), null, NAMESPACE_FM, NAMESPACE_XS);
+    return actionsXPath.evaluate(root);
   }
 }
