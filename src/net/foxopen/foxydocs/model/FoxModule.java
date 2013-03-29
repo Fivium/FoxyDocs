@@ -1,16 +1,16 @@
 /*
-Copyright (c) 2013, ENERGY DEVELOPMENT UNIT (INFORMATION TECHNOLOGY)
+Copyright (c) 2013, Fivium Ltd.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
- * Redistributions of source code must retain the above copyright notice, 
+    * Redistributions of source code must retain the above copyright notice, 
       this list of conditions and the following disclaimer.
- * Redistributions in binary form must reproduce the above copyright notice, 
+    * Redistributions in binary form must reproduce the above copyright notice, 
       this list of conditions and the following disclaimer in the documentation 
       and/or other materials provided with the distribution.
- * Neither the name of the DEPARTMENT OF ENERGY AND CLIMATE CHANGE nor the
+    * Neither the name of Fivium Ltd nor the
       names of its contributors may be used to endorse or promote products
       derived from this software without specific prior written permission.
 
@@ -25,7 +25,9 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
- */
+$Revision$
+
+*/
 package net.foxopen.foxydocs.model;
 
 import static net.foxopen.foxydocs.FoxyDocs.FOX_MODULE_XPATH;
@@ -44,7 +46,6 @@ import java.util.List;
 import javax.xml.parsers.ParserConfigurationException;
 
 import net.foxopen.foxydocs.FoxyDocs;
-import net.foxopen.foxydocs.analysers.ScopeAnalyser;
 import net.foxopen.foxydocs.model.abstractObject.AbstractDocumentedElement;
 import net.foxopen.foxydocs.model.abstractObject.AbstractFSItem;
 import net.foxopen.foxydocs.model.abstractObject.AbstractModelObject;

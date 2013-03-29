@@ -74,7 +74,7 @@ In the future, the relevant JARs will be added in the lib directory so we won't 
 
 ### Libraries
 * XML-Region-Analyzer : https://github.com/vincent-zurczak/Xml-Region-Analyzer
-* Metro icons : http://dakirby309.deviantart.com/art/Metro-UI-Dock-Icon-Set-678-Icons-280724102
+* Icons : http://tango.freedesktop.org/Tango_Icon_Library
 * FOP 1.1
 * jConfig
 * jDom2
