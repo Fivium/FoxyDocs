@@ -40,7 +40,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Observable;
 
-import net.foxopen.foxydocs.FoxyDocs;
 import net.foxopen.foxydocs.model.FoxModule;
 import net.foxopen.foxydocs.model.ModuleInformation;
 
@@ -77,9 +76,6 @@ public abstract class AbstractModelObject extends Observable implements Comparab
     addPropertyChangeListener("status", new PropertyChangeListener() {
       @Override
       public void propertyChange(PropertyChangeEvent evt) {
-        if (getStatus() == FoxyDocs.STATUS_UNKNOWN) {
-          delete();
-        }
         firePropertyChange("name", null, getName());
         if (getParent() != null) {
           // Cascade propagate the change
