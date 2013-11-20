@@ -63,6 +63,49 @@ In the future, the relevant JARs will be added in the lib directory so we won't 
 * After saving a file, the currently opened entry is not highlighted anymore
 * You can close an unsaved tab without any warning
 
+## Development Notes
+### Static assets
+The static assets such as XSL and images are stored in `lib/assets.jar` with the following structure:
+<pre>
+\_ img      
+  \_ actions
+    \_ ...			All actions images (save, open, etc..)
+  \_ icons
+    \_ ... 			All other useful icons
+\_ xsl
+  \_ bg.png 		Background image for the HTML report
+  \_ index.html 	Frame set for the HTML report
+  \_ listing.xsl 	XSL for the list of modules
+  \_ logo.png 		FOXopen logo
+  \_ module.xsl 	XSL for extracting the documentation out of a FOX module
+  \_ style.css 		Cascading style sheet for index.html
+  \_ summary.html 	Module specification container
+  \_ xhtml2fo.xsl 	XSL to convert a XHTML document to FOP for PDF export
+</pre>
+
+Those assets can be loaded directly from the similar structure in `lib` or from `assets.jar`.
+
+### Databinding source files
+All sources in `src/org/eclipse/wb` are automaticly imported by Eclipse when adding databinding libraries. Those files are not to be modified.
+
+### Source structure
+Structure inside `src/net/foxopen/foxydocs`:
+<pre>
+foxydocs
+\_ FoxyDocs.java 				Main class; starts the GUI
+\_ model
+  \_ ... 						Model files for databinding
+\_ utils
+  \_ Export.java 				Generates the HTML or PDF report
+  \_ Loader.java 				Load all FOX modules from a folder
+  \_ Logger.java 				Log a message into the terminal
+  \_ ResourceManager.java 		Handle static ressources (please see the static assets section
+  \_ WatchDog.java 				Watch for files to be modified into a folder (similar to Clobber
+  \_ WatchDogEventHandler.java 	Handle the events raised by the watch dog
+\_ view
+  \_ .. 						GUI elements
+</pre>
+
 ## Credits
 
 ### Development team
@@ -74,7 +117,6 @@ In the future, the relevant JARs will be added in the lib directory so we won't 
 
 ### Libraries
 * XML-Region-Analyzer : https://github.com/vincent-zurczak/Xml-Region-Analyzer
-* Metro icons : http://dakirby309.deviantart.com/art/Metro-UI-Dock-Icon-Set-678-Icons-280724102
 * FOP 1.1
 * jConfig
 * jDom2
